@@ -1,0 +1,26 @@
+server:
+  port: @server.port@
+partyManagement:
+  url: http://localhost:8022/repo
+magista:
+  url: http://localhost:8022/stat
+signer:
+  url: http://localhost:8022/signer
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: @db.url@
+    username: @db.user@
+    password: @db.password@
+    hikari:
+      maximum-pool-size: 3
+      idle-timeout: 30000
+storage:
+  endpoint: localhost
+  signingRegion: RU
+  bucketName: "reports"
+  urlEndpoint: "https://example.org"
+scheduler:
+  cron: "0 0 0 2 * *"
+  timezone: Europe/Moscow
