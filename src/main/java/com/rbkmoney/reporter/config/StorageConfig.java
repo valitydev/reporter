@@ -19,16 +19,22 @@ import org.springframework.context.annotation.Configuration;
 public class StorageConfig {
 
     @Value("${storage.endpoint}")
-    String endpoint;
+    private String endpoint;
 
     @Value("${storage.signingRegion}")
-    String signingRegion;
+    private String signingRegion;
 
     @Value("${storage.accessKey:}")
-    String accessKey;
+    private String accessKey;
 
     @Value("${storage.secretKey:}")
-    String secretKey;
+    private String secretKey;
+
+    @Value("${storage.client.protocol:HTTP}")
+    private Protocol protocol;
+
+    @Value("${storage.client.maxErrorRetry}")
+    private int maxErrorRetry;
 
     @Bean
     public AmazonS3 storageClient(AWSCredentialsProviderChain credentialsProviderChain, ClientConfiguration clientConfiguration) {
@@ -57,10 +63,10 @@ public class StorageConfig {
 
     @Bean
     public ClientConfiguration clientConfiguration() {
-        ClientConfiguration clientConfiguration = new ClientConfiguration();
-        clientConfiguration.setProtocol(Protocol.HTTP);
-        clientConfiguration.setSignerOverride("S3SignerType");
-        return clientConfiguration;
+        return new ClientConfiguration()
+                .withProtocol(protocol)
+                .withSignerOverride("S3SignerType")
+                .withMaxErrorRetry(maxErrorRetry);
     }
 
     @Bean
