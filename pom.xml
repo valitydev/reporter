@@ -11,9 +11,9 @@
         <version>1.5.8.RELEASE</version>
     </parent>
 
-    <groupId>com.rbkmoney.reporter</groupId>
+    <groupId>com.rbkmoney</groupId>
     <artifactId>reporter</artifactId>
-    <version>1.0.0-SHAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <project.maintainer>Pavel Popov &lt;p.popov@rbkmoney.com&gt;</project.maintainer>
