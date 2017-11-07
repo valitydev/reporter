@@ -182,7 +182,7 @@ public class ReportService {
             FileMeta reportFileModel = storageService.saveFile(reportFile);
 
             byte[] sign = signService.sign(reportFile);
-            FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sign", sign);
+            FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
 
             return Arrays.asList(reportFileModel, signFileModel);
         } finally {

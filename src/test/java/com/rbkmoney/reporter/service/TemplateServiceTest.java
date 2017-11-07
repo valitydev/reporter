@@ -60,11 +60,11 @@ public class TemplateServiceTest extends AbstractIntegrationTest {
                     String.format("к Договору № %s от", partyModel.getMerchantContractId()),
                     merchantContractIdCell.getStringCellValue()
             );
-            Cell merchantContractCreatedAtCell = headerRow.getCell(3);
-            assertEquals("dd\\.mm\\.yyyy", merchantContractCreatedAtCell.getCellStyle().getDataFormatString());
+            Cell merchantContractSignedAtCell = headerRow.getCell(3);
+            assertEquals("dd\\.mm\\.yyyy", merchantContractSignedAtCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    partyModel.getMerchantContractCreatedAt(),
-                    merchantContractCreatedAtCell.getDateCellValue()
+                    partyModel.getMerchantContractSignedAt(),
+                    merchantContractSignedAtCell.getDateCellValue()
             );
 
             Cell merchantNameCell = sheet.getRow(5).getCell(4);
@@ -76,13 +76,13 @@ public class TemplateServiceTest extends AbstractIntegrationTest {
             Row dateRow = sheet.getRow(14);
             Cell fromTimeCell = dateRow.getCell(1);
             assertEquals(
-                    "[$-FC19]dd\\ mmmm\\ yyyy\\ \\г\\.;@",
+                    "dd\\.mm\\.yyyy",
                     fromTimeCell.getCellStyle().getDataFormatString()
             );
             assertEquals(Date.from(toZoneSameLocal(fromTime, zoneId)), fromTimeCell.getDateCellValue());
             Cell toTimeCell = dateRow.getCell(3);
             assertEquals(
-                    "[$-FC19]dd\\ mmmm\\ yyyy\\ \\г\\.;@",
+                    "dd\\.mm\\.yyyy",
                     toTimeCell.getCellStyle().getDataFormatString()
             );
             assertEquals(Date.from(toZoneSameLocal(toTime, zoneId)), toTimeCell.getDateCellValue());

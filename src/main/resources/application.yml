@@ -20,7 +20,6 @@ storage:
   endpoint: localhost
   signingRegion: RU
   bucketName: "reports"
-  urlEndpoint: "https://example.org"
   client:
     maxErrorRetry: 10
 scheduler:

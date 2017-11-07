@@ -31,12 +31,10 @@ import static com.rbkmoney.reporter.util.DamselUtil.buildInvalidRequest;
 public class ReportsHandler implements ReportingSrv.Iface {
 
     private final ReportService reportService;
-    private final UrlResource urlEndpoint;
 
     @Autowired
-    public ReportsHandler(ReportService reportService, @Value("${storage.urlEndpoint}") UrlResource urlEndpoint) {
+    public ReportsHandler(ReportService reportService) {
         this.reportService = reportService;
-        this.urlEndpoint = urlEndpoint;
     }
 
     @Override
@@ -108,12 +106,6 @@ public class ReportsHandler implements ReportingSrv.Iface {
         try {
             Instant expiresInInstant = TypeUtil.stringToInstant(expiresIn);
             URL url = reportService.generatePresignedUrl(fileId, expiresInInstant);
-            try {
-                URL secondUrl = urlEndpoint.getURL();
-                url = new URL(secondUrl.getProtocol(), secondUrl.getHost(), secondUrl.getPort(), url.getFile());
-            } catch (IOException e) {
-                throw new TException(String.format("Failed to change host on generated url, url='{}', fileId='{}', expiresIn='{}'", url, fileId, expiresIn));
-            }
             return url.toString();
         } catch (FileNotFoundException ex) {
             throw new FileNotFound();

@@ -1,9 +1,6 @@
 package com.rbkmoney.reporter.service.impl;
 
-import com.rbkmoney.damsel.domain.Contract;
-import com.rbkmoney.damsel.domain.Party;
-import com.rbkmoney.damsel.domain.RussianLegalEntity;
-import com.rbkmoney.damsel.domain.Shop;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
@@ -49,9 +46,10 @@ public class PartyServiceImpl implements PartyService {
                 throw new ShopNotFoundException(String.format("Contract on shop not found, contractId='%s', shopId='%s', partyId='%s', time='%s'", contractId, shopId, partyId, timestamp));
             }
 
-            partyModel.setMerchantContractId(contractId);
-            partyModel.setMerchantContractCreatedAt(
-                    Date.from(TypeUtil.stringToInstant(contract.getCreatedAt()))
+            LegalAgreement legalAgreement = contract.getLegalAgreement();
+            partyModel.setMerchantContractId(legalAgreement.getLegalAgreementId());
+            partyModel.setMerchantContractSignedAt(
+                    Date.from(TypeUtil.stringToInstant(legalAgreement.getSignedAt()))
             );
 
             partyModel.setMerchantContractId(contract.getId());

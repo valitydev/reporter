@@ -13,7 +13,7 @@ public class PartyModel {
 
     private String merchantContractId;
 
-    private Date merchantContractCreatedAt;
+    private Date merchantContractSignedAt;
 
     private String merchantRepresentativePosition;
 
@@ -45,12 +45,12 @@ public class PartyModel {
         this.merchantContractId = merchantContractId;
     }
 
-    public Date getMerchantContractCreatedAt() {
-        return merchantContractCreatedAt;
+    public Date getMerchantContractSignedAt() {
+        return merchantContractSignedAt;
     }
 
-    public void setMerchantContractCreatedAt(Date merchantContractCreatedAt) {
-        this.merchantContractCreatedAt = merchantContractCreatedAt;
+    public void setMerchantContractSignedAt(Date merchantContractSignedAt) {
+        this.merchantContractSignedAt = merchantContractSignedAt;
     }
 
     public String getMerchantRepresentativePosition() {
@@ -88,7 +88,7 @@ public class PartyModel {
         if (merchantName != null ? !merchantName.equals(that.merchantName) : that.merchantName != null) return false;
         if (merchantContractId != null ? !merchantContractId.equals(that.merchantContractId) : that.merchantContractId != null)
             return false;
-        if (merchantContractCreatedAt != null ? !merchantContractCreatedAt.equals(that.merchantContractCreatedAt) : that.merchantContractCreatedAt != null)
+        if (merchantContractSignedAt != null ? !merchantContractSignedAt.equals(that.merchantContractSignedAt) : that.merchantContractSignedAt != null)
             return false;
         if (merchantRepresentativePosition != null ? !merchantRepresentativePosition.equals(that.merchantRepresentativePosition) : that.merchantRepresentativePosition != null)
             return false;
@@ -102,7 +102,7 @@ public class PartyModel {
         int result = merchantId != null ? merchantId.hashCode() : 0;
         result = 31 * result + (merchantName != null ? merchantName.hashCode() : 0);
         result = 31 * result + (merchantContractId != null ? merchantContractId.hashCode() : 0);
-        result = 31 * result + (merchantContractCreatedAt != null ? merchantContractCreatedAt.hashCode() : 0);
+        result = 31 * result + (merchantContractSignedAt != null ? merchantContractSignedAt.hashCode() : 0);
         result = 31 * result + (merchantRepresentativePosition != null ? merchantRepresentativePosition.hashCode() : 0);
         result = 31 * result + (merchantRepresentativeFullName != null ? merchantRepresentativeFullName.hashCode() : 0);
         result = 31 * result + (merchantRepresentativeDocument != null ? merchantRepresentativeDocument.hashCode() : 0);
@@ -115,7 +115,7 @@ public class PartyModel {
                 "merchantId='" + merchantId + '\'' +
                 ", merchantName='" + merchantName + '\'' +
                 ", merchantContractId='" + merchantContractId + '\'' +
-                ", merchantContractCreatedAt=" + merchantContractCreatedAt +
+                ", merchantContractCreatedAt=" + merchantContractSignedAt +
                 ", merchantRepresentativePosition='" + merchantRepresentativePosition + '\'' +
                 ", merchantRepresentativeFullName='" + merchantRepresentativeFullName + '\'' +
                 ", merchantRepresentativeDocument='" + merchantRepresentativeDocument + '\'' +
