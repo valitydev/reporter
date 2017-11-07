@@ -19,8 +19,6 @@ public class PartyModel {
 
     private String merchantRepresentativeFullName;
 
-    private String merchantRepresentativeDocument;
-
     public String getMerchantId() {
         return merchantId;
     }
@@ -69,14 +67,6 @@ public class PartyModel {
         this.merchantRepresentativeFullName = merchantRepresentativeFullName;
     }
 
-    public String getMerchantRepresentativeDocument() {
-        return merchantRepresentativeDocument;
-    }
-
-    public void setMerchantRepresentativeDocument(String merchantRepresentativeDocument) {
-        this.merchantRepresentativeDocument = merchantRepresentativeDocument;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,9 +82,7 @@ public class PartyModel {
             return false;
         if (merchantRepresentativePosition != null ? !merchantRepresentativePosition.equals(that.merchantRepresentativePosition) : that.merchantRepresentativePosition != null)
             return false;
-        if (merchantRepresentativeFullName != null ? !merchantRepresentativeFullName.equals(that.merchantRepresentativeFullName) : that.merchantRepresentativeFullName != null)
-            return false;
-        return merchantRepresentativeDocument != null ? merchantRepresentativeDocument.equals(that.merchantRepresentativeDocument) : that.merchantRepresentativeDocument == null;
+        return merchantRepresentativeFullName != null ? merchantRepresentativeFullName.equals(that.merchantRepresentativeFullName) : that.merchantRepresentativeFullName == null;
     }
 
     @Override
@@ -105,7 +93,6 @@ public class PartyModel {
         result = 31 * result + (merchantContractSignedAt != null ? merchantContractSignedAt.hashCode() : 0);
         result = 31 * result + (merchantRepresentativePosition != null ? merchantRepresentativePosition.hashCode() : 0);
         result = 31 * result + (merchantRepresentativeFullName != null ? merchantRepresentativeFullName.hashCode() : 0);
-        result = 31 * result + (merchantRepresentativeDocument != null ? merchantRepresentativeDocument.hashCode() : 0);
         return result;
     }
 
@@ -115,10 +102,9 @@ public class PartyModel {
                 "merchantId='" + merchantId + '\'' +
                 ", merchantName='" + merchantName + '\'' +
                 ", merchantContractId='" + merchantContractId + '\'' +
-                ", merchantContractCreatedAt=" + merchantContractSignedAt +
+                ", merchantContractSignedAt=" + merchantContractSignedAt +
                 ", merchantRepresentativePosition='" + merchantRepresentativePosition + '\'' +
                 ", merchantRepresentativeFullName='" + merchantRepresentativeFullName + '\'' +
-                ", merchantRepresentativeDocument='" + merchantRepresentativeDocument + '\'' +
                 '}';
     }
 }

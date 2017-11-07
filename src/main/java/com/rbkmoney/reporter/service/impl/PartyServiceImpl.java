@@ -52,7 +52,6 @@ public class PartyServiceImpl implements PartyService {
                     Date.from(TypeUtil.stringToInstant(legalAgreement.getSignedAt()))
             );
 
-            partyModel.setMerchantContractId(contract.getId());
             if (contract.isSetContractor()
                     && contract.getContractor().isSetLegalEntity()
                     && contract.getContractor().getLegalEntity().isSetRussianLegalEntity()) {
@@ -62,7 +61,6 @@ public class PartyServiceImpl implements PartyService {
                 partyModel.setMerchantName(entity.getRegisteredName());
                 partyModel.setMerchantRepresentativeFullName(entity.getRepresentativeFullName());
                 partyModel.setMerchantRepresentativePosition(entity.getRepresentativePosition());
-                partyModel.setMerchantRepresentativeDocument(entity.getRepresentativeDocument());
             }
 
             return partyModel;

@@ -16,7 +16,9 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 import static com.rbkmoney.reporter.util.TimeUtil.toZoneSameLocal;
@@ -85,7 +87,7 @@ public class TemplateServiceTest extends AbstractIntegrationTest {
                     "dd\\.mm\\.yyyy",
                     toTimeCell.getCellStyle().getDataFormatString()
             );
-            assertEquals(Date.from(toZoneSameLocal(toTime, zoneId)), toTimeCell.getDateCellValue());
+            assertEquals(Date.from(toZoneSameLocal(toTime, zoneId).minusMillis(1)), toTimeCell.getDateCellValue());
 
             Cell openingBalanceCell = sheet.getRow(23).getCell(3);
             assertEquals("#,##0.00", openingBalanceCell.getCellStyle().getDataFormatString());

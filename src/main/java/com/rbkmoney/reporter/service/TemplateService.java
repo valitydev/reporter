@@ -50,7 +50,7 @@ public class TemplateService {
         context.putVar("shopAccounting", shopAccountingModel);
         context.putVar("partyRepresentation", partyModel);
         context.putVar("fromTime", Date.from(toZoneSameLocal(fromTime, zoneId)));
-        context.putVar("toTime", Date.from(toZoneSameLocal(toTime, zoneId)));
+        context.putVar("toTime", Date.from(toZoneSameLocal(toTime, zoneId).minusMillis(1)));
 
         processTemplate(context, ReportType.provision_of_service, outputStream);
     }
