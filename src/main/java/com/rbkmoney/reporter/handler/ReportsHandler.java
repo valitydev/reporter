@@ -11,12 +11,8 @@ import com.rbkmoney.reporter.service.ReportService;
 import com.rbkmoney.reporter.util.DamselUtil;
 import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;

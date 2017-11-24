@@ -6,6 +6,7 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
 import com.rbkmoney.reporter.exception.ShopNotFoundException;
 import com.rbkmoney.reporter.model.PartyModel;
+import com.rbkmoney.reporter.service.DomainConfigService;
 import com.rbkmoney.reporter.service.PartyService;
 import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,12 @@ public class PartyServiceImpl implements PartyService {
 
     private final PartyManagementSrv.Iface partyManagementClient;
 
+    private final DomainConfigService domainConfigService;
+
     @Autowired
-    public PartyServiceImpl(PartyManagementSrv.Iface partyManagementClient) {
+    public PartyServiceImpl(PartyManagementSrv.Iface partyManagementClient, DomainConfigService domainConfigService) {
         this.partyManagementClient = partyManagementClient;
+        this.domainConfigService = domainConfigService;
     }
 
     @Override
@@ -39,6 +43,15 @@ public class PartyServiceImpl implements PartyService {
             if (shop == null) {
                 throw new ShopNotFoundException(String.format("Shop not found, shopId='%s', partyId='%s', time='%s'", shopId, partyId, timestamp));
             }
+
+            partyModel.setShopId(shop.getId());
+
+            ShopDetails details = shop.getDetails();
+            partyModel.setShopName(details.getName());
+            partyModel.setShopName(details.getDescription());
+
+            CategoryType shopCategoryType = domainConfigService.getCategoryType(shop.getCategory().getId());
+            partyModel.setShopCategoryType(shopCategoryType);
 
             String contractId = shop.getContractId();
             Contract contract = party.getContracts().get(contractId);

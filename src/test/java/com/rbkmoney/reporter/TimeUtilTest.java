@@ -2,6 +2,7 @@ package com.rbkmoney.reporter;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;

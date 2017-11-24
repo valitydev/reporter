@@ -4,7 +4,6 @@ import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.reports.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

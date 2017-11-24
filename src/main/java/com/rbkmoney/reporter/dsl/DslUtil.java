@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rbkmoney.damsel.merch_stat.StatRequest;
 
 import java.time.Instant;
+import java.util.Collection;
 
 public class DslUtil {
 
@@ -30,12 +31,13 @@ public class DslUtil {
         }
     }
 
-    public static StatRequest createShopAccountingStatRequest(Instant from, Instant to, ObjectMapper objectMapper) {
+    public static StatRequest createShopAccountingStatRequest(Instant from, Instant to, Collection<Integer> shopCategoryIds, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         ShopAccountingQuery shopAccountingQuery = new ShopAccountingQuery();
         shopAccountingQuery.setFromTime(from);
         shopAccountingQuery.setToTime(to);
+        shopAccountingQuery.setWithoutShopCategoryIds(shopCategoryIds);
         query.setShopAccountingQuery(shopAccountingQuery);
         statisticDsl.setQuery(query);
 

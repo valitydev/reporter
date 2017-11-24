@@ -184,7 +184,7 @@ public abstract class AbstractGenericDao extends NamedParameterJdbcDaoSupport im
 
     @Override
     public void executeWithReturn(String namedSql, KeyHolder keyHolder) throws DaoException {
-        executeWithReturn(namedSql,  EmptySqlParameterSource.INSTANCE, keyHolder);
+        executeWithReturn(namedSql, EmptySqlParameterSource.INSTANCE, keyHolder);
     }
 
     @Override

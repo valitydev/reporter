@@ -3,32 +3,46 @@ package com.rbkmoney.reporter.model;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rbkmoney.reporter.serializer.CurrencyDeserializer;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+
 /**
  * Created by tolkonepiu on 17/07/2017.
  */
 public class ShopAccountingModel {
 
+    @NotNull
     private String merchantId;
 
+    @NotNull
     private String shopId;
 
+    @NotNull
     private String currencyCode;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double fundsAcquired;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double feeCharged;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double openingBalance;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double fundsPaidOut;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double fundsRefunded;
 
+    @DecimalMin("0")
     @JsonDeserialize(using = CurrencyDeserializer.class)
     private double closingBalance;
 

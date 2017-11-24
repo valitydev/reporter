@@ -4,7 +4,6 @@ import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.exception.FileNotFoundException;
 import com.rbkmoney.reporter.exception.FileStorageException;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.Instant;

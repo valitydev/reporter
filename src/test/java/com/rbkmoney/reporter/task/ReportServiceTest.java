@@ -1,5 +1,6 @@
 package com.rbkmoney.reporter.task;
 
+import com.rbkmoney.damsel.domain.CategoryType;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
@@ -13,7 +14,6 @@ import com.rbkmoney.reporter.service.SignService;
 import com.rbkmoney.reporter.service.StatisticService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,18 +53,18 @@ public class ReportServiceTest extends AbstractIntegrationTest {
     @MockBean
     private SignService signService;
 
-    @Before
-    public void setup() {
+    @Test
+    public void generateProvisionOfServiceReportTest() throws IOException {
         given(statisticService.getPayments(anyString(), anyString(), any(), any())).willReturn(new ArrayList<>());
-        given(partyService.getPartyRepresentation(anyString(), anyString(), any(Instant.class))).willReturn(random(PartyModel.class));
+
+        PartyModel partyModel = random(PartyModel.class);
+        partyModel.setShopCategoryType(CategoryType.live);
+        given(partyService.getPartyRepresentation(anyString(), anyString(), any(Instant.class))).willReturn(partyModel);
         given(signService.sign(any(Path.class)))
                 .willAnswer(
                         (Answer<byte[]>) invocation -> Base64.getEncoder().encode(Files.readAllBytes(invocation.getArgumentAt(0, Path.class)))
                 );
-    }
 
-    @Test
-    public void generateProvisionOfServiceReportTest() throws IOException {
         ShopAccountingModel shopAccountingModel = random(ShopAccountingModel.class);
         given(statisticService.getShopAccounting(anyString(), anyString(), any(Instant.class), any(Instant.class))).willReturn(shopAccountingModel);
 
@@ -96,6 +96,16 @@ public class ReportServiceTest extends AbstractIntegrationTest {
                 }
             }
         }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTryingToCreateReportForTestShop() {
+        PartyModel partyModel = random(PartyModel.class);
+        partyModel.setShopCategoryType(CategoryType.test);
+
+        given(partyService.getPartyRepresentation(anyString(), anyString(), any(Instant.class))).willReturn(partyModel);
+
+        reportService.createReport("test", "test", Instant.now(), Instant.now(), ReportType.provision_of_service);
     }
 
 }

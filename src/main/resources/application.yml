@@ -6,6 +6,8 @@ magista:
   url: http://localhost:8022/stat
 signer:
   url: http://localhost:8022/signer
+domainConfig:
+  url: http://localhost:8022/domain
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

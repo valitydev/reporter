@@ -1,5 +1,6 @@
 package com.rbkmoney.reporter.service;
 
+import com.rbkmoney.damsel.domain.CategoryType;
 import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -113,6 +115,12 @@ public class ReportService {
             throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId));
         }
 
+        if (partyModel.getShopCategoryType() == CategoryType.test) {
+            throw new IllegalArgumentException(
+                    String.format("Cannot create report for test shop, partyId='%s', shopId='%s'", partyId, shopId)
+            );
+        }
+
         try {
             return reportDao.createReport(
                     partyId,
@@ -152,9 +160,22 @@ public class ReportService {
             finishedReportTask(report.getId(), reportFiles);
             log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+        } catch (ValidationException ex) {
+            log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
+            changeReportStatus(report, ReportStatus.cancelled);
         } catch (Throwable throwable) {
             log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime(), throwable);
+        }
+    }
+
+    public void changeReportStatus(Report report, ReportStatus reportStatus) {
+        log.debug("Trying to change report status, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
+        try {
+            reportDao.changeReportStatus(report.getId(), reportStatus);
+            log.info("Report status have been successfully changed, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
+        } catch (DaoException ex) {
+            throw new StorageException(String.format("Failed to change report status, reportId='%d', reportStatus='%s'", report.getId(), reportStatus), ex);
         }
     }
 
