@@ -22,31 +22,6 @@ public class TaskService {
     @Autowired
     private ReportService reportService;
 
-    @Autowired
-    private StatisticService statisticService;
-
-    @Value("${scheduler.timezone}")
-    private ZoneId zoneId;
-
-    @Scheduled(cron = "${scheduler.cron}")
-    public void generateProvisionOfServiceReports() {
-        YearMonth yearMonth = YearMonth.now();
-        Instant fromTime = yearMonth.minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
-        Instant toTime = yearMonth.atDay(1).atStartOfDay(zoneId).toInstant();
-
-        statisticService.getShopAccountings(fromTime, toTime)
-                .parallelStream()
-                .forEach(shopAccountingModel -> reportService.createReport(
-                        shopAccountingModel.getMerchantId(),
-                        shopAccountingModel.getShopId(),
-                        fromTime,
-                        toTime,
-                        ReportType.provision_of_service,
-                        zoneId,
-                        Instant.now()
-                ));
-    }
-
     @Scheduled(fixedDelay = 500)
     public void processPendingReports() {
         List<Report> reports = reportService.getPendingReports();

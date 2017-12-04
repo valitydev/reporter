@@ -97,6 +97,7 @@ public class S3StorageServiceImpl implements StorageService {
 
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentDisposition("attachment;filename=" + filename);
+            objectMetadata.setContentLength(bytes.length);
             Upload upload = transferManager.upload(
                     new PutObjectRequest(bucketName, fileId, new ByteArrayInputStream(bytes), objectMetadata)
             );

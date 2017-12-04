@@ -47,8 +47,10 @@ public class PartyServiceImpl implements PartyService {
             partyModel.setShopId(shop.getId());
 
             ShopDetails details = shop.getDetails();
-            partyModel.setShopName(details.getName());
-            partyModel.setShopName(details.getDescription());
+            if (details != null) {
+                partyModel.setShopName(details.getName());
+                partyModel.setShopDescription(details.getDescription());
+            }
 
             CategoryType shopCategoryType = domainConfigService.getCategoryType(shop.getCategory().getId());
             partyModel.setShopCategoryType(shopCategoryType);

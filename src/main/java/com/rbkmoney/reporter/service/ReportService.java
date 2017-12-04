@@ -110,6 +110,9 @@ public class ReportService {
     }
 
     public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
+        log.debug("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+                partyId, shopId, reportType, fromTime, toTime);
+
         PartyModel partyModel = partyService.getPartyRepresentation(partyId, shopId, createdAt);
         if (partyModel == null) {
             throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId));
@@ -122,7 +125,7 @@ public class ReportService {
         }
 
         try {
-            return reportDao.createReport(
+            long reportId = reportDao.createReport(
                     partyId,
                     shopId,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
@@ -131,6 +134,9 @@ public class ReportService {
                     timezone.getId(),
                     LocalDateTime.ofInstant(createdAt, ZoneOffset.UTC)
             );
+            log.info("Report has been successfully created, reportId={}, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+                    reportId, partyId, shopId, reportType, fromTime, toTime);
+            return reportId;
         } catch (DaoException ex) {
             throw new StorageException(String.format("Failed to save report in storage, partyId='%s', shopId='%s', fromTime='%s', toTime='%s', reportType='%s'",
                     partyId, shopId, fromTime, toTime, reportType), ex);

@@ -24,6 +24,4 @@ storage:
   bucketName: "reports"
   client:
     maxErrorRetry: 10
-scheduler:
-  cron: "0 0 0 2 * *"
-  timezone: Europe/Moscow
+
