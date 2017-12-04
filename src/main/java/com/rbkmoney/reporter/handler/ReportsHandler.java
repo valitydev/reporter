@@ -3,6 +3,7 @@ package com.rbkmoney.reporter.handler;
 import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.reports.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
+import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.exception.FileNotFoundException;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
 import com.rbkmoney.reporter.exception.ReportNotFoundException;
@@ -51,7 +52,9 @@ public class ReportsHandler implements ReportingSrv.Iface {
                             .collect(Collectors.toList()),
                     fromTime,
                     toTime
-            ).stream().map(report -> DamselUtil.toDamselReport(report, reportService.getReportFiles(report.getId())))
+            ).stream()
+                    .filter(report -> report.getStatus() != ReportStatus.cancelled)
+                    .map(report -> DamselUtil.toDamselReport(report, reportService.getReportFiles(report.getId())))
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException ex) {
             throw buildInvalidRequest(ex);
