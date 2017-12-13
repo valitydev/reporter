@@ -122,7 +122,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public long createReport(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException {
+    public long createReport(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, boolean needSign, LocalDateTime createdAt) throws DaoException {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         Query query = getDslContext().insertInto(REPORT)
@@ -132,6 +132,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
                 .set(REPORT.TO_TIME, toTime)
                 .set(REPORT.TYPE, reportType.name())
                 .set(REPORT.TIMEZONE, timezone)
+                .set(REPORT.NEED_SIGN, needSign)
                 .set(REPORT.CREATED_AT, createdAt)
                 .returning(REPORT.ID);
 

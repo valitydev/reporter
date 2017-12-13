@@ -29,7 +29,8 @@ public class AbstractIntegrationTest {
     public static String BUCKET_NAME = "TEST";
 
     @ClassRule
-    public static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:9.6");
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+            .withStartupTimeout(Duration.ofMinutes(5));
 
     @ClassRule
     public static GenericContainer cephContainer = new GenericContainer("ceph/demo:latest")

@@ -37,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Report extends TableImpl<ReportRecord> {
 
-    private static final long serialVersionUID = 1825579722;
+    private static final long serialVersionUID = 765586862;
 
     /**
      * The reference instance of <code>rpt.report</code>
@@ -96,6 +96,11 @@ public class Report extends TableImpl<ReportRecord> {
      * The column <code>rpt.report.type</code>.
      */
     public final TableField<ReportRecord, String> TYPE = createField("type", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
+
+    /**
+     * The column <code>rpt.report.need_sign</code>.
+     */
+    public final TableField<ReportRecord, Boolean> NEED_SIGN = createField("need_sign", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
      * Create a <code>rpt.report</code> table reference

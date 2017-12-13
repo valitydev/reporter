@@ -1,0 +1,1 @@
+ALTER TABLE rpt.report ADD COLUMN need_sign BOOLEAN DEFAULT TRUE;

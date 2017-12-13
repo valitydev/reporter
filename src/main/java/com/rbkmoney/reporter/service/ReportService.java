@@ -11,6 +11,7 @@ import com.rbkmoney.reporter.model.PartyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,8 +35,6 @@ import java.util.List;
 public class ReportService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    public static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("Europe/Moscow");
 
     private final ReportDao reportDao;
 
@@ -47,19 +46,27 @@ public class ReportService {
 
     private final SignService signService;
 
+    private final ZoneId defaultTimeZone;
+
+    private final boolean needSign;
+
     @Autowired
     public ReportService(
             ReportDao reportDao,
             PartyService partyService,
             TemplateService templateService,
             StorageService storageService,
-            SignService signService
+            SignService signService,
+            @Value("${report.defaultTimeZone}") ZoneId defaultTimeZone,
+            @Value("${report.needSign}") boolean needSign
     ) {
         this.reportDao = reportDao;
         this.partyService = partyService;
         this.templateService = templateService;
         this.storageService = storageService;
         this.signService = signService;
+        this.defaultTimeZone = defaultTimeZone;
+        this.needSign = needSign;
     }
 
     public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException {
@@ -106,10 +113,10 @@ public class ReportService {
     }
 
     public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException {
-        return createReport(partyId, shopId, fromTime, toTime, reportType, DEFAULT_TIMEZONE, Instant.now());
+        return createReport(partyId, shopId, fromTime, toTime, reportType, defaultTimeZone, needSign, Instant.now());
     }
 
-    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, boolean needSign, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
         log.debug("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
                 partyId, shopId, reportType, fromTime, toTime);
 
@@ -132,6 +139,7 @@ public class ReportService {
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
                     reportType,
                     timezone.getId(),
+                    needSign,
                     LocalDateTime.ofInstant(createdAt, ZoneOffset.UTC)
             );
             log.info("Report has been successfully created, reportId={}, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
@@ -206,12 +214,17 @@ public class ReportService {
                     Files.newOutputStream(reportFile)
             );
 
+            List<FileMeta> files = new ArrayList<>();
             FileMeta reportFileModel = storageService.saveFile(reportFile);
+            files.add(reportFileModel);
 
-            byte[] sign = signService.sign(reportFile);
-            FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
+            if (report.getNeedSign()) {
+                byte[] sign = signService.sign(reportFile);
+                FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
+                files.add(signFileModel);
+            }
 
-            return Arrays.asList(reportFileModel, signFileModel);
+            return files;
         } finally {
             Files.deleteIfExists(reportFile);
         }
