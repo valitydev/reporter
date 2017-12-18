@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.YearMonth;
@@ -23,6 +25,7 @@ public class TaskService {
     private ReportService reportService;
 
     @Scheduled(fixedDelay = 500)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processPendingReports() {
         List<Report> reports = reportService.getPendingReports();
         log.debug("Trying to process {} pending reports", reports.size());

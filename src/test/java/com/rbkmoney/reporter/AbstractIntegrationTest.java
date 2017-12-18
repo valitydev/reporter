@@ -12,7 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.LogMessageWaitStrategy;
+import org.testcontainers.containers.wait.HttpWaitStrategy;
 
 import java.time.Duration;
 
@@ -40,11 +40,12 @@ public class AbstractIntegrationTest {
             .withEnv("CEPH_DEMO_ACCESS_KEY", AWS_ACCESS_KEY)
             .withEnv("CEPH_DEMO_SECRET_KEY", AWS_SECRET_KEY)
             .withEnv("CEPH_DEMO_BUCKET", BUCKET_NAME)
-            .withExposedPorts(80)
+            .withExposedPorts(5000, 80)
             .waitingFor(
-                    new LogMessageWaitStrategy()
-                            .withRegEx(".*\\/entrypoint.sh: SUCCESS\n")
-                            .withStartupTimeout(Duration.ofMinutes(5))
+                    new HttpWaitStrategy()
+                            .forPath("/api/v0.1/health")
+                            .forStatusCode(200)
+                            .withStartupTimeout(Duration.ofMinutes(10))
             );
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -68,5 +69,7 @@ public class AbstractIntegrationTest {
 
     @LocalServerPort
     protected int port;
+
+
 
 }

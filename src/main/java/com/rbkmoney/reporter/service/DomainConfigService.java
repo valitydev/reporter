@@ -8,6 +8,7 @@ import com.rbkmoney.damsel.domain_config.Reference;
 import com.rbkmoney.damsel.domain_config.RepositorySrv;
 import com.rbkmoney.damsel.domain_config.Snapshot;
 import org.apache.thrift.TException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,6 +19,7 @@ public class DomainConfigService {
 
     private final RepositorySrv.Iface domainConfigClient;
 
+    @Autowired
     public DomainConfigService(RepositorySrv.Iface domainConfigClient) {
         this.domainConfigClient = domainConfigClient;
     }

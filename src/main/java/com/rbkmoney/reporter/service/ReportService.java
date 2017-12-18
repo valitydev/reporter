@@ -84,6 +84,7 @@ public class ReportService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<Report> getPendingReports() throws StorageException {
         try {
             return reportDao.getPendingReports();
@@ -166,6 +167,7 @@ public class ReportService {
         return storageService.getFileUrl(file.getFileId(), file.getBucketId(), expiresIn);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void generateReport(Report report) {
         log.debug("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                 report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());

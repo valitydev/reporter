@@ -91,7 +91,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     @Override
     public List<Report> getPendingReports() throws DaoException {
         Query query = getDslContext().selectFrom(REPORT)
-                .where(REPORT.STATUS.eq(ReportStatus.pending));
+                .where(REPORT.STATUS.eq(ReportStatus.pending))
+                .forUpdate();
 
         return fetch(query, reportRowMapper);
     }
@@ -100,7 +101,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     public List<Report> getPendingReportsByType(ReportType reportType) throws DaoException {
         Query query = getDslContext().selectFrom(REPORT)
                 .where(REPORT.STATUS.eq(ReportStatus.pending))
-                .and(REPORT.TYPE.eq(reportType.name()));
+                .and(REPORT.TYPE.eq(reportType.name()))
+                .forUpdate();
 
         return fetch(query, reportRowMapper);
     }
