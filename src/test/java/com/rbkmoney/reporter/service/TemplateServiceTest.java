@@ -138,6 +138,16 @@ public class TemplateServiceTest extends AbstractIntegrationTest {
                     BigDecimal.valueOf(feeChargedCell.getNumericCellValue()),
                     BigDecimal.valueOf(sheet.getRow(25).getCell(3).getNumericCellValue())
             );
+
+            assertEquals(
+                    partyModel.getMerchantRepresentativePosition(),
+                    sheet.getRow(40).getCell(4).getStringCellValue()
+            );
+            assertEquals(
+                    partyModel.getMerchantRepresentativeFullName(),
+                    sheet.getRow(41).getCell(4).getStringCellValue()
+            );
+
         } finally {
             Files.deleteIfExists(tempFile);
         }

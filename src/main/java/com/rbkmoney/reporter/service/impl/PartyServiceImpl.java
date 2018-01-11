@@ -61,11 +61,13 @@ public class PartyServiceImpl implements PartyService {
                 throw new ShopNotFoundException(String.format("Contract on shop not found, contractId='%s', shopId='%s', partyId='%s', time='%s'", contractId, shopId, partyId, timestamp));
             }
 
-            LegalAgreement legalAgreement = contract.getLegalAgreement();
-            partyModel.setMerchantContractId(legalAgreement.getLegalAgreementId());
-            partyModel.setMerchantContractSignedAt(
-                    Date.from(TypeUtil.stringToInstant(legalAgreement.getSignedAt()))
-            );
+            if (contract.isSetLegalAgreement()) {
+                LegalAgreement legalAgreement = contract.getLegalAgreement();
+                partyModel.setMerchantContractId(legalAgreement.getLegalAgreementId());
+                partyModel.setMerchantContractSignedAt(
+                        Date.from(TypeUtil.stringToInstant(legalAgreement.getSignedAt()))
+                );
+            }
 
             if (contract.isSetContractor()
                     && contract.getContractor().isSetLegalEntity()

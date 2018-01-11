@@ -27,7 +27,9 @@ public class DomainConfigService {
     public CategoryType getCategoryType(int categoryId) {
         try {
             Snapshot snapshot = domainConfigClient.checkout(Reference.head(new Head()));
-            DomainObject domainObject = snapshot.getDomain().get(new CategoryRef(categoryId));
+            DomainObject domainObject = snapshot.getDomain().get(
+                    com.rbkmoney.damsel.domain.Reference.category(new CategoryRef(categoryId))
+            );
             return domainObject.getCategory().getData().getType();
         } catch (TException ex) {
             throw new RuntimeException(String.format("Failed to get category type, categoryId='%d'", categoryId), ex);

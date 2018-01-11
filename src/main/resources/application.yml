@@ -1,13 +1,13 @@
 server:
   port: @server.port@
 partyManagement:
-  url: http://localhost:8022/repo
+  url: http://hellgate:8022/v1/processing/partymgmt
 magista:
-  url: http://localhost:8022/stat
+  url: http://magista:8022/stat
 signer:
-  url: http://localhost:8022/signer
+  url: http://signer:8022/signer
 domainConfig:
-  url: http://localhost:8022/domain
+  url: http://dominant:8022/v1/domain/repository
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
