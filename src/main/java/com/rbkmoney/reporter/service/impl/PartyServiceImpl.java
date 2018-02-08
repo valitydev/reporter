@@ -33,7 +33,7 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public PartyModel getPartyRepresentation(String partyId, String shopId, Instant timestamp) throws PartyNotFoundException, ShopNotFoundException {
         try {
-            Party party = partyManagementClient.checkout(userInfo, partyId, TypeUtil.temporalToString(timestamp));
+            Party party = partyManagementClient.checkout(userInfo, partyId, PartyRevisionParam.timestamp(TypeUtil.temporalToString(timestamp)));
 
             PartyModel partyModel = new PartyModel();
             partyModel.setMerchantId(partyId);
