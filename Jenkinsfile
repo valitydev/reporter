@@ -3,7 +3,6 @@ build('reporter', 'java-maven') {
     checkoutRepo()
 
     def serviceName = env.REPO_NAME
-    def baseImageTag = "f26fcc19d1941ab74f1c72dd8a408be17a769333"
     def mvnArgs = '-DjvmArgs="-Xmx256m"'
 
     // Run mvn and generate docker file
