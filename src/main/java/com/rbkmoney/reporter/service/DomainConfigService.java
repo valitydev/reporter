@@ -3,11 +3,10 @@ package com.rbkmoney.reporter.service;
 import com.rbkmoney.damsel.domain.CategoryRef;
 import com.rbkmoney.damsel.domain.CategoryType;
 import com.rbkmoney.damsel.domain.DomainObject;
-import com.rbkmoney.damsel.domain_config.Head;
-import com.rbkmoney.damsel.domain_config.Reference;
-import com.rbkmoney.damsel.domain_config.RepositorySrv;
-import com.rbkmoney.damsel.domain_config.Snapshot;
+import com.rbkmoney.damsel.domain_config.*;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,44 +16,35 @@ import java.util.stream.Collectors;
 @Service
 public class DomainConfigService {
 
-    private final RepositorySrv.Iface domainConfigClient;
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private RepositoryClientSrv.Iface dominantClient;
 
     @Autowired
-    public DomainConfigService(RepositorySrv.Iface domainConfigClient) {
-        this.domainConfigClient = domainConfigClient;
+    public DomainConfigService(RepositoryClientSrv.Iface dominantClient) {
+        this.dominantClient = dominantClient;
     }
 
-    public CategoryType getCategoryType(int categoryId) {
+    public CategoryType getCategoryType(CategoryRef categoryRef) {
+        return getCategoryType(categoryRef, Reference.head(new Head()));
+    }
+
+    public CategoryType getCategoryType(CategoryRef categoryRef, long domainRevision) {
+        return getCategoryType(categoryRef, Reference.version(domainRevision));
+    }
+
+    public CategoryType getCategoryType(CategoryRef categoryRef, Reference revisionReference) {
+        log.info("Trying to get category type, categoryRef='{}', revisionReference='{}'", categoryRef, revisionReference);
         try {
-            Snapshot snapshot = domainConfigClient.checkout(Reference.head(new Head()));
-            DomainObject domainObject = snapshot.getDomain().get(
-                    com.rbkmoney.damsel.domain.Reference.category(new CategoryRef(categoryId))
-            );
-            return domainObject.getCategory().getData().getType();
+            com.rbkmoney.damsel.domain.Reference reference = new com.rbkmoney.damsel.domain.Reference();
+            reference.setCategory(categoryRef);
+            VersionedObject versionedObject = dominantClient.checkoutObject(revisionReference, reference);
+            CategoryType categoryType = versionedObject.getObject().getCategory().getData().getType();
+            log.info("Category type has been found, categoryRef='{}', revisionReference='{}', categoryType='{}'", categoryRef, revisionReference, categoryType);
+            return categoryType;
         } catch (TException ex) {
-            throw new RuntimeException(String.format("Failed to get category type, categoryId='%d'", categoryId), ex);
+            throw new RuntimeException(String.format("Failed to get category type, categoryRef='%s', revisionReference='%s'", categoryRef, revisionReference), ex);
         }
-    }
-
-    public Map<Integer, CategoryType> getCategories() {
-        try {
-            Snapshot snapshot = domainConfigClient.checkout(Reference.head(new Head()));
-            return snapshot.getDomain().entrySet().stream()
-                    .filter(entry -> entry.getKey().isSetCategory())
-                    .collect(Collectors.toMap(
-                            entry -> entry.getKey().getCategory().getId(),
-                            entry -> entry.getValue().getCategory().getData().getType()
-                            )
-                    );
-        } catch (TException ex) {
-            throw new RuntimeException("Failed to get categories from domain", ex);
-        }
-    }
-
-    public Map<Integer, CategoryType> getTestCategories() {
-        return getCategories().entrySet().stream()
-                .filter(entry -> entry.getValue() == CategoryType.test)
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
     }
 
 }

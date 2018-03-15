@@ -56,7 +56,7 @@ public class S3StorageServiceImpl implements StorageService {
     @Override
     public URL getFileUrl(String fileId, String bucketId, Instant expiresIn) throws FileStorageException, FileNotFoundException {
         try {
-            log.debug("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'", fileId, bucketId, expiresIn);
+            log.info("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'", fileId, bucketId, expiresIn);
             URL url = storageClient.generatePresignedUrl(bucketId, fileId, Date.from(expiresIn));
             if (Objects.isNull(url)) {
                 throw new FileNotFoundException(String.format("Presigned url is null, fileId='%s', bucketId='%s'", fileId, bucketId));
@@ -79,7 +79,7 @@ public class S3StorageServiceImpl implements StorageService {
 
     @Override
     public FileMeta saveFile(String filename, byte[] bytes) throws FileStorageException {
-        log.debug("Trying to upload file to storage, filename='{}', bucketId='{}'", filename, bucketName);
+        log.info("Trying to upload file to storage, filename='{}', bucketId='{}'", filename, bucketName);
 
         try {
             String fileId;

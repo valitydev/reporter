@@ -26,16 +26,13 @@ public class StatisticServiceImpl implements StatisticService {
 
     private final MerchantStatisticsSrv.Iface merchantStatisticsClient;
 
-    private final DomainConfigService domainConfigService;
-
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public StatisticServiceImpl(MerchantStatisticsSrv.Iface merchantStatisticsClient, DomainConfigService domainConfigService, ObjectMapper objectMapper) {
+    public StatisticServiceImpl(MerchantStatisticsSrv.Iface merchantStatisticsClient, ObjectMapper objectMapper) {
         this.merchantStatisticsClient = merchantStatisticsClient;
-        this.domainConfigService = domainConfigService;
         this.objectMapper = objectMapper;
     }
 
@@ -52,8 +49,7 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public List<ShopAccountingModel> getShopAccountings(Instant fromTime, Instant toTime) {
         try {
-            Set<Integer> testCategoryIds = domainConfigService.getTestCategories().keySet();
-            return merchantStatisticsClient.getStatistics(DslUtil.createShopAccountingStatRequest(fromTime, toTime, testCategoryIds, objectMapper))
+            return merchantStatisticsClient.getStatistics(DslUtil.createShopAccountingStatRequest(fromTime, toTime, objectMapper))
                     .getData()
                     .getRecords()
                     .stream()

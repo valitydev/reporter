@@ -1,5 +1,6 @@
 package com.rbkmoney.reporter.config;
 
+import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.domain_config.RepositorySrv;
 import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +17,9 @@ public class DomainConfig {
     Resource resource;
 
     @Bean
-    public RepositorySrv.Iface domainConfigClient() throws IOException {
+    public RepositoryClientSrv.Iface dominantClient() throws IOException {
         return new THSpawnClientBuilder()
-                .withAddress(resource.getURI()).build(RepositorySrv.Iface.class);
+                .withAddress(resource.getURI()).build(RepositoryClientSrv.Iface.class);
     }
 
 }

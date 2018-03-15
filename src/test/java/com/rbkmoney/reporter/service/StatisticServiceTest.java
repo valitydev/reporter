@@ -29,9 +29,6 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     StatisticService statisticService;
 
     @MockBean
-    DomainConfigService domainConfigService;
-
-    @MockBean
     MerchantStatisticsSrv.Iface merchantStatisticsClient;
 
     @Test
@@ -49,7 +46,6 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
 
         given(merchantStatisticsClient.getStatistics(new StatRequest(anyString())))
                 .willReturn(new StatResponse(StatResponseData.records(Arrays.asList(statisticResponse))));
-        given(domainConfigService.getTestCategories()).willReturn(new HashMap<>());
 
         try {
             statisticService.getShopAccounting("test", "test", Instant.now(), Instant.now());

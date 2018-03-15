@@ -52,7 +52,7 @@ public class PartyServiceImpl implements PartyService {
                 partyModel.setShopDescription(details.getDescription());
             }
 
-            CategoryType shopCategoryType = domainConfigService.getCategoryType(shop.getCategory().getId());
+            CategoryType shopCategoryType = domainConfigService.getCategoryType(shop.getCategory());
             partyModel.setShopCategoryType(shopCategoryType);
 
             String contractId = shop.getContractId();

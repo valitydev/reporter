@@ -118,7 +118,7 @@ public class ReportService {
     }
 
     public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, boolean needSign, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
-        log.debug("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+        log.info("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
                 partyId, shopId, reportType, fromTime, toTime);
 
         PartyModel partyModel = partyService.getPartyRepresentation(partyId, shopId, createdAt);
@@ -169,7 +169,7 @@ public class ReportService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateReport(Report report) {
-        log.debug("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                 report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         try {
             List<FileMeta> reportFiles = processSignAndUpload(report);
@@ -186,7 +186,7 @@ public class ReportService {
     }
 
     public void changeReportStatus(Report report, ReportStatus reportStatus) {
-        log.debug("Trying to change report status, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
+        log.info("Trying to change report status, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
         try {
             reportDao.changeReportStatus(report.getId(), reportStatus);
             log.info("Report status have been successfully changed, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
