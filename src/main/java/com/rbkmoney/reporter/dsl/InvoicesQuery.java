@@ -4,12 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.Objects;
-import java.util.Optional;
 
-/**
- * Created by tolkonepiu on 14/07/2017.
- */
-public class ShopAccountingQuery {
+public class InvoicesQuery {
 
     @JsonProperty("merchant_id")
     String merchantId;
@@ -17,11 +13,11 @@ public class ShopAccountingQuery {
     @JsonProperty("contract_id")
     String contractId;
 
-    @JsonProperty("currency_code")
-    String currencyCode;
+    @JsonProperty("invoice_id")
+    String invoiceId;
 
     @JsonProperty("from_time")
-    Optional<Instant> fromTime;
+    Instant fromTime;
 
     @JsonProperty("to_time")
     Instant toTime;
@@ -42,19 +38,19 @@ public class ShopAccountingQuery {
         this.contractId = contractId;
     }
 
-    public String getCurrencyCode() {
-        return currencyCode;
+    public String getInvoiceId() {
+        return invoiceId;
     }
 
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
-    public Optional<Instant> getFromTime() {
+    public Instant getFromTime() {
         return fromTime;
     }
 
-    public void setFromTime(Optional<Instant> fromTime) {
+    public void setFromTime(Instant fromTime) {
         this.fromTime = fromTime;
     }
 
@@ -69,26 +65,26 @@ public class ShopAccountingQuery {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ShopAccountingQuery that = (ShopAccountingQuery) o;
-        return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(contractId, that.contractId) &&
-                Objects.equals(currencyCode, that.currencyCode) &&
-                Objects.equals(fromTime, that.fromTime) &&
-                Objects.equals(toTime, that.toTime);
+        if (!(o instanceof InvoicesQuery)) return false;
+        InvoicesQuery that = (InvoicesQuery) o;
+        return Objects.equals(getMerchantId(), that.getMerchantId()) &&
+                Objects.equals(getContractId(), that.getContractId()) &&
+                Objects.equals(getInvoiceId(), that.getInvoiceId()) &&
+                Objects.equals(getFromTime(), that.getFromTime()) &&
+                Objects.equals(getToTime(), that.getToTime());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(merchantId, contractId, currencyCode, fromTime, toTime);
+        return Objects.hash(getMerchantId(), getContractId(), getInvoiceId(), getFromTime(), getToTime());
     }
 
     @Override
     public String toString() {
-        return "ShopAccountingQuery{" +
+        return "PaymentsQuery{" +
                 "merchantId='" + merchantId + '\'' +
                 ", contractId='" + contractId + '\'' +
-                ", currencyCode='" + currencyCode + '\'' +
+                ", invoiceId='" + invoiceId + '\'' +
                 ", fromTime=" + fromTime +
                 ", toTime=" + toTime +
                 '}';

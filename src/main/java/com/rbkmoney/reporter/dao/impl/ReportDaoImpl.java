@@ -37,11 +37,11 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public Report getReport(String partyId, String shopId, long reportId) throws DaoException {
+    public Report getReport(String partyId, String contractId, long reportId) throws DaoException {
         Query query = getDslContext().selectFrom(REPORT).where(
                 REPORT.ID.eq(reportId)
                         .and(REPORT.PARTY_ID.eq(partyId))
-                        .and(REPORT.PARTY_SHOP_ID.eq(shopId))
+                        .and(REPORT.PARTY_CONTRACT_ID.eq(contractId))
         );
         return fetchOne(query, reportRowMapper);
     }
@@ -108,9 +108,9 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) throws DaoException {
+    public List<Report> getReportsByRange(String partyId, String contractId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) throws DaoException {
         Condition condition = REPORT.PARTY_ID.eq(partyId)
-                .and(REPORT.PARTY_SHOP_ID.eq(shopId))
+                .and(REPORT.PARTY_CONTRACT_ID.eq(contractId))
                 .and(REPORT.CREATED_AT.ge(fromTime))
                 .and(REPORT.CREATED_AT.lt(toTime));
 
@@ -124,12 +124,12 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public long createReport(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, boolean needSign, LocalDateTime createdAt) throws DaoException {
+    public long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, boolean needSign, LocalDateTime createdAt) throws DaoException {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         Query query = getDslContext().insertInto(REPORT)
                 .set(REPORT.PARTY_ID, partyId)
-                .set(REPORT.PARTY_SHOP_ID, shopId)
+                .set(REPORT.PARTY_CONTRACT_ID, contractId)
                 .set(REPORT.FROM_TIME, fromTime)
                 .set(REPORT.TO_TIME, toTime)
                 .set(REPORT.TYPE, reportType.name())

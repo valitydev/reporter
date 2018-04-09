@@ -1,0 +1,1 @@
+ALTER TABLE rpt.REPORT RENAME party_shop_id TO party_contract_id;

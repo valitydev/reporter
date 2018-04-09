@@ -4,6 +4,7 @@ partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt
 magista:
   url: http://magista:8022/stat
+  timeout: 60000
 signer:
   url: http://signer:8022/signer
 domainConfig:

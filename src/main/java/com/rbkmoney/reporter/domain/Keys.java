@@ -5,8 +5,10 @@ package com.rbkmoney.reporter.domain;
 
 
 import com.rbkmoney.reporter.domain.tables.FileMeta;
+import com.rbkmoney.reporter.domain.tables.PosReportMeta;
 import com.rbkmoney.reporter.domain.tables.Report;
 import com.rbkmoney.reporter.domain.tables.records.FileMetaRecord;
+import com.rbkmoney.reporter.domain.tables.records.PosReportMetaRecord;
 import com.rbkmoney.reporter.domain.tables.records.ReportRecord;
 
 import javax.annotation.Generated;
@@ -41,6 +43,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<FileMetaRecord> FILE_META_PKEY = UniqueKeys0.FILE_META_PKEY;
+    public static final UniqueKey<PosReportMetaRecord> POS_REPORT_META_PKEY = UniqueKeys0.POS_REPORT_META_PKEY;
     public static final UniqueKey<ReportRecord> REPORT_PKEY = UniqueKeys0.REPORT_PKEY;
 
     // -------------------------------------------------------------------------
@@ -58,6 +61,7 @@ public class Keys {
 
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<FileMetaRecord> FILE_META_PKEY = createUniqueKey(FileMeta.FILE_META, "file_meta_pkey", FileMeta.FILE_META.BUCKET_ID, FileMeta.FILE_META.FILE_ID);
+        public static final UniqueKey<PosReportMetaRecord> POS_REPORT_META_PKEY = createUniqueKey(PosReportMeta.POS_REPORT_META, "pos_report_meta_pkey", PosReportMeta.POS_REPORT_META.PARTY_ID, PosReportMeta.POS_REPORT_META.CONTRACT_ID);
         public static final UniqueKey<ReportRecord> REPORT_PKEY = createUniqueKey(Report.REPORT, "report_pkey", Report.REPORT.ID);
     }
 }

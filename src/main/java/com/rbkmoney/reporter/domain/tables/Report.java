@@ -37,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Report extends TableImpl<ReportRecord> {
 
-    private static final long serialVersionUID = 765586862;
+    private static final long serialVersionUID = -1886648945;
 
     /**
      * The reference instance of <code>rpt.report</code>
@@ -78,9 +78,9 @@ public class Report extends TableImpl<ReportRecord> {
     public final TableField<ReportRecord, String> PARTY_ID = createField("party_id", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
-     * The column <code>rpt.report.party_shop_id</code>.
+     * The column <code>rpt.report.party_contract_id</code>.
      */
-    public final TableField<ReportRecord, String> PARTY_SHOP_ID = createField("party_shop_id", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<ReportRecord, String> PARTY_CONTRACT_ID = createField("party_contract_id", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>rpt.report.status</code>.
@@ -100,7 +100,7 @@ public class Report extends TableImpl<ReportRecord> {
     /**
      * The column <code>rpt.report.need_sign</code>.
      */
-    public final TableField<ReportRecord, Boolean> NEED_SIGN = createField("need_sign", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+    public final TableField<ReportRecord, Boolean> NEED_SIGN = createField("need_sign", org.jooq.impl.SQLDataType.BOOLEAN.defaultValue(org.jooq.impl.DSL.field("true", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
 
     /**
      * Create a <code>rpt.report</code> table reference

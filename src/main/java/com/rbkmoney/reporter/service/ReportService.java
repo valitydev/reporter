@@ -1,13 +1,12 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.domain.CategoryType;
+import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.*;
-import com.rbkmoney.reporter.model.PartyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class ReportService {
 
     private final PartyService partyService;
 
-    private final TemplateService templateService;
+    private final List<TemplateService> templateServices;
 
     private final StorageService storageService;
 
@@ -54,7 +53,7 @@ public class ReportService {
     public ReportService(
             ReportDao reportDao,
             PartyService partyService,
-            TemplateService templateService,
+            List<TemplateService> templateServices,
             StorageService storageService,
             SignService signService,
             @Value("${report.defaultTimeZone}") ZoneId defaultTimeZone,
@@ -62,7 +61,7 @@ public class ReportService {
     ) {
         this.reportDao = reportDao;
         this.partyService = partyService;
-        this.templateService = templateService;
+        this.templateServices = templateServices;
         this.storageService = storageService;
         this.signService = signService;
         this.defaultTimeZone = defaultTimeZone;
@@ -70,17 +69,19 @@ public class ReportService {
     }
 
     public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException {
+        Shop shop = partyService.getShop(partyId, shopId);
+        String contractId = shop.getContractId();
         try {
             return reportDao.getReportsByRange(
                     partyId,
-                    shopId,
+                    contractId,
                     reportTypes,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC)
             );
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get reports by range, partyId='%s', shopId='%s', reportTypes='%s', fromTime='%s', toTime='%s'",
-                    partyId, shopId, reportTypes, fromTime, toTime), ex);
+            throw new StorageException(String.format("Failed to get reports by range, partyId='%s', shopId='%s', contractId='%s', reportTypes='%s', fromTime='%s', toTime='%s'",
+                    partyId, shopId, contractId, reportTypes, fromTime, toTime), ex);
         }
     }
 
@@ -102,14 +103,16 @@ public class ReportService {
     }
 
     public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
+        Shop shop = partyService.getShop(partyId, shopId);
+        String contractId = shop.getContractId();
         try {
-            Report report = reportDao.getReport(partyId, shopId, reportId);
+            Report report = reportDao.getReport(partyId, contractId, reportId);
             if (report == null) {
-                throw new ReportNotFoundException(String.format("Report not found, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId));
+                throw new ReportNotFoundException(String.format("Report not found, partyId='%s', contractId='%s', reportId='%d'", partyId, contractId, reportId));
             }
             return report;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId), ex);
+            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', shopId='%s', contractId='%s', reportId='%d'", partyId, shopId, contractId, reportId), ex);
         }
     }
 
@@ -121,21 +124,12 @@ public class ReportService {
         log.info("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
                 partyId, shopId, reportType, fromTime, toTime);
 
-        PartyModel partyModel = partyService.getPartyRepresentation(partyId, shopId, createdAt);
-        if (partyModel == null) {
-            throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId));
-        }
-
-        if (partyModel.getShopCategoryType() == CategoryType.test) {
-            throw new IllegalArgumentException(
-                    String.format("Cannot create report for test shop, partyId='%s', shopId='%s'", partyId, shopId)
-            );
-        }
-
+        Shop shop = partyService.getShop(partyId, shopId, createdAt);
+        String contractId = shop.getContractId();
         try {
             long reportId = reportDao.createReport(
                     partyId,
-                    shopId,
+                    contractId,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
                     reportType,
@@ -169,19 +163,19 @@ public class ReportService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateReport(Report report) {
-        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', contractId='{}', fromTime='{}', toTime='{}'",
+                report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime());
         try {
             List<FileMeta> reportFiles = processSignAndUpload(report);
             finishedReportTask(report.getId(), reportFiles);
-            log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+            log.info("Report has been successfully processed, reportId='{}', reportType='{}', contractId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                    report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime());
         } catch (ValidationException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
             changeReportStatus(report, ReportStatus.cancelled);
         } catch (Throwable throwable) {
-            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime(), throwable);
+            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', contractId='{}', fromTime='{}', toTime='{}'",
+                    report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime(), throwable);
         }
     }
 
@@ -209,27 +203,29 @@ public class ReportService {
     }
 
     public List<FileMeta> processSignAndUpload(Report report) throws IOException {
-        Path reportFile = Files.createTempFile(report.getType() + "_", "_report.xlsx");
-        try {
-            templateService.processReportTemplate(
-                    report,
-                    Files.newOutputStream(reportFile)
-            );
+        List<FileMeta> files = new ArrayList<>();
+        for (TemplateService templateService : templateServices) {
+            if (templateService.accept(ReportType.valueOf(report.getType()))) {
+                Path reportFile = Files.createTempFile(report.getType() + "_", "_report.xlsx");
+                try {
+                    templateService.processReportTemplate(
+                            report,
+                            Files.newOutputStream(reportFile)
+                    );
+                    FileMeta reportFileModel = storageService.saveFile(reportFile);
+                    files.add(reportFileModel);
 
-            List<FileMeta> files = new ArrayList<>();
-            FileMeta reportFileModel = storageService.saveFile(reportFile);
-            files.add(reportFileModel);
-
-            if (report.getNeedSign()) {
-                byte[] sign = signService.sign(reportFile);
-                FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
-                files.add(signFileModel);
+                    if (report.getNeedSign()) {
+                        byte[] sign = signService.sign(reportFile);
+                        FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
+                        files.add(signFileModel);
+                    }
+                } finally {
+                    Files.deleteIfExists(reportFile);
+                }
             }
-
-            return files;
-        } finally {
-            Files.deleteIfExists(reportFile);
         }
+        return files;
     }
 
 }

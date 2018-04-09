@@ -13,10 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -35,24 +32,22 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     public void testValidate() throws TException {
         Map<String, String> statisticResponse = new HashMap<>();
         statisticResponse.put("merchant_id", "test");
-        statisticResponse.put("shop_id", "test");
+        statisticResponse.put("contract_id", "test");
         statisticResponse.put("currency_code", null);
         statisticResponse.put("funds_acquired", "-10");
         statisticResponse.put("fee_charged", "-1");
-        statisticResponse.put("opening_balance", "-15");
         statisticResponse.put("funds_paid_out", "-5");
         statisticResponse.put("funds_refunded", "-20");
-        statisticResponse.put("closing_balance", "-34");
 
         given(merchantStatisticsClient.getStatistics(new StatRequest(anyString())))
                 .willReturn(new StatResponse(StatResponseData.records(Arrays.asList(statisticResponse))));
 
         try {
-            statisticService.getShopAccounting("test", "test", Instant.now(), Instant.now());
+            statisticService.getShopAccounting("test", "test", "RUB", Instant.now(), Instant.now());
             fail();
         } catch (ConstraintViolationException ex) {
             Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
-            assertEquals(7, constraintViolations.size());
+            assertEquals(5, constraintViolations.size());
         }
     }
 

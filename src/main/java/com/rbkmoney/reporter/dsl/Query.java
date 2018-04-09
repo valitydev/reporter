@@ -2,6 +2,8 @@ package com.rbkmoney.reporter.dsl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 /**
  * Created by tolkonepiu on 10/07/2017.
  */
@@ -10,8 +12,18 @@ public class Query {
     @JsonProperty("shop_accounting_report")
     private ShopAccountingQuery shopAccountingQuery;
 
+    @JsonProperty("invoices")
+    private InvoicesQuery invoicesQuery;
+
     @JsonProperty("payments")
     private PaymentsQuery paymentsQuery;
+
+    @JsonProperty("refunds")
+    private RefundsQuery refundsQuery;
+
+    private long from;
+
+    private int size;
 
     public ShopAccountingQuery getShopAccountingQuery() {
         return shopAccountingQuery;
@@ -19,6 +31,14 @@ public class Query {
 
     public void setShopAccountingQuery(ShopAccountingQuery shopAccountingQuery) {
         this.shopAccountingQuery = shopAccountingQuery;
+    }
+
+    public InvoicesQuery getInvoicesQuery() {
+        return invoicesQuery;
+    }
+
+    public void setInvoicesQuery(InvoicesQuery invoicesQuery) {
+        this.invoicesQuery = invoicesQuery;
     }
 
     public PaymentsQuery getPaymentsQuery() {
@@ -29,30 +49,58 @@ public class Query {
         this.paymentsQuery = paymentsQuery;
     }
 
+    public RefundsQuery getRefundsQuery() {
+        return refundsQuery;
+    }
+
+    public void setRefundsQuery(RefundsQuery refundsQuery) {
+        this.refundsQuery = refundsQuery;
+    }
+
+    public long getFrom() {
+        return from;
+    }
+
+    public void setFrom(long from) {
+        this.from = from;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (!(o instanceof Query)) return false;
         Query query = (Query) o;
-
-        if (shopAccountingQuery != null ? !shopAccountingQuery.equals(query.shopAccountingQuery) : query.shopAccountingQuery != null)
-            return false;
-        return paymentsQuery != null ? paymentsQuery.equals(query.paymentsQuery) : query.paymentsQuery == null;
+        return getFrom() == query.getFrom() &&
+                getSize() == query.getSize() &&
+                Objects.equals(getShopAccountingQuery(), query.getShopAccountingQuery()) &&
+                Objects.equals(getInvoicesQuery(), query.getInvoicesQuery()) &&
+                Objects.equals(getPaymentsQuery(), query.getPaymentsQuery()) &&
+                Objects.equals(getRefundsQuery(), query.getRefundsQuery());
     }
 
     @Override
     public int hashCode() {
-        int result = shopAccountingQuery != null ? shopAccountingQuery.hashCode() : 0;
-        result = 31 * result + (paymentsQuery != null ? paymentsQuery.hashCode() : 0);
-        return result;
+
+        return Objects.hash(getShopAccountingQuery(), getInvoicesQuery(), getPaymentsQuery(), getRefundsQuery(), getFrom(), getSize());
     }
 
     @Override
     public String toString() {
         return "Query{" +
                 "shopAccountingQuery=" + shopAccountingQuery +
+                ", invoicesQuery=" + invoicesQuery +
                 ", paymentsQuery=" + paymentsQuery +
+                ", refundsQuery=" + refundsQuery +
+                ", from=" + from +
+                ", size=" + size +
                 '}';
     }
 }

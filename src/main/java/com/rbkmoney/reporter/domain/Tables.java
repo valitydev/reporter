@@ -5,6 +5,7 @@ package com.rbkmoney.reporter.domain;
 
 
 import com.rbkmoney.reporter.domain.tables.FileMeta;
+import com.rbkmoney.reporter.domain.tables.PosReportMeta;
 import com.rbkmoney.reporter.domain.tables.Report;
 
 import javax.annotation.Generated;
@@ -27,6 +28,11 @@ public class Tables {
      * The table <code>rpt.file_meta</code>.
      */
     public static final FileMeta FILE_META = com.rbkmoney.reporter.domain.tables.FileMeta.FILE_META;
+
+    /**
+     * The table <code>rpt.pos_report_meta</code>.
+     */
+    public static final PosReportMeta POS_REPORT_META = com.rbkmoney.reporter.domain.tables.PosReportMeta.POS_REPORT_META;
 
     /**
      * The table <code>rpt.report</code>.

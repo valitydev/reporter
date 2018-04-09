@@ -7,7 +7,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
+import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
+import com.rbkmoney.damsel.signer.SignerSrv;
 import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,19 +19,35 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 
-/**
- * Created by tolkonepiu on 10/07/2017.
- */
 @Configuration
-public class StatisticConfig {
-
-    @Value("${magista.url}")
-    private Resource resource;
+public class ApplicationConfig {
 
     @Bean
-    public MerchantStatisticsSrv.Iface merchantStatisticsClient() throws IOException {
+    public RepositoryClientSrv.Iface dominantClient(@Value("${domainConfig.url}") Resource resource) throws IOException {
+        return new THSpawnClientBuilder()
+                .withAddress(resource.getURI()).build(RepositoryClientSrv.Iface.class);
+    }
+
+    @Bean
+    public PartyManagementSrv.Iface partyManagementClient(@Value("${partyManagement.url}") Resource resource) throws IOException {
+        return new THSpawnClientBuilder()
+                .withAddress(resource.getURI()).build(PartyManagementSrv.Iface.class);
+    }
+
+    @Bean
+    public SignerSrv.Iface signerClient(@Value("${signer.url}") Resource resource) throws IOException {
+        return new THSpawnClientBuilder()
+                .withAddress(resource.getURI()).build(SignerSrv.Iface.class);
+    }
+
+    @Bean
+    public MerchantStatisticsSrv.Iface merchantStatisticsClient(
+            @Value("${magista.url}") Resource resource,
+            @Value("${magista.timeout}") int timeout
+    ) throws IOException {
         return new THSpawnClientBuilder()
                 .withAddress(resource.getURI())
+                .withNetworkTimeout(timeout)
                 .build(MerchantStatisticsSrv.Iface.class);
     }
 
@@ -36,7 +55,7 @@ public class StatisticConfig {
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 .registerModule(new ParameterNamesModule())
                 .registerModule(new Jdk8Module())
