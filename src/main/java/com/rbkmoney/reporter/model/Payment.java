@@ -4,8 +4,8 @@ public class Payment {
     private String id;
     private String capturedAt;
     private String paymentTool;
-    private Long amount;
-    private Long payoutAmount;
+    private Double amount;
+    private Double payoutAmount;
     private String payerEmail;
     private String shopUrl;
     private String purpose;
@@ -34,19 +34,19 @@ public class Payment {
         this.paymentTool = paymentTool;
     }
 
-    public Long getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
-    public Long getPayoutAmount() {
+    public Double getPayoutAmount() {
         return payoutAmount;
     }
 
-    public void setPayoutAmount(Long payoutAmount) {
+    public void setPayoutAmount(Double payoutAmount) {
         this.payoutAmount = payoutAmount;
     }
 

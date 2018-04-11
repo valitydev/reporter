@@ -6,7 +6,7 @@ public class Refund {
     private String paymentCapturedAt;
     private String succeededAt;
     private String paymentTool;
-    private Long amount;
+    private Double amount;
     private String payerEmail;
     private String shopUrl;
     private String paymentPurpose;
@@ -51,11 +51,11 @@ public class Refund {
         this.paymentTool = paymentTool;
     }
 
-    public Long getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
