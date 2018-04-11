@@ -29,10 +29,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
@@ -69,6 +66,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
         party.setId(partyId);
         Shop shop = new Shop();
         shop.setContractId(contractId);
+        shop.setLocation(ShopLocation.url("http://2ch.hk/"));
         Contract contract = new Contract();
         contract.setId(contractId);
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
@@ -105,7 +103,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
 
         assertEquals(ReportStatus.created, report.getStatus());
         List<FileMeta> reportFiles = reportService.getReportFiles(report.getId());
-        assertEquals(2, reportFiles.size());
+        assertEquals(4, reportFiles.size());
         for (FileMeta fileMeta : reportFiles) {
             URL url = reportService.generatePresignedUrl(fileMeta.getFileId(), LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
             assertNotNull(url);

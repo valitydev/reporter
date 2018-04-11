@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -84,10 +81,15 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded())
         ).stream().sorted(Comparator.comparing(r -> r.getStatus().getSucceeded().getAt())).map(r -> {
             Refund refund = new Refund();
-            StatPayment statPayment = statisticService.getPayment(r.getInvoiceId(), r.getPaymentId(), InvoicePaymentStatus.captured(new InvoicePaymentCaptured()));
+            StatPayment statPayment = statisticService.getPayment(r.getInvoiceId(), r.getPaymentId());
             refund.setId(r.getId());
             refund.setPaymentId(r.getInvoiceId() + "." + r.getPaymentId());
-            refund.setPaymentCapturedAt(statPayment.getStatus().getCaptured().getAt());
+            //TODO captured_at only
+            if (statPayment.getStatus().isSetCaptured()) {
+                refund.setPaymentCapturedAt(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
+            } else {
+                refund.setPaymentCapturedAt(TimeUtil.toLocalizedDateTime(statPayment.getCreatedAt(), reportZoneId));
+            }
             refund.setSucceededAt(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
             if (statPayment.getPayer().isSetPaymentResource()) {
                 refund.setPaymentTool(statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
@@ -120,6 +122,6 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
     @Override
     public List<ReportType> getReportTypes() {
-        return Arrays.asList(ReportType.payment_registry);
+        return Arrays.asList(ReportType.provision_of_service, ReportType.payment_registry);
     }
 }

@@ -21,9 +21,9 @@ public class Query {
     @JsonProperty("refunds")
     private RefundsQuery refundsQuery;
 
-    private long from;
+    private Long from;
 
-    private int size;
+    private Integer size;
 
     public ShopAccountingQuery getShopAccountingQuery() {
         return shopAccountingQuery;
@@ -57,19 +57,19 @@ public class Query {
         this.refundsQuery = refundsQuery;
     }
 
-    public long getFrom() {
+    public Long getFrom() {
         return from;
     }
 
-    public void setFrom(long from) {
+    public void setFrom(Long from) {
         this.from = from;
     }
 
-    public int getSize() {
+    public Integer getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(Integer size) {
         this.size = size;
     }
 
@@ -88,7 +88,6 @@ public class Query {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(getShopAccountingQuery(), getInvoicesQuery(), getPaymentsQuery(), getRefundsQuery(), getFrom(), getSize());
     }
 

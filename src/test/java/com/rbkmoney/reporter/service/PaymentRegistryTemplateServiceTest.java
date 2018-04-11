@@ -1,16 +1,12 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.domain.BankCardPaymentSystem;
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
-import com.rbkmoney.reporter.model.Payment;
-import com.rbkmoney.reporter.model.Refund;
 import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -22,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -35,7 +30,6 @@ import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 
 /**
  * Created by tolkonepiu on 12/07/2017.
@@ -69,7 +63,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             payment.setPayer(Payer.payment_resource(paymentResourcePayer));
             payment.setAmount(123L + i);
             payment.setFee(2L + i);
-            payment.setShopId("shopId"+i);
+            payment.setShopId("shopId" + i);
             paymentList.add(payment);
         }
 
@@ -81,7 +75,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             refund.setInvoiceId("invoiceId" + i);
             refund.setStatus(InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded("201" + i + "-03-22T06:12:27Z")));
             refund.setAmount(123L + i);
-            refund.setShopId("shopId"+i);
+            refund.setShopId("shopId" + i);
             refundList.add(refund);
         }
 
@@ -99,7 +93,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         paymentResourcePayer.setEmail("xyz@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
-        given(statisticService.getPayment(any(), any(), any()))
+        given(statisticService.getPayment(any(), any()))
                 .willReturn(payment);
 
         List<StatInvoice> invoices = new ArrayList<>();
@@ -118,7 +112,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         given(statisticService.getInvoices(any(), any(), any(), any()))
                 .willReturn(invoices);
 
-        Map<String, String> shops  = new HashMap<>();
+        Map<String, String> shops = new HashMap<>();
         shops.put("shopId0", "http://0ch.ru/b");
         shops.put("shopId1", "http://1ch.ru/b");
         shops.put("shopId2", "http://2ch.ru/b");

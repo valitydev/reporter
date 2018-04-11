@@ -1,10 +1,9 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
-import com.rbkmoney.damsel.merch_stat.StatRequest;
-import com.rbkmoney.damsel.merch_stat.StatResponse;
-import com.rbkmoney.damsel.merch_stat.StatResponseData;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
+import com.rbkmoney.reporter.dsl.DslUtil;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,23 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     @Autowired
     StatisticService statisticService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @MockBean
     MerchantStatisticsSrv.Iface merchantStatisticsClient;
+
+    @Test
+    public void testCreatePaymentRequest() {
+        assertEquals(
+                new StatRequest("{\"query\":{\"payments\":{\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\",\"payment_status\":\"captured\"}}}"),
+                DslUtil.createPaymentRequest("invoiceId", "paymentId", Optional.of(InvoicePaymentStatus.captured(new InvoicePaymentCaptured())), objectMapper)
+        );
+        assertEquals(
+                new StatRequest("{\"query\":{\"payments\":{\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
+                DslUtil.createPaymentRequest("invoiceId", "paymentId", Optional.empty(), objectMapper)
+        );
+    }
 
     @Test
     public void testValidate() throws TException {

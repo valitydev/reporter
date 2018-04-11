@@ -131,7 +131,7 @@ public class PartyServiceImpl implements PartyService {
         Party party = getParty(partyId, timestamp);
         Map<String, String> shopUrls = new HashMap<>();
         party.getShops().forEach((id, shop) -> {
-            if (shop.getLocation().isSetUrl()) {
+            if (shop.getContractId().equals(contractId) && shop.getLocation().isSetUrl()) {
                 shopUrls.put(id, shop.getLocation().getUrl());
             }
         });

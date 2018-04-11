@@ -5,6 +5,7 @@ import com.rbkmoney.reporter.model.ShopAccountingModel;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by tolkonepiu on 11/07/2017.
@@ -21,7 +22,9 @@ public interface StatisticService {
 
     List<StatPayment> getPayments(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentStatus status);
 
-    StatPayment getPayment(String invoiceId, String paymentId, InvoicePaymentStatus status);
+    StatPayment getPayment(String invoiceId, String paymentId);
+
+    StatPayment getPayment(String invoiceId, String paymentId, Optional<InvoicePaymentStatus> status);
 
     List<StatRefund> getRefunds(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
 

@@ -13,7 +13,7 @@
 
     <groupId>com.rbkmoney</groupId>
     <artifactId>reporter</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
 
     <properties>
         <project.maintainer>Pavel Popov &lt;p.popov@rbkmoney.com&gt;</project.maintainer>

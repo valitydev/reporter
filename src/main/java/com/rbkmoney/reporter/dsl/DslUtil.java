@@ -56,13 +56,13 @@ public class DslUtil {
         return createStatRequest(statisticDsl, objectMapper);
     }
 
-    public static StatRequest createPaymentRequest(String invoiceId, String paymentId, InvoicePaymentStatus status, ObjectMapper objectMapper) {
+    public static StatRequest createPaymentRequest(String invoiceId, String paymentId, Optional<InvoicePaymentStatus> status, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         PaymentsQuery paymentsQuery = new PaymentsQuery();
         paymentsQuery.setInvoiceId(invoiceId);
         paymentsQuery.setPaymentId(paymentId);
-        paymentsQuery.setPaymentStatus(status.getSetField().getFieldName());
+        status.ifPresent((paymentStatus) -> paymentsQuery.setPaymentStatus(paymentStatus.getSetField().getFieldName()));
         query.setPaymentsQuery(paymentsQuery);
         statisticDsl.setQuery(query);
 
