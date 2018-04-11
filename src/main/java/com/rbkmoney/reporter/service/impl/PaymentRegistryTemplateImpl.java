@@ -130,6 +130,6 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
     @Override
     public List<ReportType> getReportTypes() {
-        return Arrays.asList(ReportType.provision_of_service, ReportType.payment_registry);
+        return Arrays.asList(ReportType.payment_registry);
     }
 }
