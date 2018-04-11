@@ -103,11 +103,10 @@ public class ReportServiceTest extends AbstractIntegrationTest {
 
         assertEquals(ReportStatus.created, report.getStatus());
         List<FileMeta> reportFiles = reportService.getReportFiles(report.getId());
-        assertEquals(4, reportFiles.size());
+        assertEquals(2, reportFiles.size());
         for (FileMeta fileMeta : reportFiles) {
             URL url = reportService.generatePresignedUrl(fileMeta.getFileId(), LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
             assertNotNull(url);
-
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 try (InputStream inputStream = url.openStream()) {
                     Streams.copy(inputStream, outputStream, true);

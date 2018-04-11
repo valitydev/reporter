@@ -8,6 +8,7 @@ import com.rbkmoney.reporter.model.Refund;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.service.TemplateService;
+import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.jxls.common.Context;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.io.OutputStream;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,6 +47,8 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 report.getToTime().toInstant(ZoneOffset.UTC)
         ).stream().collect(Collectors.toMap(StatInvoice::getId, StatInvoice::getProduct));
 
+        AtomicLong totalAmnt = new AtomicLong();
+        AtomicLong totalPayoutAmnt = new AtomicLong();
         List<Payment> paymentList = statisticService.getPayments(
                 report.getPartyId(),
                 report.getPartyContractId(),
@@ -58,8 +62,10 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
             if (p.getPayer().isSetPaymentResource()) {
                 payment.setPaymentTool(p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
             }
-            payment.setAmount(p.getAmount());
-            payment.setPayoutAmount(p.getAmount() - p.getFee());
+            payment.setAmount(FormatUtil.formatCurrency(p.getAmount()));
+            payment.setPayoutAmount(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
+            totalAmnt.addAndGet(p.getAmount());
+            totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
             if (p.getPayer().isSetPaymentResource()) {
                 payment.setPayerEmail(p.getPayer().getPaymentResource().getEmail());
             }
@@ -73,6 +79,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
             return payment;
         }).collect(Collectors.toList());
 
+        AtomicLong totalRefundAmnt = new AtomicLong();
         List<Refund> refundList = statisticService.getRefunds(
                 report.getPartyId(),
                 report.getPartyContractId(),
@@ -94,7 +101,8 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
             if (statPayment.getPayer().isSetPaymentResource()) {
                 refund.setPaymentTool(statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
             }
-            refund.setAmount(r.getAmount());
+            refund.setAmount(FormatUtil.formatCurrency(r.getAmount()));
+            totalRefundAmnt.addAndGet(r.getAmount());
             if (statPayment.getPayer().isSetPaymentResource()) {
                 refund.setPayerEmail(statPayment.getPayer().getPaymentResource().getEmail());
             }
@@ -113,15 +121,15 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         context.putVar("refunds", refundList);
         context.putVar("fromTime", TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId));
         context.putVar("toTime", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
-        context.putVar("totalAmnt", paymentList.stream().mapToLong(Payment::getAmount).sum());
-        context.putVar("totalPayoutAmnt", paymentList.stream().mapToLong(Payment::getPayoutAmount).sum());
-        context.putVar("totalRefundAmnt", refundList.stream().mapToLong(Refund::getAmount).sum());
+        context.putVar("totalAmnt", FormatUtil.formatCurrency(totalAmnt.longValue()));
+        context.putVar("totalPayoutAmnt", FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
+        context.putVar("totalRefundAmnt", FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
 
         processTemplate(context, ReportType.payment_registry.getTemplateResource().getInputStream(), outputStream);
     }
 
     @Override
     public List<ReportType> getReportTypes() {
-        return Arrays.asList(ReportType.provision_of_service, ReportType.payment_registry);
+        return Arrays.asList(ReportType.payment_registry);
     }
 }

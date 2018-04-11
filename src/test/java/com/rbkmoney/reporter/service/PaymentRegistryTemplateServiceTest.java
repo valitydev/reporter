@@ -5,6 +5,7 @@ import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
+import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 
@@ -136,13 +138,15 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             assertEquals(String.format("Платежи за период с %s по %s", from, to), paymentsHeaderCell.getStringCellValue());
 
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
-            assertEquals(paymentList.stream().mapToLong(StatPayment::getAmount).sum(), (long) paymentsTotalSum.getNumericCellValue());
+            long expectedSum = paymentList.stream().mapToLong(StatPayment::getAmount).sum();
+            assertTrue(FormatUtil.formatCurrency(expectedSum) - paymentsTotalSum.getNumericCellValue() < 0.00001);
 
             Cell refundsHeaderCell = sheet.getRow(8).getCell(0);
             assertEquals(String.format("Возвраты за период с %s по %s", from, to), refundsHeaderCell.getStringCellValue());
 
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
-            assertEquals(refundList.stream().mapToLong(StatRefund::getAmount).sum(), (long) refundsTotalSum.getNumericCellValue());
+            long expectedRefundSum = refundList.stream().mapToLong(StatRefund::getAmount).sum();
+            assertTrue(FormatUtil.formatCurrency(expectedRefundSum) - refundsTotalSum.getNumericCellValue() < 0.00001);
 
         } finally {
             Files.deleteIfExists(tempFile);
