@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.Payment;
@@ -16,11 +17,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class PaymentRegistryTemplateImpl implements TemplateService {
@@ -49,35 +52,46 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
         AtomicLong totalAmnt = new AtomicLong();
         AtomicLong totalPayoutAmnt = new AtomicLong();
-        List<Payment> paymentList = statisticService.getPayments(
+
+        Stream<StatPayment> statPaymentsStream = statisticService.getPayments(
                 report.getPartyId(),
                 report.getPartyContractId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC),
                 report.getToTime().toInstant(ZoneOffset.UTC),
                 InvoicePaymentStatus.captured(new InvoicePaymentCaptured())
-        ).stream().sorted(Comparator.comparing(p -> p.getStatus().getCaptured().getAt())).map(p -> {
-            Payment payment = new Payment();
-            payment.setId(p.getInvoiceId() + "." + p.getId());
-            payment.setCapturedAt(TimeUtil.toLocalizedDateTime(p.getStatus().getCaptured().getAt(), reportZoneId));
-            if (p.getPayer().isSetPaymentResource()) {
-                payment.setPaymentTool(p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
-            }
-            payment.setAmount(FormatUtil.formatCurrency(p.getAmount()));
-            payment.setPayoutAmount(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
-            totalAmnt.addAndGet(p.getAmount());
-            totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
-            if (p.getPayer().isSetPaymentResource()) {
-                payment.setPayerEmail(p.getPayer().getPaymentResource().getEmail());
-            }
-            payment.setShopUrl(shopUrls.get(p.getShopId()));
-            String purpose = purposes.get(p.getInvoiceId());
-            if (purpose == null) {
-                StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
-                purpose = invoice.getProduct();
-            }
-            payment.setPurpose(purpose);
-            return payment;
-        }).collect(Collectors.toList());
+        ).stream();
+
+        Stream<StatPayment>  statPaymentsRefundedStream = statisticService.getPayments(
+                report.getPartyId(),
+                report.getPartyContractId(),
+                report.getFromTime().toInstant(ZoneOffset.UTC),
+                report.getToTime().toInstant(ZoneOffset.UTC),
+                InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())).stream();
+
+        List<Payment> paymentList = Stream.concat(statPaymentsStream, statPaymentsRefundedStream)
+                .sorted(Comparator.comparing(this::getStatusChangedAt)).map(p -> {
+                    Payment payment = new Payment();
+                    payment.setId(p.getInvoiceId() + "." + p.getId());
+                    payment.setCapturedAt(TimeUtil.toLocalizedDateTime(getStatusChangedAt(p), reportZoneId));
+                    if (p.getPayer().isSetPaymentResource()) {
+                        payment.setPaymentTool(p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
+                    }
+                    payment.setAmount(FormatUtil.formatCurrency(p.getAmount()));
+                    payment.setPayoutAmount(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
+                    totalAmnt.addAndGet(p.getAmount());
+                    totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
+                    if (p.getPayer().isSetPaymentResource()) {
+                        payment.setPayerEmail(p.getPayer().getPaymentResource().getEmail());
+                    }
+                    payment.setShopUrl(shopUrls.get(p.getShopId()));
+                    String purpose = purposes.get(p.getInvoiceId());
+                    if (purpose == null) {
+                        StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
+                        purpose = invoice.getProduct();
+                    }
+                    payment.setPurpose(purpose);
+                    return payment;
+                }).collect(Collectors.toList());
 
         AtomicLong totalRefundAmnt = new AtomicLong();
         List<Refund> refundList = statisticService.getRefunds(
@@ -126,6 +140,14 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         context.putVar("totalRefundAmnt", FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
 
         processTemplate(context, ReportType.payment_registry.getTemplateResource().getInputStream(), outputStream);
+    }
+
+    private Instant getStatusChangedAt(StatPayment sp) {
+        if (sp.getStatus().isSetCaptured()) {
+            return TypeUtil.stringToInstant(sp.getStatus().getCaptured().getAt());
+        } else {
+            return TypeUtil.stringToInstant(sp.getStatus().getRefunded().getAt());
+        }
     }
 
     @Override
