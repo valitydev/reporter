@@ -24,6 +24,8 @@ public class ShopAccountingModel {
     @Min(0)
     private long feeCharged;
 
+    private long fundsAdjusted;
+
     @Min(0)
     private long fundsPaidOut;
 
@@ -87,6 +89,14 @@ public class ShopAccountingModel {
         this.fundsPaidOut = fundsPaidOut;
     }
 
+    public long getFundsAdjusted() {
+        return fundsAdjusted;
+    }
+
+    public void setFundsAdjusted(long fundsAdjusted) {
+        this.fundsAdjusted = fundsAdjusted;
+    }
+
     public long getFundsRefunded() {
         return fundsRefunded;
     }
@@ -96,7 +106,7 @@ public class ShopAccountingModel {
     }
 
     public long getAvailableFunds() {
-        return fundsAcquired - feeCharged - fundsPaidOut - fundsRefunded;
+        return fundsAcquired + fundsAdjusted - feeCharged - fundsPaidOut - fundsRefunded;
     }
 
     @Override
@@ -106,6 +116,7 @@ public class ShopAccountingModel {
         ShopAccountingModel that = (ShopAccountingModel) o;
         return fundsAcquired == that.fundsAcquired &&
                 feeCharged == that.feeCharged &&
+                fundsAdjusted == that.fundsAdjusted &&
                 fundsPaidOut == that.fundsPaidOut &&
                 fundsRefunded == that.fundsRefunded &&
                 Objects.equals(merchantId, that.merchantId) &&
@@ -115,7 +126,7 @@ public class ShopAccountingModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(merchantId, contractId, currencyCode, fundsAcquired, feeCharged, fundsPaidOut, fundsRefunded);
+        return Objects.hash(merchantId, contractId, currencyCode, fundsAcquired, feeCharged, fundsAdjusted, fundsPaidOut, fundsRefunded);
     }
 
     @Override
@@ -126,6 +137,7 @@ public class ShopAccountingModel {
                 ", currencyCode='" + currencyCode + '\'' +
                 ", fundsAcquired=" + fundsAcquired +
                 ", feeCharged=" + feeCharged +
+                ", fundsAdjusted=" + fundsAdjusted +
                 ", fundsPaidOut=" + fundsPaidOut +
                 ", fundsRefunded=" + fundsRefunded +
                 '}';

@@ -50,6 +50,7 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
         statisticResponse.put("currency_code", null);
         statisticResponse.put("funds_acquired", "-10");
         statisticResponse.put("fee_charged", "-1");
+        statisticResponse.put("funds_adjusted", "-1");
         statisticResponse.put("funds_paid_out", "-5");
         statisticResponse.put("funds_refunded", "-20");
 
