@@ -171,7 +171,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             assertTrue(FormatUtil.formatCurrency(expectedRefundSum) - refundsTotalSum.getNumericCellValue() < 0.00001);
 
         } finally {
-    //        Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempFile);
         }
     }
 
