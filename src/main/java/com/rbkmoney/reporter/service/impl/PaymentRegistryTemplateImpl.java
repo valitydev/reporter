@@ -43,11 +43,13 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
         Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), report.getPartyContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
 
+        Instant fromTime = report.getFromTime().toInstant(ZoneOffset.UTC);
+        Instant toTime = report.getToTime().toInstant(ZoneOffset.UTC);
         Map<String, String> purposes = statisticService.getInvoices(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC)
+                fromTime,
+                toTime
         ).stream().collect(Collectors.toMap(StatInvoice::getId, StatInvoice::getProduct));
 
         AtomicLong totalAmnt = new AtomicLong();
@@ -56,17 +58,22 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         Stream<StatPayment> statPaymentsStream = statisticService.getPayments(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC),
+                fromTime,
+                toTime,
                 InvoicePaymentStatus.captured(new InvoicePaymentCaptured())
         ).stream();
 
         Stream<StatPayment>  statPaymentsRefundedStream = statisticService.getPayments(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC),
-                InvoicePaymentStatus.refunded(new InvoicePaymentRefunded())).stream();
+                fromTime,
+                toTime,
+                InvoicePaymentStatus.refunded(new InvoicePaymentRefunded()))
+                .stream()
+                .filter(p -> {
+                    Instant createdAt = TypeUtil.stringToInstant(p.getCreatedAt());
+                    return createdAt.isAfter(fromTime) && createdAt.isBefore(toTime);
+                });
 
         List<Payment> paymentList = Stream.concat(statPaymentsStream, statPaymentsRefundedStream)
                 .sorted(Comparator.comparing(this::getStatusChangedAt)).map(p -> {
@@ -97,8 +104,8 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         List<Refund> refundList = statisticService.getRefunds(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC),
+                fromTime,
+                toTime,
                 InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded())
         ).stream().sorted(Comparator.comparing(r -> r.getStatus().getSucceeded().getAt())).map(r -> {
             Refund refund = new Refund();
@@ -133,7 +140,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         Context context = new Context();
         context.putVar("payments", paymentList);
         context.putVar("refunds", refundList);
-        context.putVar("fromTime", TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId));
+        context.putVar("fromTime", TimeUtil.toLocalizedDate(fromTime, reportZoneId));
         context.putVar("toTime", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
         context.putVar("totalAmnt", FormatUtil.formatCurrency(totalAmnt.longValue()));
         context.putVar("totalPayoutAmnt", FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
