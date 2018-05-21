@@ -7,6 +7,7 @@ package com.rbkmoney.reporter.domain.tables;
 import com.rbkmoney.reporter.domain.Keys;
 import com.rbkmoney.reporter.domain.Rpt;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.records.ReportRecord;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Report extends TableImpl<ReportRecord> {
 
-    private static final long serialVersionUID = -1886648945;
+    private static final long serialVersionUID = -1226953796;
 
     /**
      * The reference instance of <code>rpt.report</code>
@@ -95,12 +96,7 @@ public class Report extends TableImpl<ReportRecord> {
     /**
      * The column <code>rpt.report.type</code>.
      */
-    public final TableField<ReportRecord, String> TYPE = createField("type", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
-
-    /**
-     * The column <code>rpt.report.need_sign</code>.
-     */
-    public final TableField<ReportRecord, Boolean> NEED_SIGN = createField("need_sign", org.jooq.impl.SQLDataType.BOOLEAN.defaultValue(org.jooq.impl.DSL.field("true", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
+    public final TableField<ReportRecord, ReportType> TYPE = createField("type", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.rbkmoney.reporter.domain.enums.ReportType.class), this, "");
 
     /**
      * Create a <code>rpt.report</code> table reference

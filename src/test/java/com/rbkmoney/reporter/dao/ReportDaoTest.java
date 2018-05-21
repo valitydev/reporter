@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.dao;
 
 import com.rbkmoney.reporter.AbstractIntegrationTest;
-import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
@@ -34,7 +34,7 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         String timezone = random(TimeZone.class).getID();
         LocalDateTime createdAt = random(LocalDateTime.class);
 
-        long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, true, createdAt);
+        long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
         assertNull(reportDao.getReport("is", "null", reportId));
 
         Report report = reportDao.getReport(partyId, shopId, reportId);
@@ -43,7 +43,7 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         assertEquals(shopId, report.getPartyContractId());
         assertEquals(fromTime, report.getFromTime());
         assertEquals(toTime, report.getToTime());
-        assertEquals(reportType.name(), report.getType());
+        assertEquals(reportType, report.getType());
         assertEquals(timezone, report.getTimezone());
         assertEquals(createdAt, report.getCreatedAt());
 
@@ -62,7 +62,7 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         String timezone = random(TimeZone.class).getID();
         LocalDateTime createdAt = random(LocalDateTime.class);
 
-        long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, true, createdAt);
+        long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
         reportDao.changeReportStatus(reportId, ReportStatus.created);
 
         reportDao.getReport(partyId, shopId, reportId);

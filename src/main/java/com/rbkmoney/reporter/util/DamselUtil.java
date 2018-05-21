@@ -19,7 +19,7 @@ public class DamselUtil {
                 TypeUtil.temporalToString(report.getToTime())
         );
         dReport.setTimeRange(timeRange);
-        dReport.setReportType(ReportType.valueOf(report.getType()));
+        dReport.setReportType(ReportType.valueOf(report.getType().name()));
         dReport.setCreatedAt(TypeUtil.temporalToString(report.getCreatedAt()));
 
         dReport.setFiles(files.stream()

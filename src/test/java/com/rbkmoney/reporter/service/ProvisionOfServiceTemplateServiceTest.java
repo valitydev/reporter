@@ -4,6 +4,7 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
+import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.impl.ProvisionOfServiceTemplateImpl;
@@ -79,9 +80,11 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
         given(statisticService.getShopAccounting(party.getId(), contract.getId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC)))
                 .willReturn(currentAccounting);
 
+        ContractMeta contractMeta = random(ContractMeta.class, "lastClosingBalance");
         try {
             templateService.processReportTemplate(
                     report,
+                    contractMeta,
                     Files.newOutputStream(tempFile)
             );
 
@@ -170,11 +173,11 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
             );
 
             assertEquals(
-                    russianLegalEntity.getRepresentativePosition(),
+                    contractMeta.getRepresentativePosition(),
                     sheet.getRow(40).getCell(4).getStringCellValue()
             );
             assertEquals(
-                    russianLegalEntity.getRepresentativeFullName(),
+                    contractMeta.getRepresentativeFullName(),
                     sheet.getRow(41).getCell(4).getStringCellValue()
             );
 

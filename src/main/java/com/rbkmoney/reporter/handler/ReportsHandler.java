@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.handler;
 
 import com.rbkmoney.damsel.base.InvalidRequest;
+import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.damsel.reports.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
@@ -8,6 +9,7 @@ import com.rbkmoney.reporter.exception.FileNotFoundException;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
 import com.rbkmoney.reporter.exception.ReportNotFoundException;
 import com.rbkmoney.reporter.exception.ShopNotFoundException;
+import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportService;
 import com.rbkmoney.reporter.util.DamselUtil;
 import org.apache.thrift.TException;
@@ -29,9 +31,12 @@ public class ReportsHandler implements ReportingSrv.Iface {
 
     private final ReportService reportService;
 
+    private final PartyService partyService;
+
     @Autowired
-    public ReportsHandler(ReportService reportService) {
+    public ReportsHandler(ReportService reportService, PartyService partyService) {
         this.reportService = reportService;
+        this.partyService = partyService;
     }
 
     @Override
@@ -48,7 +53,7 @@ public class ReportsHandler implements ReportingSrv.Iface {
                     reportRequest.getPartyId(),
                     reportRequest.getShopId(),
                     reportTypes.stream()
-                            .map(reportType -> com.rbkmoney.reporter.ReportType.valueOf(reportType.name()))
+                            .map(reportType -> TypeUtil.toEnumField(reportType.name(), com.rbkmoney.reporter.domain.enums.ReportType.class))
                             .collect(Collectors.toList()),
                     fromTime,
                     toTime
@@ -72,12 +77,15 @@ public class ReportsHandler implements ReportingSrv.Iface {
                 throw buildInvalidRequest("fromTime must be less that toTime");
             }
 
+            Shop shop = partyService.getShop(reportRequest.getPartyId(), reportRequest.getShopId());
+            String contractId = shop.getContractId();
+
             return reportService.createReport(
                     reportRequest.getPartyId(),
-                    reportRequest.getShopId(),
+                    contractId,
                     fromTime,
                     toTime,
-                    com.rbkmoney.reporter.ReportType.valueOf(reportType.name())
+                    TypeUtil.toEnumField(reportType.name(), com.rbkmoney.reporter.domain.enums.ReportType.class)
             );
         } catch (PartyNotFoundException ex) {
             throw new PartyNotFound();

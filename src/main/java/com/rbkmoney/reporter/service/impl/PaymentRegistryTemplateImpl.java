@@ -2,7 +2,8 @@ package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
-import com.rbkmoney.reporter.ReportType;
+import com.rbkmoney.reporter.domain.enums.ReportType;
+import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.Payment;
 import com.rbkmoney.reporter.model.Refund;
@@ -13,6 +14,9 @@ import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.jxls.common.Context;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,7 +24,9 @@ import java.io.OutputStream;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,14 +38,33 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
     private final PartyService partyService;
 
+    private final Resource paymentRegistry;
+
+    private final Resource paymentRegistryWithoutRefunds;
+
     @Autowired
-    public PaymentRegistryTemplateImpl(StatisticService statisticService, PartyService partyService) {
+    public PaymentRegistryTemplateImpl(
+            StatisticService statisticService,
+            PartyService partyService,
+            @Value("${report.type.pr.path|classpath:/templates/payment_registry.xlsx}") ClassPathResource paymentRegistry,
+            @Value("${report.type.prwr.path|classpath:/templates/payment_registry_wo_refunds.xlsx}") ClassPathResource paymentRegistryWithoutRefunds
+    ) {
         this.statisticService = statisticService;
         this.partyService = partyService;
+        this.paymentRegistry = paymentRegistry;
+        this.paymentRegistryWithoutRefunds = paymentRegistryWithoutRefunds;
     }
 
     @Override
-    public void processReportTemplate(Report report, OutputStream outputStream) throws IOException {
+    public boolean accept(ReportType reportType, ContractMeta contractMeta) {
+        return reportType == ReportType.payment_registry
+                || (contractMeta.getReportType() == ReportType.provision_of_service
+                && partyService.needReference(contractMeta.getPartyId(), contractMeta.getContractId()));
+    }
+
+    @Override
+    public void processReportTemplate(Report report, ContractMeta contractMeta, OutputStream outputStream) throws
+            IOException {
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
         Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), report.getPartyContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
 
@@ -63,7 +88,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 InvoicePaymentStatus.captured(new InvoicePaymentCaptured())
         ).stream();
 
-        Stream<StatPayment>  statPaymentsRefundedStream = statisticService.getPayments(
+        Stream<StatPayment> statPaymentsRefundedStream = statisticService.getPayments(
                 report.getPartyId(),
                 report.getPartyContractId(),
                 fromTime,
@@ -139,14 +164,18 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
         Context context = new Context();
         context.putVar("payments", paymentList);
-        context.putVar("refunds", refundList);
         context.putVar("fromTime", TimeUtil.toLocalizedDate(fromTime, reportZoneId));
         context.putVar("toTime", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
         context.putVar("totalAmnt", FormatUtil.formatCurrency(totalAmnt.longValue()));
         context.putVar("totalPayoutAmnt", FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
-        context.putVar("totalRefundAmnt", FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
 
-        processTemplate(context, ReportType.payment_registry.getTemplateResource().getInputStream(), outputStream);
+        if (refundList.size() > 0) {
+            context.putVar("refunds", refundList);
+            context.putVar("totalRefundAmnt", FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
+            processTemplate(context, paymentRegistry.getInputStream(), outputStream);
+        } else {
+            processTemplate(context, paymentRegistryWithoutRefunds.getInputStream(), outputStream);
+        }
     }
 
     private Instant getStatusChangedAt(StatPayment sp) {
@@ -157,8 +186,4 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         }
     }
 
-    @Override
-    public List<ReportType> getReportTypes() {
-        return Arrays.asList(ReportType.payment_registry);
-    }
 }

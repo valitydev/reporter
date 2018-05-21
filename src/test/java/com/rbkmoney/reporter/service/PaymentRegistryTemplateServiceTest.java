@@ -4,6 +4,8 @@ import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
+import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.util.FormatUtil;
@@ -144,11 +146,11 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         given(partyService.getShopUrls(any(), any(), any()))
                 .willReturn(shops);
 
-        Report report = new Report(random(Long.class), LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusDays(1), random(LocalDateTime.class), random(String.class), random(String.class), random(ReportStatus.class), "Europe/Moscow", random(String.class), true);
-
+        Report report = new Report(random(Long.class), LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusDays(1), random(LocalDateTime.class), random(String.class), random(String.class), random(ReportStatus.class), "Europe/Moscow", random(ReportType.class));
+        ContractMeta contractMeta = random(ContractMeta.class);
 
         try {
-            templateService.processReportTemplate(report, Files.newOutputStream(tempFile));
+            templateService.processReportTemplate(report, contractMeta, Files.newOutputStream(tempFile));
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));
             Sheet sheet = wb.getSheetAt(0);
 

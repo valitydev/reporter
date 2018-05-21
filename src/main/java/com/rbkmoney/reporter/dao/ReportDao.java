@@ -1,6 +1,6 @@
 package com.rbkmoney.reporter.dao;
 
-import com.rbkmoney.reporter.ReportType;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
@@ -27,5 +27,5 @@ public interface ReportDao extends GenericDao {
 
     List<Report> getReportsByRange(String partyId, String contractId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) throws DaoException;
 
-    long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, boolean needSign, LocalDateTime createdAt) throws DaoException;
+    long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException;
 }

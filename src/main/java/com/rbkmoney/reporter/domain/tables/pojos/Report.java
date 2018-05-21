@@ -5,6 +5,7 @@ package com.rbkmoney.reporter.domain.tables.pojos;
 
 
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Report implements Serializable {
 
-    private static final long serialVersionUID = -1456352511;
+    private static final long serialVersionUID = -1425358993;
 
     private Long          id;
     private LocalDateTime fromTime;
@@ -35,8 +36,7 @@ public class Report implements Serializable {
     private String        partyContractId;
     private ReportStatus  status;
     private String        timezone;
-    private String        type;
-    private Boolean       needSign;
+    private ReportType    type;
 
     public Report() {}
 
@@ -50,7 +50,6 @@ public class Report implements Serializable {
         this.status = value.status;
         this.timezone = value.timezone;
         this.type = value.type;
-        this.needSign = value.needSign;
     }
 
     public Report(
@@ -62,8 +61,7 @@ public class Report implements Serializable {
         String        partyContractId,
         ReportStatus  status,
         String        timezone,
-        String        type,
-        Boolean       needSign
+        ReportType    type
     ) {
         this.id = id;
         this.fromTime = fromTime;
@@ -74,7 +72,6 @@ public class Report implements Serializable {
         this.status = status;
         this.timezone = timezone;
         this.type = type;
-        this.needSign = needSign;
     }
 
     public Long getId() {
@@ -141,20 +138,12 @@ public class Report implements Serializable {
         this.timezone = timezone;
     }
 
-    public String getType() {
+    public ReportType getType() {
         return this.type;
     }
 
-    public void setType(String type) {
+    public void setType(ReportType type) {
         this.type = type;
-    }
-
-    public Boolean getNeedSign() {
-        return this.needSign;
-    }
-
-    public void setNeedSign(Boolean needSign) {
-        this.needSign = needSign;
     }
 
     @Override
@@ -220,12 +209,6 @@ public class Report implements Serializable {
         }
         else if (!type.equals(other.type))
             return false;
-        if (needSign == null) {
-            if (other.needSign != null)
-                return false;
-        }
-        else if (!needSign.equals(other.needSign))
-            return false;
         return true;
     }
 
@@ -242,7 +225,6 @@ public class Report implements Serializable {
         result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
         result = prime * result + ((this.timezone == null) ? 0 : this.timezone.hashCode());
         result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
-        result = prime * result + ((this.needSign == null) ? 0 : this.needSign.hashCode());
         return result;
     }
 
@@ -259,7 +241,6 @@ public class Report implements Serializable {
         sb.append(", ").append(status);
         sb.append(", ").append(timezone);
         sb.append(", ").append(type);
-        sb.append(", ").append(needSign);
 
         sb.append(")");
         return sb.toString();

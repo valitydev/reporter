@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
+        <version>1.5.10.RELEASE</version>
     </parent>
 
     <groupId>com.rbkmoney</groupId>
@@ -17,7 +17,7 @@
 
     <properties>
         <project.maintainer>Pavel Popov &lt;p.popov@rbkmoney.com&gt;</project.maintainer>
-        <damsel.version>1.228-b0806eb</damsel.version>
+        <damsel.version>1.234-5b4e65d</damsel.version>
         <shared.resources.version>0.2.1</shared.resources.version>
         <server.port>8022</server.port>
         <dockerfile.base.service.tag>22c57470c4fc47161894f036b7cf9d70f42b75f5</dockerfile.base.service.tag>
@@ -42,9 +42,8 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.codecentric</groupId>
-            <artifactId>spring-boot-admin-starter-client</artifactId>
-            <version>1.4.2</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -70,6 +69,21 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>1.11.160</version>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz-jobs</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+            <version>7.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -138,6 +152,11 @@
             <groupId>com.rbkmoney</groupId>
             <artifactId>shared-resources</artifactId>
             <version>${shared.resources.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rbkmoney</groupId>
+            <artifactId>eventstock-client</artifactId>
+            <version>1.1.9</version>
         </dependency>
 
         <!--Test libs-->

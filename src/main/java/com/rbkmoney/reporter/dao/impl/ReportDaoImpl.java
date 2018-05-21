@@ -1,9 +1,9 @@
 package com.rbkmoney.reporter.dao.impl;
 
-import com.rbkmoney.reporter.ReportType;
 import com.rbkmoney.reporter.dao.AbstractGenericDao;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
@@ -101,7 +101,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     public List<Report> getPendingReportsByType(ReportType reportType) throws DaoException {
         Query query = getDslContext().selectFrom(REPORT)
                 .where(REPORT.STATUS.eq(ReportStatus.pending))
-                .and(REPORT.TYPE.eq(reportType.name()))
+                .and(REPORT.TYPE.eq(reportType))
                 .forUpdate();
 
         return fetch(query, reportRowMapper);
@@ -124,7 +124,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, boolean needSign, LocalDateTime createdAt) throws DaoException {
+    public long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         Query query = getDslContext().insertInto(REPORT)
@@ -132,9 +132,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
                 .set(REPORT.PARTY_CONTRACT_ID, contractId)
                 .set(REPORT.FROM_TIME, fromTime)
                 .set(REPORT.TO_TIME, toTime)
-                .set(REPORT.TYPE, reportType.name())
+                .set(REPORT.TYPE, reportType)
                 .set(REPORT.TIMEZONE, timezone)
-                .set(REPORT.NEED_SIGN, needSign)
                 .set(REPORT.CREATED_AT, createdAt)
                 .returning(REPORT.ID);
 
