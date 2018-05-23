@@ -100,7 +100,9 @@ public class TaskServiceImpl implements TaskService {
 
     private boolean isTriggerOnNormalState(Trigger trigger) {
         try {
-            return scheduler.getTriggerState(trigger.getKey()) == Trigger.TriggerState.NORMAL;
+            Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+            log.debug("Trigger '{}' on '{}' state", trigger, triggerState);
+            return triggerState == Trigger.TriggerState.NORMAL;
         } catch (SchedulerException ex) {
             throw new ScheduleProcessingException(String.format("Failed to get trigger state, triggerKey='%s'", trigger.getKey()), ex);
         }

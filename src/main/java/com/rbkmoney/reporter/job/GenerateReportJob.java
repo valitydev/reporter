@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 import static com.rbkmoney.geck.common.util.TypeUtil.toLocalDateTime;
 
@@ -48,7 +47,7 @@ public class GenerateReportJob implements Job {
         try {
             Instant toTime = trigger.getCurrentCronTime().toInstant();
             ZoneId zoneId = trigger.getTimeZone().toZoneId();
-            Instant fromTime = YearMonth.from(toLocalDateTime(toTime)).minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
+            Instant fromTime = YearMonth.from(toLocalDateTime(toTime, zoneId)).minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
 
             reportService.createReport(partyId, contractId, fromTime, toTime, reportType, zoneId, jobExecutionContext.getFireTime().toInstant());
 
