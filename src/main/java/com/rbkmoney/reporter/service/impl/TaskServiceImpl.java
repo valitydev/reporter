@@ -76,7 +76,7 @@ public class TaskServiceImpl implements TaskService {
             }
 
             for (ContractMeta contractMeta : activeContracts) {
-                JobKey jobKey = buildJobKey(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getReportType(), contractMeta.getScheduleId(), contractMeta.getCalendarId());
+                JobKey jobKey = buildJobKey(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getReportType(), contractMeta.getCalendarId(), contractMeta.getScheduleId());
                 List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                 if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
                     if (scheduler.checkExists(jobKey)) {
