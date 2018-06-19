@@ -23,9 +23,14 @@ import java.io.IOException;
 public class ApplicationConfig {
 
     @Bean
-    public RepositoryClientSrv.Iface dominantClient(@Value("${domainConfig.url}") Resource resource) throws IOException {
+    public RepositoryClientSrv.Iface dominantClient(
+            @Value("${domainConfig.url}") Resource resource,
+            @Value("${domainConfig.timeout}") int timeout
+    ) throws IOException {
         return new THSpawnClientBuilder()
-                .withAddress(resource.getURI()).build(RepositoryClientSrv.Iface.class);
+                .withAddress(resource.getURI())
+                .withNetworkTimeout(timeout)
+                .build(RepositoryClientSrv.Iface.class);
     }
 
     @Bean
