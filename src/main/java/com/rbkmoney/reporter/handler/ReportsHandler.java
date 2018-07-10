@@ -99,11 +99,22 @@ public class ReportsHandler implements ReportingSrv.Iface {
     @Override
     public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
         try {
+            Shop shop = partyService.getShop(partyId, shopId);
             return DamselUtil.toDamselReport(
-                    reportService.getReport(partyId, shopId, reportId),
+                    reportService.getReport(partyId, shop.getContractId(), reportId),
                     reportService.getReportFiles(reportId)
             );
-        } catch (ReportNotFoundException ex) {
+        } catch (PartyNotFoundException | ShopNotFoundException | ReportNotFoundException ex) {
+            throw new ReportNotFound();
+        }
+    }
+
+    @Override
+    public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
+        try {
+            Shop shop = partyService.getShop(partyId, shopId);
+            reportService.cancelReport(partyId, shop.getContractId(), reportId);
+        } catch (PartyNotFoundException | ShopNotFoundException | ReportNotFoundException ex) {
             throw new ReportNotFound();
         }
     }

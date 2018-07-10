@@ -2,9 +2,9 @@ package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
-import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
@@ -104,9 +104,7 @@ public class ReportService {
         }
     }
 
-    public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
-        Shop shop = partyService.getShop(partyId, shopId);
-        String contractId = shop.getContractId();
+    public Report getReport(String partyId, String contractId, long reportId) throws ReportNotFoundException, StorageException {
         try {
             Report report = reportDao.getReport(partyId, contractId, reportId);
             if (report == null) {
@@ -114,7 +112,7 @@ public class ReportService {
             }
             return report;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', shopId='%s', contractId='%s', reportId='%d'", partyId, shopId, contractId, reportId), ex);
+            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', contractId='%s', reportId='%d'", partyId, contractId, reportId), ex);
         }
     }
 
@@ -182,6 +180,14 @@ public class ReportService {
             log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', contractId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime(), throwable);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void cancelReport(String partyId, String contractId, long reportId) throws ReportNotFoundException, StorageException {
+        log.info("Trying to cancel report, reportId='{}'", reportId);
+        Report report = getReport(partyId, contractId, reportId);
+        changeReportStatus(report, ReportStatus.cancelled);
+        log.info("Report have been cancelled, reportId='{}'", reportId);
     }
 
     public void changeReportStatus(Report report, ReportStatus reportStatus) {
