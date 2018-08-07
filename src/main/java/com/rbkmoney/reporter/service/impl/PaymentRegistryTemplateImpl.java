@@ -1,35 +1,28 @@
 package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.merch_stat.*;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
-import com.rbkmoney.reporter.model.Payment;
-import com.rbkmoney.reporter.model.Refund;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.service.TemplateService;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
-import org.jxls.common.Context;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellUtil;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class PaymentRegistryTemplateImpl implements TemplateService {
@@ -38,21 +31,12 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
     private final PartyService partyService;
 
-    private final Resource paymentRegistry;
-
-    private final Resource paymentRegistryWithoutRefunds;
-
     @Autowired
     public PaymentRegistryTemplateImpl(
             StatisticService statisticService,
-            PartyService partyService,
-            @Value("${report.type.pr.path|classpath:/templates/payment_registry.xlsx}") ClassPathResource paymentRegistry,
-            @Value("${report.type.prwr.path|classpath:/templates/payment_registry_wo_refunds.xlsx}") ClassPathResource paymentRegistryWithoutRefunds
-    ) {
+            PartyService partyService) {
         this.statisticService = statisticService;
         this.partyService = partyService;
-        this.paymentRegistry = paymentRegistry;
-        this.paymentRegistryWithoutRefunds = paymentRegistryWithoutRefunds;
     }
 
     @Override
@@ -66,124 +50,195 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
     public void processReportTemplate(Report report, ContractMeta contractMeta, OutputStream outputStream) throws
             IOException {
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
+        String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
+        String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
+
         Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), report.getPartyContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
 
-        Instant fromTime = report.getFromTime().toInstant(ZoneOffset.UTC);
-        Instant toTime = report.getToTime().toInstant(ZoneOffset.UTC);
-        Map<String, String> purposes = statisticService.getInvoices(
+        Map<String, String> purposes = statisticService.getPurposes(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                fromTime,
-                toTime
-        ).stream().collect(Collectors.toMap(StatInvoice::getId, StatInvoice::getProduct));
+                report.getFromTime().toInstant(ZoneOffset.UTC),
+                report.getToTime().toInstant(ZoneOffset.UTC)
+        );
 
         AtomicLong totalAmnt = new AtomicLong();
         AtomicLong totalPayoutAmnt = new AtomicLong();
-
-        Stream<StatPayment> statPaymentsStream = statisticService.getPayments(
+        Iterator<StatPayment> paymentsIterator = statisticService.getCapturedPaymentsIterator(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                fromTime,
-                toTime,
-                InvoicePaymentStatus.captured(new InvoicePaymentCaptured())
-        ).stream();
+                report.getFromTime().toInstant(ZoneOffset.UTC),
+                report.getToTime().toInstant(ZoneOffset.UTC)
+        );
 
-        Stream<StatPayment> statPaymentsRefundedStream = statisticService.getPayments(
-                report.getPartyId(),
-                report.getPartyContractId(),
-                fromTime,
-                toTime,
-                InvoicePaymentStatus.refunded(new InvoicePaymentRefunded()))
-                .stream()
-                .filter(p -> {
-                    Instant createdAt = TypeUtil.stringToInstant(p.getCreatedAt());
-                    return createdAt.isAfter(fromTime) && createdAt.isBefore(toTime);
-                });
+        SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
+        Sheet sh = wb.createSheet();
+        sh.setDefaultColumnWidth(20);
+        int rownum = 0;
+        Row rowFirstPayments = sh.createRow(rownum++);
 
-        List<Payment> paymentList = Stream.concat(statPaymentsStream, statPaymentsRefundedStream)
-                .sorted(Comparator.comparing(this::getStatusChangedAt)).map(p -> {
-                    Payment payment = new Payment();
-                    payment.setId(p.getInvoiceId() + "." + p.getId());
-                    payment.setCapturedAt(TimeUtil.toLocalizedDateTime(getStatusChangedAt(p), reportZoneId));
-                    if (p.getPayer().isSetPaymentResource()) {
-                        payment.setPaymentTool(p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
-                    }
-                    payment.setAmount(FormatUtil.formatCurrency(p.getAmount()));
-                    payment.setPayoutAmount(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
-                    totalAmnt.addAndGet(p.getAmount());
-                    totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
-                    if (p.getPayer().isSetPaymentResource()) {
-                        payment.setPayerEmail(p.getPayer().getPaymentResource().getEmail());
-                    }
-                    payment.setShopUrl(shopUrls.get(p.getShopId()));
-                    String purpose = purposes.get(p.getInvoiceId());
-                    if (purpose == null) {
-                        StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
-                        purpose = invoice.getProduct();
-                    }
-                    payment.setPurpose(purpose);
-                    return payment;
-                }).collect(Collectors.toList());
+        for (int i = 0; i < 8; ++i) {
+            rowFirstPayments.createCell(i);
+        }
+        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
+        Cell cellFirstPayments = rowFirstPayments.getCell(0);
+        cellFirstPayments.setCellValue(String.format("Платежи за период с %s по %s", fromTime, toTime));
+        CellUtil.setAlignment(cellFirstPayments, HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setBold(true);
+        CellUtil.setFont(cellFirstPayments, font);
+
+        Row rowSecondPayments = sh.createRow(rownum++);
+        CellStyle greyStyle = wb.createCellStyle();
+        greyStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        greyStyle.setFillPattern(FillPatternType.LESS_DOTS);
+        for (int i = 0; i < 8; ++i) {
+            Cell cell = rowSecondPayments.createCell(i);
+            CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+            cell.setCellStyle(greyStyle);
+            CellUtil.setFont(cell, font);
+        }
+        rowSecondPayments.getCell(0).setCellValue("Дата");
+        rowSecondPayments.getCell(1).setCellValue("Id платежа");
+        rowSecondPayments.getCell(2).setCellValue("Метод оплаты");
+        rowSecondPayments.getCell(3).setCellValue("Сумма платежа");
+        rowSecondPayments.getCell(4).setCellValue("Сумма к выводу");
+        rowSecondPayments.getCell(5).setCellValue("Email плательщика");
+        rowSecondPayments.getCell(6).setCellValue("URL магазина");
+        rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
+
+        while (paymentsIterator.hasNext()) {
+            StatPayment p = paymentsIterator.next();
+            Row row = sh.createRow(rownum++);
+            row.createCell(0).setCellValue(p.getInvoiceId() + "." + p.getId());
+            row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(p.getStatus().getCaptured().getAt(), reportZoneId));
+            String paymentTool = null;
+            if (p.getPayer().isSetPaymentResource()) {
+                paymentTool = p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName();
+            }
+            row.createCell(2).setCellValue(paymentTool);
+            row.createCell(3).setCellValue(FormatUtil.formatCurrency(p.getAmount()));
+            row.createCell(4).setCellValue(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
+            totalAmnt.addAndGet(p.getAmount());
+            totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
+            String payerEmail = null;
+            if (p.getPayer().isSetPaymentResource()) {
+                payerEmail = p.getPayer().getPaymentResource().getEmail();
+            }
+            row.createCell(5).setCellValue(payerEmail);
+            row.createCell(6).setCellValue(shopUrls.get(p.getShopId()));
+            String purpose = purposes.get(p.getInvoiceId());
+            if (purpose == null) {
+                StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
+                purpose = invoice.getProduct();
+            }
+            row.createCell(7).setCellValue(purpose);
+        }
+
+        CellStyle borderStyle = wb.createCellStyle();
+        borderStyle.setBorderBottom(BorderStyle.MEDIUM);
+        borderStyle.setBorderTop(BorderStyle.MEDIUM);
+        borderStyle.setBorderRight(BorderStyle.MEDIUM);
+        borderStyle.setBorderLeft(BorderStyle.MEDIUM);
+
+        //---- total amount ---------
+        Row rowTotalPaymentAmount = sh.createRow(rownum++);
+        for (int i = 0; i < 5; ++i) {
+            Cell cell = rowTotalPaymentAmount.createCell(i);
+            cell.setCellStyle(borderStyle);
+            CellUtil.setFont(cell, font);
+        }
+        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
+        Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
+        cellTotalPaymentAmount.setCellValue("Сумма");
+        CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
+        rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAmnt.longValue()));
+        rowTotalPaymentAmount.getCell(4).setCellValue(FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
+
+        //-----skip rows -------
+        sh.createRow(rownum++);
+        sh.createRow(rownum++);
+
+        Row rowFirstRefunds = sh.createRow(rownum++);
+        for (int i = 0; i < 8; ++i) {
+            rowFirstRefunds.createCell(i);
+        }
+        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
+        Cell cellFirstRefunds = rowFirstRefunds.getCell(0);
+        cellFirstRefunds.setCellValue(String.format("Возвраты за период с %s по %s", fromTime, toTime));
+        CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
+        CellUtil.setFont(cellFirstRefunds, font);
+        Row rowSecondRefunds = sh.createRow(rownum++);
+        for (int i = 0; i < 8; ++i) {
+            Cell cell = rowSecondRefunds.createCell(i);
+            CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+            cell.setCellStyle(greyStyle);
+            CellUtil.setFont(cell, font);
+        }
+        rowSecondRefunds.getCell(0).setCellValue("Дата возврата");
+        rowSecondRefunds.getCell(1).setCellValue("Дата платежа");
+        rowSecondRefunds.getCell(2).setCellValue("Id платежа");
+        rowSecondRefunds.getCell(3).setCellValue("Сумма возврата");
+        rowSecondRefunds.getCell(4).setCellValue("Метод оплаты");
+        rowSecondRefunds.getCell(5).setCellValue("Email плательщика");
+        rowSecondRefunds.getCell(6).setCellValue("URL магазина");
+        rowSecondRefunds.getCell(7).setCellValue("Назначение платежа");
 
         AtomicLong totalRefundAmnt = new AtomicLong();
-        List<Refund> refundList = statisticService.getRefunds(
+        Iterator<StatRefund> refundsIterator = statisticService.getRefundsIterator(
                 report.getPartyId(),
                 report.getPartyContractId(),
-                fromTime,
-                toTime,
+                report.getFromTime().toInstant(ZoneOffset.UTC),
+                report.getToTime().toInstant(ZoneOffset.UTC),
                 InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded())
-        ).stream().sorted(Comparator.comparing(r -> r.getStatus().getSucceeded().getAt())).map(r -> {
-            Refund refund = new Refund();
-            StatPayment statPayment = statisticService.getPayment(r.getInvoiceId(), r.getPaymentId());
-            refund.setId(r.getId());
-            refund.setPaymentId(r.getInvoiceId() + "." + r.getPaymentId());
+        );
+        while (refundsIterator.hasNext()) {
+            StatRefund r = refundsIterator.next();
+            Row row = sh.createRow(rownum++);
+            StatPayment statPayment = statisticService.getPayment(report.getPartyId(), report.getPartyContractId(), r.getInvoiceId(), r.getPaymentId());
+            row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
             //TODO captured_at only
-            if (statPayment.getStatus().isSetCaptured()) {
-                refund.setPaymentCapturedAt(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
-            } else {
-                refund.setPaymentCapturedAt(TimeUtil.toLocalizedDateTime(statPayment.getCreatedAt(), reportZoneId));
-            }
-            refund.setSucceededAt(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
+            row.createCell(1).setCellValue(statPayment.getStatus().isSetCaptured() ?
+                    TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId) :
+                    TimeUtil.toLocalizedDateTime(statPayment.getCreatedAt(), reportZoneId));
+            row.createCell(2).setCellValue(r.getInvoiceId() + "." + r.getPaymentId());
+            row.createCell(3).setCellValue(FormatUtil.formatCurrency(r.getAmount()));
+            String paymentTool = null;
             if (statPayment.getPayer().isSetPaymentResource()) {
-                refund.setPaymentTool(statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName());
+                paymentTool = statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName();
             }
-            refund.setAmount(FormatUtil.formatCurrency(r.getAmount()));
+            row.createCell(4).setCellValue(paymentTool);
             totalRefundAmnt.addAndGet(r.getAmount());
+            String payerEmail = null;
             if (statPayment.getPayer().isSetPaymentResource()) {
-                refund.setPayerEmail(statPayment.getPayer().getPaymentResource().getEmail());
+                payerEmail = statPayment.getPayer().getPaymentResource().getEmail();
             }
-            refund.setShopUrl(shopUrls.get(r.getShopId()));
+            row.createCell(5).setCellValue(payerEmail);
+            row.createCell(6).setCellValue(shopUrls.get(r.getShopId()));
             String purpose = purposes.get(r.getInvoiceId());
             if (purpose == null) {
                 StatInvoice invoice = statisticService.getInvoice(r.getInvoiceId());
                 purpose = invoice.getProduct();
             }
-            refund.setPaymentPurpose(purpose);
-            return refund;
-        }).collect(Collectors.toList());
-
-        Context context = new Context();
-        context.putVar("payments", paymentList);
-        context.putVar("fromTime", TimeUtil.toLocalizedDate(fromTime, reportZoneId));
-        context.putVar("toTime", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
-        context.putVar("totalAmnt", FormatUtil.formatCurrency(totalAmnt.longValue()));
-        context.putVar("totalPayoutAmnt", FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
-
-        if (refundList.size() > 0) {
-            context.putVar("refunds", refundList);
-            context.putVar("totalRefundAmnt", FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
-            processTemplate(context, paymentRegistry.getInputStream(), outputStream);
-        } else {
-            processTemplate(context, paymentRegistryWithoutRefunds.getInputStream(), outputStream);
+            row.createCell(7).setCellValue(purpose);
         }
-    }
 
-    private Instant getStatusChangedAt(StatPayment sp) {
-        if (sp.getStatus().isSetCaptured()) {
-            return TypeUtil.stringToInstant(sp.getStatus().getCaptured().getAt());
-        } else {
-            return TypeUtil.stringToInstant(sp.getStatus().getRefunded().getAt());
+        //---- total refund amount ---------
+        Row rowTotalRefundAmount = sh.createRow(rownum++);
+        for (int i = 0; i < 4; ++i) {
+            Cell cell = rowTotalRefundAmount.createCell(i);
+            cell.setCellStyle(borderStyle);
+            CellUtil.setFont(cell, font);
         }
+        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
+        Cell cellTotalRefundAmount = rowTotalRefundAmount.getCell(0);
+        cellTotalRefundAmount.setCellValue("Сумма");
+        CellUtil.setAlignment(cellTotalRefundAmount, HorizontalAlignment.CENTER);
+        rowTotalRefundAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
+
+        wb.write(outputStream);
+        outputStream.close();
+        wb.dispose();
     }
 
 }

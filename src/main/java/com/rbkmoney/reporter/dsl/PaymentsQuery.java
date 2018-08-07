@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rbkmoney.damsel.merch_stat.InvoicePaymentStatus;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class PaymentsQuery {
 
@@ -24,9 +25,6 @@ public class PaymentsQuery {
 
     @JsonProperty("to_time")
     Instant toTime;
-
-    @JsonProperty("payment_status")
-    String paymentStatus;
 
     public String getMerchantId() {
         return merchantId;
@@ -76,40 +74,22 @@ public class PaymentsQuery {
         this.toTime = toTime;
     }
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         PaymentsQuery that = (PaymentsQuery) o;
-
-        if (merchantId != null ? !merchantId.equals(that.merchantId) : that.merchantId != null) return false;
-        if (contractId != null ? !contractId.equals(that.contractId) : that.contractId != null) return false;
-        if (invoiceId != null ? !invoiceId.equals(that.invoiceId) : that.invoiceId != null) return false;
-        if (paymentId != null ? !paymentId.equals(that.paymentId) : that.paymentId != null) return false;
-        if (fromTime != null ? !fromTime.equals(that.fromTime) : that.fromTime != null) return false;
-        if (toTime != null ? !toTime.equals(that.toTime) : that.toTime != null) return false;
-        return paymentStatus != null ? paymentStatus.equals(that.paymentStatus) : that.paymentStatus == null;
+        return Objects.equals(merchantId, that.merchantId) &&
+                Objects.equals(contractId, that.contractId) &&
+                Objects.equals(invoiceId, that.invoiceId) &&
+                Objects.equals(paymentId, that.paymentId) &&
+                Objects.equals(fromTime, that.fromTime) &&
+                Objects.equals(toTime, that.toTime);
     }
 
     @Override
     public int hashCode() {
-        int result = merchantId != null ? merchantId.hashCode() : 0;
-        result = 31 * result + (contractId != null ? contractId.hashCode() : 0);
-        result = 31 * result + (fromTime != null ? fromTime.hashCode() : 0);
-        result = 31 * result + (invoiceId != null ? invoiceId.hashCode() : 0);
-        result = 31 * result + (paymentId != null ? paymentId.hashCode() : 0);
-        result = 31 * result + (toTime != null ? toTime.hashCode() : 0);
-        result = 31 * result + (paymentStatus != null ? paymentStatus.hashCode() : 0);
-        return result;
+        return Objects.hash(merchantId, contractId, invoiceId, paymentId, fromTime, toTime);
     }
 
     @Override
@@ -121,7 +101,6 @@ public class PaymentsQuery {
                 ", paymentId='" + paymentId + '\'' +
                 ", fromTime=" + fromTime +
                 ", toTime=" + toTime +
-                ", paymentStatus=" + paymentStatus +
                 '}';
     }
 }

@@ -15,7 +15,7 @@ public class Query {
     @JsonProperty("invoices")
     private InvoicesQuery invoicesQuery;
 
-    @JsonProperty("payments")
+    @JsonProperty("payments_for_report")
     private PaymentsQuery paymentsQuery;
 
     @JsonProperty("refunds")

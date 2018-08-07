@@ -4,7 +4,9 @@ import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -16,16 +18,14 @@ public interface StatisticService {
 
     ShopAccountingModel getShopAccounting(String partyId, String contractId, String currencyCode, Instant fromTime, Instant toTime);
 
-    List<StatInvoice> getInvoices(String partyId, String contractId, Instant fromTime, Instant toTime);
+    Map<String, String> getPurposes(String partyId, String contractId, Instant fromTime, Instant toTime);
 
     StatInvoice getInvoice(String invoiceId);
 
-    List<StatPayment> getPayments(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentStatus status);
+    Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String contractId, Instant fromTime, Instant toTime);
 
-    StatPayment getPayment(String invoiceId, String paymentId);
+    StatPayment getPayment(String partyId, String contractId, String invoiceId, String paymentId);
 
-    StatPayment getPayment(String invoiceId, String paymentId, Optional<InvoicePaymentStatus> status);
-
-    List<StatRefund> getRefunds(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
+    Iterator<StatRefund> getRefundsIterator(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
 
 }

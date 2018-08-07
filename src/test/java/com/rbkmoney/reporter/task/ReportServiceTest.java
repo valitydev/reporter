@@ -2,9 +2,10 @@ package com.rbkmoney.reporter.task;
 
 import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain.Calendar;
 import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.domain_config.VersionedObject;
+import com.rbkmoney.damsel.merch_stat.StatPayment;
+import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.damsel.msgpack.Value;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -13,15 +14,16 @@ import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
-import com.rbkmoney.reporter.handler.EventStockHandler;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
-import com.rbkmoney.reporter.service.*;
+import com.rbkmoney.reporter.service.ReportService;
+import com.rbkmoney.reporter.service.SignService;
+import com.rbkmoney.reporter.service.StatisticService;
+import com.rbkmoney.reporter.service.TaskService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.thrift.TException;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
-import org.quartz.impl.SchedulerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -34,16 +36,17 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 
 public class ReportServiceTest extends AbstractIntegrationTest {
 
@@ -67,7 +70,33 @@ public class ReportServiceTest extends AbstractIntegrationTest {
 
     @Test
     public void generateProvisionOfServiceReportTest() throws IOException, TException, InterruptedException {
-        given(statisticService.getPayments(anyString(), anyString(), any(), any(), any())).willReturn(new ArrayList<>());
+        given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any())).willReturn(
+                new Iterator<StatPayment>() {
+                    @Override
+                    public boolean hasNext() {
+                        return false;
+                    }
+
+                    @Override
+                    public StatPayment next() {
+                        return new StatPayment();
+                    }
+                }
+        );
+
+        given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any(), any())).willReturn(
+                new Iterator<StatRefund>() {
+                    @Override
+                    public boolean hasNext() {
+                        return false;
+                    }
+
+                    @Override
+                    public StatRefund next() {
+                        return new StatRefund();
+                    }
+                }
+        );
 
         String partyId = random(String.class);
         String shopId = random(String.class);

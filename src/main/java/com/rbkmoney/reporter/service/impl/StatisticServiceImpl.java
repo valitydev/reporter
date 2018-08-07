@@ -16,10 +16,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class StatisticServiceImpl implements StatisticService {
@@ -47,19 +44,19 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<StatInvoice> getInvoices(String partyId, String contractId, Instant fromTime, Instant toTime) {
+    public Map<String, String> getPurposes(String partyId, String contractId, Instant fromTime, Instant toTime) {
         try {
-            long from = 0;
+            Optional<String> continuationToken = Optional.empty();
             int size = 1000;
-            List<StatInvoice> invoices = new ArrayList<>();
+            Map<String, String> purposes = new HashMap<>();
             List<StatInvoice> nextInvoices;
             do {
-                StatResponse statResponse = merchantStatisticsClient.getInvoices(DslUtil.createInvoicesRequest(partyId, contractId, fromTime, toTime, from, size, objectMapper));
+                StatResponse statResponse = merchantStatisticsClient.getInvoices(DslUtil.createInvoicesRequest(partyId, contractId, fromTime, toTime, continuationToken, size, objectMapper));
                 nextInvoices = statResponse.getData().getInvoices();
-                invoices.addAll(nextInvoices);
-                from += size;
-            } while (nextInvoices.size() == size);
-            return invoices;
+                nextInvoices.forEach(i -> purposes.put(i.getId(), i.getProduct()));
+                continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
+            } while (continuationToken.isPresent());
+            return purposes;
         } catch (TException ex) {
             throw new RuntimeException(ex);
         }
@@ -97,60 +94,73 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<StatPayment> getPayments(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentStatus status) {
-        try {
-            long from = 0;
-            int size = 1000;
-            List<StatPayment> payments = new ArrayList<>();
-            List<StatPayment> nextPayments;
-            do {
-                StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createPaymentsRequest(partyId, contractId, fromTime, toTime, status, from, size, objectMapper));
-                nextPayments = statResponse.getData().getPayments();
-                payments.addAll(nextPayments);
-                from += size;
-            } while (nextPayments.size() == size);
-            return payments;
-        } catch (TException ex) {
-            throw new RuntimeException(ex);
-        }
+    public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String contractId, Instant fromTime, Instant toTime) {
+        return new Iterator<StatPayment>() {
+            private Optional<String> continuationToken = Optional.empty();
+            private final int size = 1000;
+            private List<StatPayment> nextPayments;
+
+            @Override
+            public boolean hasNext() {
+                if (nextPayments == null || ((!nextPayments.iterator().hasNext()) && continuationToken.isPresent())) {
+                    try {
+                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createPaymentsRequest(partyId, contractId, fromTime, toTime, continuationToken, size, objectMapper));
+                        nextPayments = statResponse.getData().getPayments();
+                        continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
+                    } catch (TException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return nextPayments.iterator().hasNext();
+            }
+
+            @Override
+            public StatPayment next() {
+                return nextPayments.iterator().next();
+            }
+        };
     }
 
     @Override
-    public StatPayment getPayment(String invoiceId, String paymentId) {
-        return getPayment(invoiceId, paymentId, Optional.empty());
-    }
-
-    @Override
-    public StatPayment getPayment(String invoiceId, String paymentId, Optional<InvoicePaymentStatus> status) {
+    public StatPayment getPayment(String partyId, String contractId, String invoiceId, String paymentId) {
         try {
-            return merchantStatisticsClient.getPayments(DslUtil.createPaymentRequest(invoiceId, paymentId, status, objectMapper))
+            return merchantStatisticsClient.getPayments(DslUtil.createPaymentRequest(partyId, contractId, invoiceId, paymentId, objectMapper))
                     .getData()
                     .getPayments()
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new PaymentNotFoundException(String.format("Payment not found, invoiceId='%s', paymentId='%s', paymentStatus='%s'", invoiceId, paymentId, status)));
+                    .orElseThrow(() -> new PaymentNotFoundException(String.format("Payment not found, invoiceId='%s', paymentId='%s'", invoiceId, paymentId)));
         } catch (TException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     @Override
-    public List<StatRefund> getRefunds(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status) {
-        try {
-            long from = 0;
-            int size = 1000;
-            List<StatRefund> refunds = new ArrayList<>();
-            List<StatRefund> nextRefunds;
-            do {
-                StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, contractId, fromTime, toTime, status, from, size, objectMapper));
-                nextRefunds = statResponse.getData().getRefunds();
-                refunds.addAll(nextRefunds);
-                from += size;
-            } while (nextRefunds.size() == size);
-            return refunds;
-        } catch (TException ex) {
-            throw new RuntimeException(ex);
-        }
+    public Iterator<StatRefund> getRefundsIterator(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status) {
+        return new Iterator<StatRefund>() {
+            private long from = 0;
+            private int size = 1000;
+            private List<StatRefund> nextRefunds;
+
+            @Override
+            public boolean hasNext() {
+                if (nextRefunds == null || ((!nextRefunds.iterator().hasNext()) && nextRefunds.size() == size)) {
+                    try {
+                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, contractId, fromTime, toTime, status, from, size, objectMapper));
+                        nextRefunds = statResponse.getData().getRefunds();
+                        from += size;
+                    } catch (TException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return nextRefunds.iterator().hasNext();
+            }
+
+            @Override
+            public StatRefund next() {
+                return nextRefunds.iterator().next();
+            }
+        };
     }
 
     private <T> void validate(T model) {

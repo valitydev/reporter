@@ -12,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -33,12 +35,19 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     @Test
     public void testCreatePaymentRequest() {
         assertEquals(
-                new StatRequest("{\"query\":{\"payments\":{\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\",\"payment_status\":\"captured\"}}}"),
-                DslUtil.createPaymentRequest("invoiceId", "paymentId", Optional.of(InvoicePaymentStatus.captured(new InvoicePaymentCaptured())), objectMapper)
+                new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"contract_id\":\"contractId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
+                DslUtil.createPaymentRequest("partyId", "contractId","invoiceId", "paymentId", objectMapper)
         );
         assertEquals(
-                new StatRequest("{\"query\":{\"payments\":{\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
-                DslUtil.createPaymentRequest("invoiceId", "paymentId", Optional.empty(), objectMapper)
+                new StatRequest("{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\",\"contract_id\":\"contractId\",\"from_time\":\"2018-10-28T09:15:00Z\",\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
+                DslUtil.createPaymentsRequest(
+                        "partyId",
+                        "contractId",
+                        LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
+                        LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
+                        Optional.empty(),
+                        1000,
+                        objectMapper)
         );
     }
 

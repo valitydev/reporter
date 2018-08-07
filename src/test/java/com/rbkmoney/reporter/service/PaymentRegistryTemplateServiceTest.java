@@ -16,8 +16,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.thrift.TException;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
@@ -64,18 +61,9 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             payment.setId("id" + i);
             payment.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
             payment.setInvoiceId("invoiceId" + i);
-            InvoicePaymentStatus invoicePaymentStatus;
-            if (i < 2) {
-                InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
-                invoicePaymentCaptured.setAt("201" + (3 - i) + "-03-22T06:12:27Z");
-                invoicePaymentStatus = InvoicePaymentStatus.captured(invoicePaymentCaptured);
-            } else {
-                InvoicePaymentRefunded invoicePaymentRefunded = new InvoicePaymentRefunded();
-                invoicePaymentRefunded.setAt("201" + (3 - i) + "-03-22T06:12:27Z");
-                invoicePaymentStatus = InvoicePaymentStatus.refunded(invoicePaymentRefunded);
-            }
-            payment.setStatus(invoicePaymentStatus);
-
+            InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
+            invoicePaymentCaptured.setAt("201" + i + "-03-22T06:12:27Z");
+            payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
             PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "424" + i, "56789" + i)), "sessionId");
             paymentResourcePayer.setEmail("abc" + i + "@mail.ru");
             payment.setPayer(Payer.payment_resource(paymentResourcePayer));
@@ -97,19 +85,11 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             refundList.add(refund);
         }
 
-        given(statisticService.getPayments(any(), any(), any(), any(), any()))
-                .willAnswer((Answer<List<StatPayment>>) invocationOnMock -> {
-                    InvoicePaymentStatus status = invocationOnMock.getArgumentAt(4, InvoicePaymentStatus.class);
-                    if (status.isSetCaptured()) {
-                        return paymentList.stream().filter(p -> p.getStatus().isSetCaptured()).collect(Collectors.toList());
-                    } else if (status.isSetRefunded()) {
-                        return paymentList.stream().filter(p -> p.getStatus().isSetRefunded()).collect(Collectors.toList());
-                    }
-                    return null;
-                });
+        given(statisticService.getCapturedPaymentsIterator(any(), any(), any(), any()))
+                .willReturn(paymentList.iterator());
 
-        given(statisticService.getRefunds(any(), any(), any(), any(), any()))
-                .willReturn(refundList);
+        given(statisticService.getRefundsIterator(any(), any(), any(), any(), any()))
+                .willReturn(refundList.iterator());
 
         StatPayment payment = new StatPayment();
         InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
@@ -119,24 +99,16 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         paymentResourcePayer.setEmail("xyz@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
-        given(statisticService.getPayment(any(), any()))
+        given(statisticService.getPayment(any(), any(), any(), any()))
                 .willReturn(payment);
 
-        List<StatInvoice> invoices = new ArrayList<>();
-        StatInvoice i = new StatInvoice();
-        i.setId("invoiceId0");
-        i.setProduct("product0");
-        invoices.add(i);
-        i = new StatInvoice();
-        i.setId("invoiceId1");
-        i.setProduct("product1");
-        invoices.add(i);
-        i = new StatInvoice();
-        i.setId("invoiceId2");
-        i.setProduct("product2");
-        invoices.add(i);
-        given(statisticService.getInvoices(any(), any(), any(), any()))
-                .willReturn(invoices);
+        Map<String, String> purposes = new HashMap<>();
+        purposes.put("invoiceId0", "product0");
+        purposes.put("invoiceId1", "product1");
+        purposes.put("invoiceId2", "product2");
+
+        given(statisticService.getPurposes(any(), any(), any(), any()))
+                .willReturn(purposes);
 
         Map<String, String> shops = new HashMap<>();
         shops.put("shopId0", "http://0ch.ru/b");
