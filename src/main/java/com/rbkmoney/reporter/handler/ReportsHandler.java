@@ -77,12 +77,10 @@ public class ReportsHandler implements ReportingSrv.Iface {
                 throw buildInvalidRequest("fromTime must be less that toTime");
             }
 
-            Shop shop = partyService.getShop(reportRequest.getPartyId(), reportRequest.getShopId());
-            String contractId = shop.getContractId();
-
+            partyService.getShop(reportRequest.getPartyId(), reportRequest.getShopId());
             return reportService.createReport(
                     reportRequest.getPartyId(),
-                    contractId,
+                    reportRequest.getShopId(),
                     fromTime,
                     toTime,
                     TypeUtil.toEnumField(reportType.name(), com.rbkmoney.reporter.domain.enums.ReportType.class)
@@ -99,9 +97,9 @@ public class ReportsHandler implements ReportingSrv.Iface {
     @Override
     public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
         try {
-            Shop shop = partyService.getShop(partyId, shopId);
+            partyService.getShop(partyId, shopId);
             return DamselUtil.toDamselReport(
-                    reportService.getReport(partyId, shop.getContractId(), reportId),
+                    reportService.getReport(partyId, shopId, reportId),
                     reportService.getReportFiles(reportId)
             );
         } catch (PartyNotFoundException | ShopNotFoundException | ReportNotFoundException ex) {
@@ -112,8 +110,8 @@ public class ReportsHandler implements ReportingSrv.Iface {
     @Override
     public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
         try {
-            Shop shop = partyService.getShop(partyId, shopId);
-            reportService.cancelReport(partyId, shop.getContractId(), reportId);
+            partyService.getShop(partyId, shopId);
+            reportService.cancelReport(partyId, shopId, reportId);
         } catch (PartyNotFoundException | ShopNotFoundException | ReportNotFoundException ex) {
             throw new ReportNotFound();
         }

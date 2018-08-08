@@ -112,6 +112,9 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
             Cell merchantIdCell = sheet.getRow(7).getCell(4);
             assertEquals(party.getId(), merchantIdCell.getStringCellValue());
 
+            Cell shopIdCell = sheet.getRow(9).getCell(4);
+            assertEquals(report.getPartyShopId(), shopIdCell.getStringCellValue());
+
             Row dateRow = sheet.getRow(14);
             Cell fromTimeCell = dateRow.getCell(1);
             assertEquals(

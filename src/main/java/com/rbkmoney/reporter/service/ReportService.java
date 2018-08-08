@@ -171,7 +171,7 @@ public class ReportService {
             List<FileMeta> reportFiles = processSignAndUpload(report, contractMeta);
             finishedReportTask(report.getId(), reportFiles);
             contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getType(), report.getCreatedAt());
-            log.info("Report has been successfully processed, reportId='{}', reportType='{}', shopId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+            log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         } catch (ValidationException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
