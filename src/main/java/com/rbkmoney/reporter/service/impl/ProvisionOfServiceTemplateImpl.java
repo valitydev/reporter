@@ -60,12 +60,13 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
         Context context = new Context();
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
         context.putVar("party_id", report.getPartyId());
-        context.putVar("contract_id", report.getPartyContractId());
+        context.putVar("shop_id", report.getPartyShopId());
+        context.putVar("contract_id", contractMeta.getContractId());
         context.putVar("created_at", TimeUtil.toLocalizedDate(report.getCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         context.putVar("from_time", TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId));
         context.putVar("to_time", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
 
-        Contract contract = partyService.getContract(report.getPartyId(), report.getPartyContractId(), createdAt);
+        Contract contract = partyService.getContract(report.getPartyId(), contractMeta.getContractId(), createdAt);
         if (contract.isSetLegalAgreement()) {
             LegalAgreement legalAgreement = contract.getLegalAgreement();
             context.putVar("legal_agreement_id", legalAgreement.getLegalAgreementId());
@@ -86,7 +87,7 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
 
         ShopAccountingModel shopAccountingModel = statisticService.getShopAccounting(
                 report.getPartyId(),
-                report.getPartyContractId(),
+                report.getPartyShopId(),
                 DEFAULT_REPORT_CURRENCY_CODE,
                 report.getFromTime().toInstant(ZoneOffset.UTC),
                 report.getToTime().toInstant(ZoneOffset.UTC)
@@ -100,7 +101,7 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
         if (contractMeta.getLastClosingBalance() == null) {
             ShopAccountingModel previousPeriod = statisticService.getShopAccounting(
                     report.getPartyId(),
-                    report.getPartyContractId(),
+                    report.getPartyShopId(),
                     DEFAULT_REPORT_CURRENCY_CODE,
                     report.getFromTime().toInstant(ZoneOffset.UTC)
             );

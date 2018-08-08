@@ -26,14 +26,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Report implements Serializable {
 
-    private static final long serialVersionUID = -1425358993;
+    private static final long serialVersionUID = 1277833059;
 
     private Long          id;
     private LocalDateTime fromTime;
     private LocalDateTime toTime;
     private LocalDateTime createdAt;
     private String        partyId;
-    private String        partyContractId;
+    private String        partyShopId;
     private ReportStatus  status;
     private String        timezone;
     private ReportType    type;
@@ -46,7 +46,7 @@ public class Report implements Serializable {
         this.toTime = value.toTime;
         this.createdAt = value.createdAt;
         this.partyId = value.partyId;
-        this.partyContractId = value.partyContractId;
+        this.partyShopId = value.partyShopId;
         this.status = value.status;
         this.timezone = value.timezone;
         this.type = value.type;
@@ -58,7 +58,7 @@ public class Report implements Serializable {
         LocalDateTime toTime,
         LocalDateTime createdAt,
         String        partyId,
-        String        partyContractId,
+        String        partyShopId,
         ReportStatus  status,
         String        timezone,
         ReportType    type
@@ -68,7 +68,7 @@ public class Report implements Serializable {
         this.toTime = toTime;
         this.createdAt = createdAt;
         this.partyId = partyId;
-        this.partyContractId = partyContractId;
+        this.partyShopId = partyShopId;
         this.status = status;
         this.timezone = timezone;
         this.type = type;
@@ -114,12 +114,12 @@ public class Report implements Serializable {
         this.partyId = partyId;
     }
 
-    public String getPartyContractId() {
-        return this.partyContractId;
+    public String getPartyShopId() {
+        return this.partyShopId;
     }
 
-    public void setPartyContractId(String partyContractId) {
-        this.partyContractId = partyContractId;
+    public void setPartyShopId(String partyShopId) {
+        this.partyShopId = partyShopId;
     }
 
     public ReportStatus getStatus() {
@@ -185,11 +185,11 @@ public class Report implements Serializable {
         }
         else if (!partyId.equals(other.partyId))
             return false;
-        if (partyContractId == null) {
-            if (other.partyContractId != null)
+        if (partyShopId == null) {
+            if (other.partyShopId != null)
                 return false;
         }
-        else if (!partyContractId.equals(other.partyContractId))
+        else if (!partyShopId.equals(other.partyShopId))
             return false;
         if (status == null) {
             if (other.status != null)
@@ -221,7 +221,7 @@ public class Report implements Serializable {
         result = prime * result + ((this.toTime == null) ? 0 : this.toTime.hashCode());
         result = prime * result + ((this.createdAt == null) ? 0 : this.createdAt.hashCode());
         result = prime * result + ((this.partyId == null) ? 0 : this.partyId.hashCode());
-        result = prime * result + ((this.partyContractId == null) ? 0 : this.partyContractId.hashCode());
+        result = prime * result + ((this.partyShopId == null) ? 0 : this.partyShopId.hashCode());
         result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
         result = prime * result + ((this.timezone == null) ? 0 : this.timezone.hashCode());
         result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
@@ -237,7 +237,7 @@ public class Report implements Serializable {
         sb.append(", ").append(toTime);
         sb.append(", ").append(createdAt);
         sb.append(", ").append(partyId);
-        sb.append(", ").append(partyContractId);
+        sb.append(", ").append(partyShopId);
         sb.append(", ").append(status);
         sb.append(", ").append(timezone);
         sb.append(", ").append(type);

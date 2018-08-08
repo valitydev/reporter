@@ -16,7 +16,7 @@ public class Query {
     private InvoicesQuery invoicesQuery;
 
     @JsonProperty("payments_for_report")
-    private PaymentsQuery paymentsQuery;
+    private PaymentsForReportQuery paymentsForReportQuery;
 
     @JsonProperty("refunds")
     private RefundsQuery refundsQuery;
@@ -41,12 +41,12 @@ public class Query {
         this.invoicesQuery = invoicesQuery;
     }
 
-    public PaymentsQuery getPaymentsQuery() {
-        return paymentsQuery;
+    public PaymentsForReportQuery getPaymentsForReportQuery() {
+        return paymentsForReportQuery;
     }
 
-    public void setPaymentsQuery(PaymentsQuery paymentsQuery) {
-        this.paymentsQuery = paymentsQuery;
+    public void setPaymentsForReportQuery(PaymentsForReportQuery paymentsForReportQuery) {
+        this.paymentsForReportQuery = paymentsForReportQuery;
     }
 
     public RefundsQuery getRefundsQuery() {
@@ -82,13 +82,13 @@ public class Query {
                 getSize() == query.getSize() &&
                 Objects.equals(getShopAccountingQuery(), query.getShopAccountingQuery()) &&
                 Objects.equals(getInvoicesQuery(), query.getInvoicesQuery()) &&
-                Objects.equals(getPaymentsQuery(), query.getPaymentsQuery()) &&
+                Objects.equals(getPaymentsForReportQuery(), query.getPaymentsForReportQuery()) &&
                 Objects.equals(getRefundsQuery(), query.getRefundsQuery());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getShopAccountingQuery(), getInvoicesQuery(), getPaymentsQuery(), getRefundsQuery(), getFrom(), getSize());
+        return Objects.hash(getShopAccountingQuery(), getInvoicesQuery(), getPaymentsForReportQuery(), getRefundsQuery(), getFrom(), getSize());
     }
 
     @Override
@@ -96,7 +96,7 @@ public class Query {
         return "Query{" +
                 "shopAccountingQuery=" + shopAccountingQuery +
                 ", invoicesQuery=" + invoicesQuery +
-                ", paymentsQuery=" + paymentsQuery +
+                ", paymentsForReportQuery=" + paymentsForReportQuery +
                 ", refundsQuery=" + refundsQuery +
                 ", from=" + from +
                 ", size=" + size +

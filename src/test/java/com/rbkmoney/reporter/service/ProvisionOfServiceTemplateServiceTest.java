@@ -55,32 +55,34 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
         Path tempFile = Files.createTempFile("provision_of_service_", "_test_report.xlsx");
         System.out.println("Provision of service report generated on " + tempFile.toAbsolutePath().toString());
 
+        String contractId = random(String.class);
         Report report = random(Report.class);
         report.setTimezone("Europe/Moscow");
 
         Party party = new Party();
         party.setId(report.getPartyId());
         Contract contract = new Contract();
-        contract.setId(report.getPartyContractId());
+        contract.setId(contractId);
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
         russianLegalEntity.setRegisteredName(random(String.class));
         russianLegalEntity.setRepresentativePosition(random(String.class));
         russianLegalEntity.setRepresentativeFullName(random(String.class));
         contract.setContractor(Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
         contract.setLegalAgreement(new LegalAgreement(TypeUtil.temporalToString(Instant.now()), random(String.class)));
-        party.setContracts(Collections.singletonMap(report.getPartyContractId(), contract));
+        party.setContracts(Collections.singletonMap(contractId, contract));
         given(partyManagementClient.checkout(any(), any(), any()))
                 .willReturn(party);
 
         ShopAccountingModel previousAccounting = random(ShopAccountingModel.class);
-        given(statisticService.getShopAccounting(party.getId(), contract.getId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC)))
+        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC)))
                 .willReturn(previousAccounting);
 
         ShopAccountingModel currentAccounting = random(ShopAccountingModel.class);
-        given(statisticService.getShopAccounting(party.getId(), contract.getId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC)))
+        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC)))
                 .willReturn(currentAccounting);
 
         ContractMeta contractMeta = random(ContractMeta.class, "lastClosingBalance");
+        contractMeta.setContractId(contractId);
         try {
             templateService.processReportTemplate(
                     report,

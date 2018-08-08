@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rbkmoney.damsel.merch_stat.InvoicePaymentRefundStatus;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class RefundsQuery {
 
     @JsonProperty("merchant_id")
     String merchantId;
 
-    @JsonProperty("contract_id")
-    String contractId;
+    @JsonProperty("shop_id")
+    String shopId;
 
     @JsonProperty("from_time")
     Instant fromTime;
@@ -30,12 +31,12 @@ public class RefundsQuery {
         this.merchantId = merchantId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setContractId(String contractId) {
-        this.contractId = contractId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public Instant getFromTime() {
@@ -66,34 +67,27 @@ public class RefundsQuery {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         RefundsQuery that = (RefundsQuery) o;
-
-        if (merchantId != null ? !merchantId.equals(that.merchantId) : that.merchantId != null) return false;
-        if (contractId != null ? !contractId.equals(that.contractId) : that.contractId != null) return false;
-        if (fromTime != null ? !fromTime.equals(that.fromTime) : that.fromTime != null) return false;
-        if (toTime != null ? !toTime.equals(that.toTime) : that.toTime != null) return false;
-        return refundStatus != null ? refundStatus.equals(that.refundStatus) : that.refundStatus == null;
+        return Objects.equals(merchantId, that.merchantId) &&
+                Objects.equals(shopId, that.shopId) &&
+                Objects.equals(fromTime, that.fromTime) &&
+                Objects.equals(toTime, that.toTime) &&
+                Objects.equals(refundStatus, that.refundStatus);
     }
 
     @Override
     public int hashCode() {
-        int result = merchantId != null ? merchantId.hashCode() : 0;
-        result = 31 * result + (contractId != null ? contractId.hashCode() : 0);
-        result = 31 * result + (fromTime != null ? fromTime.hashCode() : 0);
-        result = 31 * result + (toTime != null ? toTime.hashCode() : 0);
-        result = 31 * result + (refundStatus != null ? refundStatus.hashCode() : 0);
-        return result;
+        return Objects.hash(merchantId, shopId, fromTime, toTime, refundStatus);
     }
 
     @Override
     public String toString() {
         return "RefundsQuery{" +
                 "merchantId='" + merchantId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", shopId='" + shopId + '\'' +
                 ", fromTime=" + fromTime +
                 ", toTime=" + toTime +
-                ", refundStatus=" + refundStatus +
+                ", refundStatus='" + refundStatus + '\'' +
                 '}';
     }
 }

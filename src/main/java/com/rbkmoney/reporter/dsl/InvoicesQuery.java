@@ -10,8 +10,8 @@ public class InvoicesQuery {
     @JsonProperty("merchant_id")
     String merchantId;
 
-    @JsonProperty("contract_id")
-    String contractId;
+    @JsonProperty("shop_id")
+    String shopId;
 
     @JsonProperty("invoice_id")
     String invoiceId;
@@ -30,12 +30,12 @@ public class InvoicesQuery {
         this.merchantId = merchantId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setContractId(String contractId) {
-        this.contractId = contractId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public String getInvoiceId() {
@@ -65,25 +65,25 @@ public class InvoicesQuery {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InvoicesQuery)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         InvoicesQuery that = (InvoicesQuery) o;
-        return Objects.equals(getMerchantId(), that.getMerchantId()) &&
-                Objects.equals(getContractId(), that.getContractId()) &&
-                Objects.equals(getInvoiceId(), that.getInvoiceId()) &&
-                Objects.equals(getFromTime(), that.getFromTime()) &&
-                Objects.equals(getToTime(), that.getToTime());
+        return Objects.equals(merchantId, that.merchantId) &&
+                Objects.equals(shopId, that.shopId) &&
+                Objects.equals(invoiceId, that.invoiceId) &&
+                Objects.equals(fromTime, that.fromTime) &&
+                Objects.equals(toTime, that.toTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getMerchantId(), getContractId(), getInvoiceId(), getFromTime(), getToTime());
+        return Objects.hash(merchantId, shopId, invoiceId, fromTime, toTime);
     }
 
     @Override
     public String toString() {
-        return "PaymentsQuery{" +
+        return "InvoicesQuery{" +
                 "merchantId='" + merchantId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", shopId='" + shopId + '\'' +
                 ", invoiceId='" + invoiceId + '\'' +
                 ", fromTime=" + fromTime +
                 ", toTime=" + toTime +

@@ -14,18 +14,18 @@ import java.util.Optional;
  */
 public interface StatisticService {
 
-    ShopAccountingModel getShopAccounting(String partyId, String contractId, String currencyCode, Instant toTime);
+    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant toTime);
 
-    ShopAccountingModel getShopAccounting(String partyId, String contractId, String currencyCode, Instant fromTime, Instant toTime);
+    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant fromTime, Instant toTime);
 
-    Map<String, String> getPurposes(String partyId, String contractId, Instant fromTime, Instant toTime);
+    Map<String, String> getPurposes(String partyId, String shopId, Instant fromTime, Instant toTime);
 
     StatInvoice getInvoice(String invoiceId);
 
-    Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String contractId, Instant fromTime, Instant toTime);
+    Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime);
 
-    StatPayment getPayment(String partyId, String contractId, String invoiceId, String paymentId);
+    StatPayment getCapturedPayment(String partyId, String shopId, String invoiceId, String paymentId);
 
-    Iterator<StatRefund> getRefundsIterator(String partyId, String contractId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
+    Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
 
 }

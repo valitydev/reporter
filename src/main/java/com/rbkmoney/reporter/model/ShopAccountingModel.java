@@ -13,7 +13,7 @@ public class ShopAccountingModel {
     private String merchantId;
 
     @NotNull
-    private String contractId;
+    private String shopId;
 
     @NotNull
     private String currencyCode;
@@ -37,7 +37,7 @@ public class ShopAccountingModel {
 
     public ShopAccountingModel(String merchantId, String shopId, String currencyCode) {
         this.merchantId = merchantId;
-        this.contractId = shopId;
+        this.shopId = shopId;
         this.currencyCode = currencyCode;
     }
 
@@ -49,12 +49,12 @@ public class ShopAccountingModel {
         this.merchantId = merchantId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setContractId(String contractId) {
-        this.contractId = contractId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public String getCurrencyCode() {
@@ -120,20 +120,20 @@ public class ShopAccountingModel {
                 fundsPaidOut == that.fundsPaidOut &&
                 fundsRefunded == that.fundsRefunded &&
                 Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(contractId, that.contractId) &&
+                Objects.equals(shopId, that.shopId) &&
                 Objects.equals(currencyCode, that.currencyCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(merchantId, contractId, currencyCode, fundsAcquired, feeCharged, fundsAdjusted, fundsPaidOut, fundsRefunded);
+        return Objects.hash(merchantId, shopId, currencyCode, fundsAcquired, feeCharged, fundsAdjusted, fundsPaidOut, fundsRefunded);
     }
 
     @Override
     public String toString() {
         return "ShopAccountingModel{" +
                 "merchantId='" + merchantId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", shopId='" + shopId + '\'' +
                 ", currencyCode='" + currencyCode + '\'' +
                 ", fundsAcquired=" + fundsAcquired +
                 ", feeCharged=" + feeCharged +

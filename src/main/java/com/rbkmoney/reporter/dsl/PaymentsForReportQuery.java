@@ -1,18 +1,17 @@
 package com.rbkmoney.reporter.dsl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.rbkmoney.damsel.merch_stat.InvoicePaymentStatus;
 
 import java.time.Instant;
 import java.util.Objects;
 
-public class PaymentsQuery {
+public class PaymentsForReportQuery {
 
     @JsonProperty("merchant_id")
     String merchantId;
 
-    @JsonProperty("contract_id")
-    String contractId;
+    @JsonProperty("shop_id")
+    String shopId;
 
     @JsonProperty("invoice_id")
     String invoiceId;
@@ -34,12 +33,12 @@ public class PaymentsQuery {
         this.merchantId = merchantId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setContractId(String contractId) {
-        this.contractId = contractId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public String getInvoiceId() {
@@ -78,9 +77,9 @@ public class PaymentsQuery {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PaymentsQuery that = (PaymentsQuery) o;
+        PaymentsForReportQuery that = (PaymentsForReportQuery) o;
         return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(contractId, that.contractId) &&
+                Objects.equals(shopId, that.shopId) &&
                 Objects.equals(invoiceId, that.invoiceId) &&
                 Objects.equals(paymentId, that.paymentId) &&
                 Objects.equals(fromTime, that.fromTime) &&
@@ -89,14 +88,14 @@ public class PaymentsQuery {
 
     @Override
     public int hashCode() {
-        return Objects.hash(merchantId, contractId, invoiceId, paymentId, fromTime, toTime);
+        return Objects.hash(merchantId, shopId, invoiceId, paymentId, fromTime, toTime);
     }
 
     @Override
     public String toString() {
         return "PaymentsQuery{" +
                 "merchantId='" + merchantId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", shopId='" + shopId + '\'' +
                 ", invoiceId='" + invoiceId + '\'' +
                 ", paymentId='" + paymentId + '\'' +
                 ", fromTime=" + fromTime +

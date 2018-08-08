@@ -71,19 +71,17 @@ public class ReportService {
     }
 
     public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException {
-        Shop shop = partyService.getShop(partyId, shopId);
-        String contractId = shop.getContractId();
         try {
             return reportDao.getReportsByRange(
                     partyId,
-                    contractId,
+                    shopId,
                     reportTypes,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC)
             );
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get reports by range, partyId='%s', shopId='%s', contractId='%s', reportTypes='%s', fromTime='%s', toTime='%s'",
-                    partyId, shopId, contractId, reportTypes, fromTime, toTime), ex);
+            throw new StorageException(String.format("Failed to get reports by range, partyId='%s', shopId='%s', reportTypes='%s', fromTime='%s', toTime='%s'",
+                    partyId, shopId, reportTypes, fromTime, toTime), ex);
         }
     }
 
@@ -104,42 +102,42 @@ public class ReportService {
         }
     }
 
-    public Report getReport(String partyId, String contractId, long reportId) throws ReportNotFoundException, StorageException {
+    public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
         try {
-            Report report = reportDao.getReport(partyId, contractId, reportId);
+            Report report = reportDao.getReport(partyId, shopId, reportId);
             if (report == null) {
-                throw new ReportNotFoundException(String.format("Report not found, partyId='%s', contractId='%s', reportId='%d'", partyId, contractId, reportId));
+                throw new ReportNotFoundException(String.format("Report not found, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId));
             }
             return report;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', contractId='%s', reportId='%d'", partyId, contractId, reportId), ex);
+            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId), ex);
         }
     }
 
-    public long createReport(String partyId, String contractId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException {
-        return createReport(partyId, contractId, fromTime, toTime, reportType, defaultTimeZone, Instant.now());
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException {
+        return createReport(partyId, shopId, fromTime, toTime, reportType, defaultTimeZone, Instant.now());
     }
 
-    public long createReport(String partyId, String contractId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
-        log.info("Trying to create report, partyId={}, contractId={}, reportType={}, fromTime={}, toTime={}",
-                partyId, contractId, reportType, fromTime, toTime);
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
+        log.info("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+                partyId, shopId, reportType, fromTime, toTime);
 
         try {
             long reportId = reportDao.createReport(
                     partyId,
-                    contractId,
+                    shopId,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
                     reportType,
                     timezone.getId(),
                     LocalDateTime.ofInstant(createdAt, ZoneOffset.UTC)
             );
-            log.info("Report has been successfully created, reportId={}, partyId={}, contractId={}, reportType={}, fromTime={}, toTime={}",
-                    reportId, partyId, contractId, reportType, fromTime, toTime);
+            log.info("Report has been successfully created, reportId={}, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+                    reportId, partyId, shopId, reportType, fromTime, toTime);
             return reportId;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to save report in storage, partyId='%s', contractId='%s', fromTime='%s', toTime='%s', reportType='%s'",
-                    partyId, contractId, fromTime, toTime, reportType), ex);
+            throw new StorageException(String.format("Failed to save report in storage, partyId='%s', shopId='%s', fromTime='%s', toTime='%s', reportType='%s'",
+                    partyId, shopId, fromTime, toTime, reportType), ex);
         }
     }
 
@@ -160,32 +158,34 @@ public class ReportService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void generateReport(Report report) {
-        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', contractId='{}', fromTime='{}', toTime='{}'",
-                report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime());
+        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         try {
-            ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), report.getPartyContractId(), report.getType());
+            Shop shop = partyService.getShop(report.getPartyId(), report.getPartyShopId());
+            String contractId = shop.getContractId();
+            ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId, report.getType());
             if (contractMeta == null) {
                 throw new NotFoundException(String.format("Failed to find meta data for contract, partyId='%s', contractId='%s', reportType='%s'",
-                        report.getPartyId(), report.getPartyContractId(), report.getType()));
+                        report.getPartyId(), contractId, report.getType()));
             }
             List<FileMeta> reportFiles = processSignAndUpload(report, contractMeta);
             finishedReportTask(report.getId(), reportFiles);
-            contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), report.getPartyContractId(), report.getType(), report.getCreatedAt());
-            log.info("Report has been successfully processed, reportId='{}', reportType='{}', contractId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime());
+            contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getType(), report.getCreatedAt());
+            log.info("Report has been successfully processed, reportId='{}', reportType='{}', shopId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         } catch (ValidationException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
             changeReportStatus(report, ReportStatus.cancelled);
         } catch (Throwable throwable) {
-            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', contractId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyContractId(), report.getFromTime(), report.getToTime(), throwable);
+            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime(), throwable);
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void cancelReport(String partyId, String contractId, long reportId) throws ReportNotFoundException, StorageException {
+    public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
         log.info("Trying to cancel report, reportId='{}'", reportId);
-        Report report = getReport(partyId, contractId, reportId);
+        Report report = getReport(partyId, shopId, reportId);
         changeReportStatus(report, ReportStatus.cancelled);
         log.info("Report have been cancelled, reportId='{}'", reportId);
     }
@@ -214,7 +214,7 @@ public class ReportService {
     }
 
     public List<FileMeta> processSignAndUpload(Report report, ContractMeta contractMeta) throws IOException {
-        boolean needSign = partyService.needSign(report.getPartyId(), report.getPartyContractId());
+        boolean needSign = partyService.needSign(report.getPartyId(), contractMeta.getContractId());
         List<FileMeta> files = new ArrayList<>();
         for (TemplateService templateService : templateServices) {
             if (templateService.accept(report.getType(), contractMeta)) {

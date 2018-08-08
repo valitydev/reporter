@@ -14,8 +14,8 @@ public class ShopAccountingQuery {
     @JsonProperty("merchant_id")
     String merchantId;
 
-    @JsonProperty("contract_id")
-    String contractId;
+    @JsonProperty("shop_id")
+    String shopId;
 
     @JsonProperty("currency_code")
     String currencyCode;
@@ -34,12 +34,12 @@ public class ShopAccountingQuery {
         this.merchantId = merchantId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setContractId(String contractId) {
-        this.contractId = contractId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public String getCurrencyCode() {
@@ -72,7 +72,7 @@ public class ShopAccountingQuery {
         if (o == null || getClass() != o.getClass()) return false;
         ShopAccountingQuery that = (ShopAccountingQuery) o;
         return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(contractId, that.contractId) &&
+                Objects.equals(shopId, that.shopId) &&
                 Objects.equals(currencyCode, that.currencyCode) &&
                 Objects.equals(fromTime, that.fromTime) &&
                 Objects.equals(toTime, that.toTime);
@@ -80,14 +80,14 @@ public class ShopAccountingQuery {
 
     @Override
     public int hashCode() {
-        return Objects.hash(merchantId, contractId, currencyCode, fromTime, toTime);
+        return Objects.hash(merchantId, shopId, currencyCode, fromTime, toTime);
     }
 
     @Override
     public String toString() {
         return "ShopAccountingQuery{" +
                 "merchantId='" + merchantId + '\'' +
-                ", contractId='" + contractId + '\'' +
+                ", shopId='" + shopId + '\'' +
                 ", currencyCode='" + currencyCode + '\'' +
                 ", fromTime=" + fromTime +
                 ", toTime=" + toTime +

@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ReportDao extends GenericDao {
 
-    Report getReport(String partyId, String contractId, long reportId) throws DaoException;
+    Report getReport(String partyId, String shopId, long reportId) throws DaoException;
 
     List<FileMeta> getReportFiles(long reportId) throws DaoException;
 
@@ -25,7 +25,7 @@ public interface ReportDao extends GenericDao {
 
     List<Report> getPendingReportsByType(ReportType reportType) throws DaoException;
 
-    List<Report> getReportsByRange(String partyId, String contractId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) throws DaoException;
+    List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) throws DaoException;
 
-    long createReport(String partyId, String contractId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException;
+    long createReport(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime, ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException;
 }

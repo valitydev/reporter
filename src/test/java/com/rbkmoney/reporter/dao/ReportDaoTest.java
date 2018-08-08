@@ -40,16 +40,16 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         Report report = reportDao.getReport(partyId, shopId, reportId);
         assertEquals(reportId, report.getId().longValue());
         assertEquals(partyId, report.getPartyId());
-        assertEquals(shopId, report.getPartyContractId());
+        assertEquals(shopId, report.getPartyShopId());
         assertEquals(fromTime, report.getFromTime());
         assertEquals(toTime, report.getToTime());
         assertEquals(reportType, report.getType());
         assertEquals(timezone, report.getTimezone());
         assertEquals(createdAt, report.getCreatedAt());
 
-        assertEquals(1, reportDao.getReportsByRange(partyId, shopId, new ArrayList<>(), createdAt.minusDays(1), createdAt.plusDays(1)).size());
+        assertEquals(1, reportDao.getReportsByRange(partyId, shopId, new ArrayList<>(), fromTime, toTime).size());
 
-        assertEquals(1, reportDao.getReportsByRange(partyId, shopId, Arrays.asList(reportType), createdAt.minusDays(1), createdAt.plusDays(1)).size());
+        assertEquals(1, reportDao.getReportsByRange(partyId, shopId, Arrays.asList(reportType), fromTime, toTime).size());
     }
 
     @Test

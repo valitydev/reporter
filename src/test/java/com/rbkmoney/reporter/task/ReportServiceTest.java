@@ -107,6 +107,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
         Party party = new Party();
         party.setId(partyId);
         Shop shop = new Shop();
+        shop.setId(shopId);
         shop.setContractId(contractId);
         shop.setLocation(ShopLocation.url("http://2ch.hk/"));
         Contract contract = new Contract();
@@ -151,13 +152,13 @@ public class ReportServiceTest extends AbstractIntegrationTest {
 
         ReportType reportType = ReportType.provision_of_service;
 
-        long reportId = reportService.createReport(partyId, contractId, fromTime, toTime, reportType);
+        long reportId = reportService.createReport(partyId, shopId, fromTime, toTime, reportType);
 
         Report report;
         int retryCount = 0;
         do {
             TimeUnit.SECONDS.sleep(1L);
-            report = reportService.getReport(partyId, contractId, reportId);
+            report = reportService.getReport(partyId, shopId, reportId);
             retryCount++;
         } while (report.getStatus() != ReportStatus.created && retryCount <= 10);
 

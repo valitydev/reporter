@@ -1,8 +1,12 @@
 package com.rbkmoney.reporter.job;
 
+import com.rbkmoney.damsel.domain.Contract;
+import com.rbkmoney.damsel.domain.Party;
+import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.exception.StorageException;
+import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportService;
 import com.rbkmoney.reporter.trigger.FreezeTimeCronTrigger;
 import com.rbkmoney.woody.api.flow.error.WRuntimeException;
@@ -15,6 +19,10 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.rbkmoney.geck.common.util.TypeUtil.toLocalDateTime;
 
@@ -31,6 +39,9 @@ public class GenerateReportJob implements Job {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private PartyService partyService;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -49,7 +60,17 @@ public class GenerateReportJob implements Job {
             ZoneId zoneId = trigger.getTimeZone().toZoneId();
             Instant fromTime = YearMonth.from(toLocalDateTime(toTime, zoneId)).minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
 
-            reportService.createReport(partyId, contractId, fromTime, toTime, reportType, zoneId, jobExecutionContext.getFireTime().toInstant());
+            List<Shop> shops = partyService.getParty(partyId, Instant.now()).getShops().values()
+                    .stream().filter(shop -> shop.getContractId().equals(contractId))
+                    .collect(Collectors.toList());
+
+            if (shops.isEmpty()) {
+                log.info("No shops found, partyId='{}', contractId='{}', trigger='{}', jobExecutionContext='{}'",
+                        partyId, contractId, trigger, jobExecutionContext);
+                return;
+            }
+
+            shops.forEach(shop -> reportService.createReport(partyId, shop.getId(), fromTime, toTime, reportType, zoneId, jobExecutionContext.getFireTime().toInstant()));
 
             log.info("Report for contract have been successfully created, partyId='{}', contractId='{}', trigger='{}', jobExecutionContext='{}'",
                     partyId, contractId, trigger, jobExecutionContext);

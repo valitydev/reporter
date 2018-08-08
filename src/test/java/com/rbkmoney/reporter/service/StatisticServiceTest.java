@@ -35,14 +35,14 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     @Test
     public void testCreatePaymentRequest() {
         assertEquals(
-                new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"contract_id\":\"contractId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
-                DslUtil.createPaymentRequest("partyId", "contractId","invoiceId", "paymentId", objectMapper)
+                new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
+                DslUtil.createPaymentRequest("partyId", "shopId","invoiceId", "paymentId", objectMapper)
         );
         assertEquals(
-                new StatRequest("{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\",\"contract_id\":\"contractId\",\"from_time\":\"2018-10-28T09:15:00Z\",\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
+                new StatRequest("{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"from_time\":\"2018-10-28T09:15:00Z\",\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
                 DslUtil.createPaymentsRequest(
                         "partyId",
-                        "contractId",
+                        "shopId",
                         LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
                         LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
                         Optional.empty(),
@@ -55,7 +55,7 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
     public void testValidate() throws TException {
         Map<String, String> statisticResponse = new HashMap<>();
         statisticResponse.put("merchant_id", "test");
-        statisticResponse.put("contract_id", "test");
+        statisticResponse.put("shop_id", "test");
         statisticResponse.put("currency_code", null);
         statisticResponse.put("funds_acquired", "-10");
         statisticResponse.put("fee_charged", "-1");

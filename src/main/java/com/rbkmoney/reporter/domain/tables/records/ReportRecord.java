@@ -32,7 +32,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements Record9<Long, LocalDateTime, LocalDateTime, LocalDateTime, String, String, ReportStatus, String, ReportType> {
 
-    private static final long serialVersionUID = -2110265575;
+    private static final long serialVersionUID = -488554555;
 
     /**
      * Setter for <code>rpt.report.id</code>.
@@ -105,16 +105,16 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
     }
 
     /**
-     * Setter for <code>rpt.report.party_contract_id</code>.
+     * Setter for <code>rpt.report.party_shop_id</code>.
      */
-    public void setPartyContractId(String value) {
+    public void setPartyShopId(String value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>rpt.report.party_contract_id</code>.
+     * Getter for <code>rpt.report.party_shop_id</code>.
      */
-    public String getPartyContractId() {
+    public String getPartyShopId() {
         return (String) get(5);
     }
 
@@ -237,7 +237,7 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
      */
     @Override
     public Field<String> field6() {
-        return Report.REPORT.PARTY_CONTRACT_ID;
+        return Report.REPORT.PARTY_SHOP_ID;
     }
 
     /**
@@ -309,7 +309,7 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
      */
     @Override
     public String value6() {
-        return getPartyContractId();
+        return getPartyShopId();
     }
 
     /**
@@ -386,7 +386,7 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
      */
     @Override
     public ReportRecord value6(String value) {
-        setPartyContractId(value);
+        setPartyShopId(value);
         return this;
     }
 
@@ -448,7 +448,7 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
     /**
      * Create a detached, initialised ReportRecord
      */
-    public ReportRecord(Long id, LocalDateTime fromTime, LocalDateTime toTime, LocalDateTime createdAt, String partyId, String partyContractId, ReportStatus status, String timezone, ReportType type) {
+    public ReportRecord(Long id, LocalDateTime fromTime, LocalDateTime toTime, LocalDateTime createdAt, String partyId, String partyShopId, ReportStatus status, String timezone, ReportType type) {
         super(Report.REPORT);
 
         set(0, id);
@@ -456,7 +456,7 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> implements R
         set(2, toTime);
         set(3, createdAt);
         set(4, partyId);
-        set(5, partyContractId);
+        set(5, partyShopId);
         set(6, status);
         set(7, timezone);
         set(8, type);

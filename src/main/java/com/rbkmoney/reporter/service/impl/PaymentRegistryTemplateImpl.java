@@ -53,11 +53,11 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
         String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
 
-        Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), report.getPartyContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
+        Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), contractMeta.getContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
 
         Map<String, String> purposes = statisticService.getPurposes(
                 report.getPartyId(),
-                report.getPartyContractId(),
+                report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC),
                 report.getToTime().toInstant(ZoneOffset.UTC)
         );
@@ -66,7 +66,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         AtomicLong totalPayoutAmnt = new AtomicLong();
         Iterator<StatPayment> paymentsIterator = statisticService.getCapturedPaymentsIterator(
                 report.getPartyId(),
-                report.getPartyContractId(),
+                report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC),
                 report.getToTime().toInstant(ZoneOffset.UTC)
         );
@@ -187,7 +187,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         AtomicLong totalRefundAmnt = new AtomicLong();
         Iterator<StatRefund> refundsIterator = statisticService.getRefundsIterator(
                 report.getPartyId(),
-                report.getPartyContractId(),
+                report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC),
                 report.getToTime().toInstant(ZoneOffset.UTC),
                 InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded())
@@ -195,12 +195,9 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         while (refundsIterator.hasNext()) {
             StatRefund r = refundsIterator.next();
             Row row = sh.createRow(rownum++);
-            StatPayment statPayment = statisticService.getPayment(report.getPartyId(), report.getPartyContractId(), r.getInvoiceId(), r.getPaymentId());
+            StatPayment statPayment = statisticService.getCapturedPayment(report.getPartyId(), report.getPartyShopId(), r.getInvoiceId(), r.getPaymentId());
             row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
-            //TODO captured_at only
-            row.createCell(1).setCellValue(statPayment.getStatus().isSetCaptured() ?
-                    TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId) :
-                    TimeUtil.toLocalizedDateTime(statPayment.getCreatedAt(), reportZoneId));
+            row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
             row.createCell(2).setCellValue(r.getInvoiceId() + "." + r.getPaymentId());
             row.createCell(3).setCellValue(FormatUtil.formatCurrency(r.getAmount()));
             String paymentTool = null;

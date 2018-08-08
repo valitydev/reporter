@@ -99,7 +99,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         paymentResourcePayer.setEmail("xyz@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
-        given(statisticService.getPayment(any(), any(), any(), any()))
+        given(statisticService.getCapturedPayment(any(), any(), any(), any()))
                 .willReturn(payment);
 
         Map<String, String> purposes = new HashMap<>();
