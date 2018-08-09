@@ -98,25 +98,25 @@ public class StatisticServiceImpl implements StatisticService {
         return new Iterator<StatPayment>() {
             private Optional<String> continuationToken = Optional.empty();
             private final int size = 1000;
-            private List<StatPayment> nextPayments;
+            private Iterator<StatPayment> iterator = null;
 
             @Override
             public boolean hasNext() {
-                if (nextPayments == null || ((!nextPayments.iterator().hasNext()) && continuationToken.isPresent())) {
+                if (iterator == null || ((!iterator.hasNext()) && continuationToken.isPresent())) {
                     try {
                         StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createPaymentsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
-                        nextPayments = statResponse.getData().getPayments();
+                        iterator = statResponse.getData().getPayments().iterator();
                         continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
                     } catch (TException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                return nextPayments.iterator().hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public StatPayment next() {
-                return nextPayments.iterator().next();
+                return iterator.next();
             }
         };
     }
@@ -140,25 +140,28 @@ public class StatisticServiceImpl implements StatisticService {
         return new Iterator<StatRefund>() {
             private long from = 0;
             private int size = 1000;
-            private List<StatRefund> nextRefunds;
+            private Iterator<StatRefund> iterator;
+            private int refundsSize = 0;
 
             @Override
             public boolean hasNext() {
-                if (nextRefunds == null || ((!nextRefunds.iterator().hasNext()) && nextRefunds.size() == size)) {
+                if (iterator == null || ((!iterator.hasNext()) && refundsSize == size)) {
                     try {
                         StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, shopId, fromTime, toTime, status, from, size, objectMapper));
-                        nextRefunds = statResponse.getData().getRefunds();
+                        List<StatRefund> refunds = statResponse.getData().getRefunds();
+                        refundsSize = refunds.size();
+                        iterator = refunds.iterator();
                         from += size;
                     } catch (TException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                return nextRefunds.iterator().hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public StatRefund next() {
-                return nextRefunds.iterator().next();
+                return iterator.next();
             }
         };
     }
