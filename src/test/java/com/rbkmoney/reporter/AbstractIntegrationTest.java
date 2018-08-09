@@ -71,5 +71,4 @@ public class AbstractIntegrationTest {
     protected int port;
 
 
-
 }
