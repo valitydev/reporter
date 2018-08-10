@@ -86,12 +86,11 @@ public class S3StorageServiceImpl implements StorageService {
                     DigestUtils.md5Hex(Files.newInputStream(file)),
                     DigestUtils.sha256Hex(Files.newInputStream(file))
             );
-
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileId, file.toFile());
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentDisposition("attachment;filename=" + filename);
-            Upload upload = transferManager.upload(
-                    new PutObjectRequest(bucketName, fileId, Files.newInputStream(file), objectMetadata)
-            );
+            putObjectRequest.setMetadata(objectMetadata);
+            Upload upload = transferManager.upload(putObjectRequest);
             try {
                 upload.waitForUploadResult();
             } catch (InterruptedException e) {
@@ -127,6 +126,7 @@ public class S3StorageServiceImpl implements StorageService {
 
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentDisposition("attachment;filename=" + filename);
+            objectMetadata.setContentLength(bytes.length);
             Upload upload = transferManager.upload(
                     new PutObjectRequest(bucketName, fileId, new ByteArrayInputStream(bytes), objectMetadata)
             );
