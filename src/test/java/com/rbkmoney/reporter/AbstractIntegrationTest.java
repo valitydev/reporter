@@ -33,7 +33,7 @@ public class AbstractIntegrationTest {
             .withStartupTimeout(Duration.ofMinutes(5));
 
     @ClassRule
-    public static GenericContainer cephContainer = new GenericContainer("ceph/demo:latest")
+    public static GenericContainer cephContainer = new GenericContainer("dr.rbkmoney.com/ceph-demo:latest")
             .withEnv("RGW_NAME", "localhost")
             .withEnv("NETWORK_AUTO_DETECT", "4")
             .withEnv("CEPH_DEMO_UID", "ceph-test")

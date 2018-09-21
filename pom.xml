@@ -17,7 +17,7 @@
 
     <properties>
         <project.maintainer>Pavel Popov &lt;p.popov@rbkmoney.com&gt;</project.maintainer>
-        <damsel.version>1.246-abda90b</damsel.version>
+        <damsel.version>1.251-84344a3</damsel.version>
         <shared.resources.version>0.2.1</shared.resources.version>
         <server.port>8022</server.port>
         <exposed.ports>${server.port}</exposed.ports>
@@ -30,7 +30,7 @@
         <db.user>postgres</db.user>
         <db.password>postgres</db.password>
         <db.schema>rpt</db.schema>
-        <postgresql.jdbc.version>9.4.1212</postgresql.jdbc.version>
+        <postgresql.jdbc.version>42.2.5</postgresql.jdbc.version>
     </properties>
 
     <dependencies>
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>${hikaricp.version}</version>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -153,11 +153,6 @@
             <version>0.6.8</version>
         </dependency>
         <dependency>
-            <groupId>com.rbkmoney.woody</groupId>
-            <artifactId>woody-thrift</artifactId>
-            <version>1.1.12</version>
-        </dependency>
-        <dependency>
             <groupId>com.rbkmoney.logback</groupId>
             <artifactId>nop-rolling</artifactId>
             <version>1.0.1</version>
@@ -170,7 +165,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>eventstock-client</artifactId>
-            <version>1.1.9</version>
+            <version>1.2.1</version>
         </dependency>
 
         <!--Test libs-->
@@ -183,7 +178,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
