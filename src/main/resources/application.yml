@@ -11,6 +11,7 @@ bustermaze:
     delay: 10000
     retryDelay: 1000
     maxPoolSize: 1
+    housekeeperTimeout: 15000
 signer:
   url: http://signer:8022/signer
 domainConfig:

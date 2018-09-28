@@ -189,12 +189,6 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public boolean needReference(String partyId, String contractId) throws NotFoundException {
-        Value value = getMetaData(partyId, String.format("%s.reports.need_reference", contractId));
-        return value != null && value.isSetB() && value.getB();
-    }
-
-    @Override
     public boolean needSign(String partyId, String contractId) throws NotFoundException {
         Value value = getMetaData(partyId, String.format("%s.reports.need_sign", contractId));
         return value != null && value.isSetB() && value.getB();

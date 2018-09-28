@@ -76,7 +76,7 @@ public class TaskServiceImpl implements TaskService {
             }
 
             for (ContractMeta contractMeta : activeContracts) {
-                JobKey jobKey = buildJobKey(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getReportType(), contractMeta.getCalendarId(), contractMeta.getScheduleId());
+                JobKey jobKey = buildJobKey(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getCalendarId(), contractMeta.getScheduleId());
                 List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                 if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
                     if (scheduler.checkExists(jobKey)) {
@@ -85,7 +85,6 @@ public class TaskServiceImpl implements TaskService {
                     createJob(
                             contractMeta.getPartyId(),
                             contractMeta.getContractId(),
-                            contractMeta.getReportType(),
                             new CalendarRef(contractMeta.getCalendarId()),
                             new BusinessScheduleRef(contractMeta.getScheduleId())
                     );
@@ -130,7 +129,6 @@ public class TaskServiceImpl implements TaskService {
             contractMeta.setCalendarId(calendarRef.getId());
             contractMeta.setLastEventId(lastEventId);
             contractMeta.setScheduleId(scheduleRef.getId());
-            contractMeta.setReportType(ReportType.provision_of_service);
 
             contractMeta.setRepresentativeFullName(signer.getFullName());
             contractMeta.setRepresentativePosition(signer.getPosition());
@@ -143,7 +141,7 @@ public class TaskServiceImpl implements TaskService {
             }
 
             contractMetaDao.save(contractMeta);
-            createJob(partyId, contractId, contractMeta.getReportType(), calendarRef, scheduleRef);
+            createJob(partyId, contractId, calendarRef, scheduleRef);
             log.info("Job have been successfully enabled, partyId='{}', contractId='{}', scheduleRef='{}', calendarRef='{}'",
                     partyId, contractId, scheduleRef, calendarRef);
         } catch (DaoException ex) {
@@ -154,8 +152,8 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    private void createJob(String partyId, String contractId, ReportType reportType, CalendarRef calendarRef, BusinessScheduleRef scheduleRef) throws ScheduleProcessingException {
-        log.info("Trying to create job, partyId='{}', contractId='{}', reportType='{}', calendarRef='{}', scheduleRef='{}'", partyId, contractId, reportType, calendarRef, scheduleRef);
+    private void createJob(String partyId, String contractId, CalendarRef calendarRef, BusinessScheduleRef scheduleRef) throws ScheduleProcessingException {
+        log.info("Trying to create job, partyId='{}', contractId='{}', calendarRef='{}', scheduleRef='{}'", partyId, contractId, calendarRef, scheduleRef);
         try {
             BusinessSchedule schedule = domainConfigService.getBusinessSchedule(scheduleRef);
             Calendar calendar = domainConfigService.getCalendar(calendarRef);
@@ -166,11 +164,11 @@ public class TaskServiceImpl implements TaskService {
             log.info("New calendar was saved, calendarRef='{}', calendarId='{}'", calendarRef, calendarId);
 
             JobDetail jobDetail = JobBuilder.newJob(GenerateReportJob.class)
-                    .withIdentity(buildJobKey(partyId, contractId, reportType, calendarRef.getId(), scheduleRef.getId()))
+                    .withIdentity(buildJobKey(partyId, contractId, calendarRef.getId(), scheduleRef.getId()))
                     .withDescription(schedule.getDescription())
                     .usingJobData(GenerateReportJob.PARTY_ID, partyId)
                     .usingJobData(GenerateReportJob.CONTRACT_ID, contractId)
-                    .usingJobData(GenerateReportJob.REPORT_TYPE, reportType.name())
+                    .usingJobData(GenerateReportJob.REPORT_TYPE, ReportType.provision_of_service.toString())
                     .build();
 
             Set<Trigger> triggers = new HashSet<>();
@@ -192,7 +190,7 @@ public class TaskServiceImpl implements TaskService {
                 }
 
                 Trigger trigger = TriggerBuilder.newTrigger()
-                        .withIdentity(buildTriggerKey(partyId, contractId, reportType, calendarRef.getId(), scheduleRef.getId(), triggerId))
+                        .withIdentity(buildTriggerKey(partyId, contractId, calendarRef.getId(), scheduleRef.getId(), triggerId))
                         .withDescription(schedule.getDescription())
                         .forJob(jobDetail)
                         .withSchedule(freezeTimeCronScheduleBuilder)
@@ -213,10 +211,9 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void deregisterProvisionOfServiceJob(String partyId, String contractId) throws ScheduleProcessingException, StorageException {
         log.info("Trying to deregister provision of service job, partyId='{}', contractId='{}'", partyId, contractId);
-        ReportType reportType = ReportType.provision_of_service;
         try {
-            ContractMeta contractMeta = contractMetaDao.get(partyId, contractId, reportType);
-            contractMetaDao.disableContract(partyId, contractId, reportType);
+            ContractMeta contractMeta = contractMetaDao.get(partyId, contractId);
+            contractMetaDao.disableContract(partyId, contractId);
             removeJob(contractMeta);
             log.info("Provision of service job have been successfully disabled, partyId='{}', contractId='{}', scheduleId='{}', calendarId='{}'",
                     partyId, contractId, contractMeta.getScheduleId(), contractMeta.getCalendarId());
@@ -233,7 +230,6 @@ public class TaskServiceImpl implements TaskService {
                 JobKey jobKey = buildJobKey(
                         contractMeta.getPartyId(),
                         contractMeta.getContractId(),
-                        contractMeta.getReportType(),
                         contractMeta.getCalendarId(),
                         contractMeta.getScheduleId()
                 );
@@ -251,7 +247,7 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    @Scheduled(fixedDelay = 500)
+    @Scheduled(fixedDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processPendingReports() {
         List<Report> reports = reportService.getPendingReports();
@@ -261,16 +257,16 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    private JobKey buildJobKey(String partyId, String contractId, ReportType reportType, int calendarId, int scheduleId) {
+    private JobKey buildJobKey(String partyId, String contractId, int calendarId, int scheduleId) {
         return JobKey.jobKey(
-                String.format("job-%s-%s-%s", partyId, contractId, reportType),
+                String.format("job-%s-%s", partyId, contractId),
                 buildGroupKey(calendarId, scheduleId)
         );
     }
 
-    private TriggerKey buildTriggerKey(String partyId, String contractId, ReportType reportType, int calendarId, int scheduleId, int triggerId) {
+    private TriggerKey buildTriggerKey(String partyId, String contractId, int calendarId, int scheduleId, int triggerId) {
         return TriggerKey.triggerKey(
-                String.format("trigger-%s-%s-%s-%d", partyId, contractId, reportType, triggerId),
+                String.format("trigger-%s-%s-%d", partyId, contractId, triggerId),
                 buildGroupKey(calendarId, scheduleId)
         );
     }

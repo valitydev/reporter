@@ -4,8 +4,6 @@
 package com.rbkmoney.reporter.domain.tables.pojos;
 
 
-import com.rbkmoney.reporter.domain.enums.ReportType;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -25,11 +23,10 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ContractMeta implements Serializable {
 
-    private static final long serialVersionUID = 461645780;
+    private static final long serialVersionUID = 653528759;
 
     private String        partyId;
     private String        contractId;
-    private ReportType    reportType;
     private LocalDateTime wtime;
     private Long          lastEventId;
     private Integer       scheduleId;
@@ -48,7 +45,6 @@ public class ContractMeta implements Serializable {
     public ContractMeta(ContractMeta value) {
         this.partyId = value.partyId;
         this.contractId = value.contractId;
-        this.reportType = value.reportType;
         this.wtime = value.wtime;
         this.lastEventId = value.lastEventId;
         this.scheduleId = value.scheduleId;
@@ -66,7 +62,6 @@ public class ContractMeta implements Serializable {
     public ContractMeta(
         String        partyId,
         String        contractId,
-        ReportType    reportType,
         LocalDateTime wtime,
         Long          lastEventId,
         Integer       scheduleId,
@@ -82,7 +77,6 @@ public class ContractMeta implements Serializable {
     ) {
         this.partyId = partyId;
         this.contractId = contractId;
-        this.reportType = reportType;
         this.wtime = wtime;
         this.lastEventId = lastEventId;
         this.scheduleId = scheduleId;
@@ -111,14 +105,6 @@ public class ContractMeta implements Serializable {
 
     public void setContractId(String contractId) {
         this.contractId = contractId;
-    }
-
-    public ReportType getReportType() {
-        return this.reportType;
-    }
-
-    public void setReportType(ReportType reportType) {
-        this.reportType = reportType;
     }
 
     public LocalDateTime getWtime() {
@@ -238,12 +224,6 @@ public class ContractMeta implements Serializable {
         }
         else if (!contractId.equals(other.contractId))
             return false;
-        if (reportType == null) {
-            if (other.reportType != null)
-                return false;
-        }
-        else if (!reportType.equals(other.reportType))
-            return false;
         if (wtime == null) {
             if (other.wtime != null)
                 return false;
@@ -325,7 +305,6 @@ public class ContractMeta implements Serializable {
         int result = 1;
         result = prime * result + ((this.partyId == null) ? 0 : this.partyId.hashCode());
         result = prime * result + ((this.contractId == null) ? 0 : this.contractId.hashCode());
-        result = prime * result + ((this.reportType == null) ? 0 : this.reportType.hashCode());
         result = prime * result + ((this.wtime == null) ? 0 : this.wtime.hashCode());
         result = prime * result + ((this.lastEventId == null) ? 0 : this.lastEventId.hashCode());
         result = prime * result + ((this.scheduleId == null) ? 0 : this.scheduleId.hashCode());
@@ -347,7 +326,6 @@ public class ContractMeta implements Serializable {
 
         sb.append(partyId);
         sb.append(", ").append(contractId);
-        sb.append(", ").append(reportType);
         sb.append(", ").append(wtime);
         sb.append(", ").append(lastEventId);
         sb.append(", ").append(scheduleId);

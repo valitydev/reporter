@@ -60,7 +60,7 @@ public class Keys {
     }
 
     private static class UniqueKeys0 extends AbstractKeys {
-        public static final UniqueKey<ContractMetaRecord> CONTRACT_META_PKEY = createUniqueKey(ContractMeta.CONTRACT_META, "contract_meta_pkey", ContractMeta.CONTRACT_META.PARTY_ID, ContractMeta.CONTRACT_META.CONTRACT_ID, ContractMeta.CONTRACT_META.REPORT_TYPE);
+        public static final UniqueKey<ContractMetaRecord> CONTRACT_META_PKEY = createUniqueKey(ContractMeta.CONTRACT_META, "contract_meta_pkey", ContractMeta.CONTRACT_META.PARTY_ID, ContractMeta.CONTRACT_META.CONTRACT_ID);
         public static final UniqueKey<FileMetaRecord> FILE_META_PKEY = createUniqueKey(FileMeta.FILE_META, "file_meta_pkey", FileMeta.FILE_META.BUCKET_ID, FileMeta.FILE_META.FILE_ID);
         public static final UniqueKey<ReportRecord> REPORT_PKEY = createUniqueKey(Report.REPORT, "report_pkey", Report.REPORT.ID);
     }

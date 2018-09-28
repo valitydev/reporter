@@ -56,7 +56,5 @@ public interface PartyService {
 
     Value getMetaData(String partyId, String namespace) throws NotFoundException;
 
-    boolean needReference(String partyId, String contractId) throws NotFoundException;
-
     boolean needSign(String partyId, String contractId) throws NotFoundException;
 }

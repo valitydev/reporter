@@ -6,7 +6,6 @@ package com.rbkmoney.reporter.domain.tables;
 
 import com.rbkmoney.reporter.domain.Keys;
 import com.rbkmoney.reporter.domain.Rpt;
-import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.records.ContractMetaRecord;
 
 import java.time.LocalDateTime;
@@ -36,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ContractMeta extends TableImpl<ContractMetaRecord> {
 
-    private static final long serialVersionUID = 122198568;
+    private static final long serialVersionUID = -1451505989;
 
     /**
      * The reference instance of <code>rpt.contract_meta</code>
@@ -60,11 +59,6 @@ public class ContractMeta extends TableImpl<ContractMetaRecord> {
      * The column <code>rpt.contract_meta.contract_id</code>.
      */
     public final TableField<ContractMetaRecord, String> CONTRACT_ID = createField("contract_id", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
-
-    /**
-     * The column <code>rpt.contract_meta.report_type</code>.
-     */
-    public final TableField<ContractMetaRecord, ReportType> REPORT_TYPE = createField("report_type", org.jooq.util.postgres.PostgresDataType.VARCHAR.asEnumDataType(com.rbkmoney.reporter.domain.enums.ReportType.class), this, "");
 
     /**
      * The column <code>rpt.contract_meta.wtime</code>.

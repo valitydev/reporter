@@ -19,18 +19,15 @@ public class ContractMetaDaoTest extends AbstractIntegrationTest {
     public void testSaveAndGet() throws DaoException {
         String partyId = "test";
         String contractId = "test";
-        ReportType reportType = ReportType.provision_of_service;
 
         ContractMeta contractMeta = random(ContractMeta.class, "partyId", "contractId", "reportType");
         contractMeta.setPartyId(partyId);
         contractMeta.setContractId(contractId);
-        contractMeta.setReportType(reportType);
 
         contractMetaDao.save(contractMeta);
-        ContractMeta contractMeta2 = contractMetaDao.get(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getReportType());
+        ContractMeta contractMeta2 = contractMetaDao.get(contractMeta.getPartyId(), contractMeta.getContractId());
         assertEquals(contractMeta.getPartyId(), contractMeta2.getPartyId());
         assertEquals(contractMeta.getContractId(), contractMeta2.getContractId());
-        assertEquals(contractMeta.getReportType(), contractMeta2.getReportType());
         assertEquals(contractMeta.getScheduleId(), contractMeta2.getScheduleId());
         assertEquals(contractMeta.getLastEventId(), contractMeta2.getLastEventId());
         assertEquals(contractMeta.getCalendarId(), contractMeta2.getCalendarId());
@@ -42,13 +39,11 @@ public class ContractMetaDaoTest extends AbstractIntegrationTest {
         contractMeta = random(ContractMeta.class, "partyId", "contractId", "reportType");
         contractMeta.setPartyId(partyId);
         contractMeta.setContractId(contractId);
-        contractMeta.setReportType(reportType);
 
         contractMetaDao.save(contractMeta);
-        contractMeta2 = contractMetaDao.get(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getReportType());
+        contractMeta2 = contractMetaDao.get(contractMeta.getPartyId(), contractMeta.getContractId());
         assertEquals(contractMeta.getPartyId(), contractMeta2.getPartyId());
         assertEquals(contractMeta.getContractId(), contractMeta2.getContractId());
-        assertEquals(contractMeta.getReportType(), contractMeta2.getReportType());
         assertEquals(contractMeta.getScheduleId(), contractMeta2.getScheduleId());
         assertEquals(contractMeta.getLastEventId(), contractMeta2.getLastEventId());
         assertEquals(contractMeta.getCalendarId(), contractMeta2.getCalendarId());

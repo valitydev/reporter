@@ -41,9 +41,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
 
     @Override
     public boolean accept(ReportType reportType, ContractMeta contractMeta) {
-        return reportType == ReportType.payment_registry
-                || (contractMeta.getReportType() == ReportType.provision_of_service
-                && partyService.needReference(contractMeta.getPartyId(), contractMeta.getContractId()));
+        return reportType == ReportType.payment_registry || reportType == ReportType.provision_of_service;
     }
 
     @Override

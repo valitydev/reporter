@@ -163,14 +163,14 @@ public class ReportService {
         try {
             Shop shop = partyService.getShop(report.getPartyId(), report.getPartyShopId());
             String contractId = shop.getContractId();
-            ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId, report.getType());
+            ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId);
             if (contractMeta == null) {
                 throw new NotFoundException(String.format("Failed to find meta data for contract, partyId='%s', contractId='%s', reportType='%s'",
                         report.getPartyId(), contractId, report.getType()));
             }
             List<FileMeta> reportFiles = processSignAndUpload(report, contractMeta);
             finishedReportTask(report.getId(), reportFiles);
-            contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getType(), report.getCreatedAt());
+            contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getCreatedAt());
             log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         } catch (ValidationException ex) {

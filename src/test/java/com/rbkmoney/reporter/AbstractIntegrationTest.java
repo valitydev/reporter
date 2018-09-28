@@ -29,7 +29,7 @@ public class AbstractIntegrationTest {
     public static String BUCKET_NAME = "TEST";
 
     @ClassRule
-    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:9.6")
+    public static PostgreSQLContainer postgres = (PostgreSQLContainer) new PostgreSQLContainer("postgres:10.5")
             .withStartupTimeout(Duration.ofMinutes(5));
 
     @ClassRule
