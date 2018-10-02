@@ -2,8 +2,8 @@ package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.domain.enums.ReportType;
-import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.service.TemplateService;
@@ -40,18 +40,18 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
     }
 
     @Override
-    public boolean accept(ReportType reportType, ContractMeta contractMeta) {
+    public boolean accept(ReportType reportType) {
         return reportType == ReportType.payment_registry || reportType == ReportType.provision_of_service;
     }
 
     @Override
-    public void processReportTemplate(Report report, ContractMeta contractMeta, OutputStream outputStream) throws
+    public void processReportTemplate(Report report, OutputStream outputStream) throws
             IOException {
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
         String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
         String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
 
-        Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId(), contractMeta.getContractId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
+        String shopUrl = partyService.getShopUrl(report.getPartyId(), report.getPartyShopId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
 
         Map<String, String> purposes = statisticService.getPurposes(
                 report.getPartyId(),
@@ -110,21 +110,15 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
             Row row = sh.createRow(rownum++);
             row.createCell(0).setCellValue(p.getInvoiceId() + "." + p.getId());
             row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(p.getStatus().getCaptured().getAt(), reportZoneId));
-            String paymentTool = null;
-            if (p.getPayer().isSetPaymentResource()) {
-                paymentTool = p.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName();
-            }
-            row.createCell(2).setCellValue(paymentTool);
+            PaymentTool paymentTool = getPaymentTool(p.getPayer());
+            row.createCell(2).setCellValue(paymentTool.getSetField().getFieldName());
             row.createCell(3).setCellValue(FormatUtil.formatCurrency(p.getAmount()));
             row.createCell(4).setCellValue(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
             totalAmnt.addAndGet(p.getAmount());
             totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
-            String payerEmail = null;
-            if (p.getPayer().isSetPaymentResource()) {
-                payerEmail = p.getPayer().getPaymentResource().getEmail();
-            }
+            String payerEmail = getEmail(p.getPayer());
             row.createCell(5).setCellValue(payerEmail);
-            row.createCell(6).setCellValue(shopUrls.get(p.getShopId()));
+            row.createCell(6).setCellValue(shopUrl);
             String purpose = purposes.get(p.getInvoiceId());
             if (purpose == null) {
                 StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
@@ -209,7 +203,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 payerEmail = statPayment.getPayer().getPaymentResource().getEmail();
             }
             row.createCell(5).setCellValue(payerEmail);
-            row.createCell(6).setCellValue(shopUrls.get(r.getShopId()));
+            row.createCell(6).setCellValue(shopUrl);
             String purpose = purposes.get(r.getInvoiceId());
             if (purpose == null) {
                 StatInvoice invoice = statisticService.getInvoice(r.getInvoiceId());
@@ -234,6 +228,32 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         wb.write(outputStream);
         outputStream.close();
         wb.dispose();
+    }
+
+    private PaymentTool getPaymentTool(Payer payer) {
+        switch (payer.getSetField()) {
+            case PAYMENT_RESOURCE:
+                return payer.getPaymentResource().getPaymentTool();
+            case CUSTOMER:
+                return payer.getCustomer().getPaymentTool();
+            case RECURRENT:
+                return payer.getRecurrent().getPaymentTool();
+            default:
+                throw new NotFoundException(String.format("Payer type '%s' not found", payer.getSetField()));
+        }
+    }
+
+    private String getEmail(Payer payer) {
+        switch (payer.getSetField()) {
+            case PAYMENT_RESOURCE:
+                return payer.getPaymentResource().getEmail();
+            case CUSTOMER:
+                return payer.getCustomer().getEmail();
+            case RECURRENT:
+                return payer.getRecurrent().getEmail();
+            default:
+                throw new NotFoundException(String.format("Payer type '%s' not found", payer.getSetField()));
+        }
     }
 
 }

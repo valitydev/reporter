@@ -159,15 +159,13 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public Map<String, String> getShopUrls(String partyId, String contractId, Instant timestamp) throws PartyNotFoundException, ContractNotFoundException {
-        Party party = getParty(partyId, timestamp);
-        Map<String, String> shopUrls = new HashMap<>();
-        party.getShops().forEach((id, shop) -> {
-            if (shop.getContractId().equals(contractId) && shop.getLocation().isSetUrl()) {
-                shopUrls.put(id, shop.getLocation().getUrl());
-            }
-        });
-        return shopUrls;
+    public String getShopUrl(String partyId, String shopId, Instant timestamp) throws PartyNotFoundException, ShopNotFoundException {
+        Shop shop = getShop(partyId, shopId, timestamp);
+        if (shop.getLocation().isSetUrl()) {
+            return shop.getLocation().getUrl();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -186,12 +184,6 @@ public class PartyServiceImpl implements PartyService {
                     String.format("Failed to get namespace, partyId='%s', namespace='%s'", partyId, namespace), ex
             );
         }
-    }
-
-    @Override
-    public boolean needSign(String partyId, String contractId) throws NotFoundException {
-        Value value = getMetaData(partyId, String.format("%s.reports.need_sign", contractId));
-        return value != null && value.isSetB() && value.getB();
     }
 
 }

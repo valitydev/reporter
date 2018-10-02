@@ -64,7 +64,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
             invoicePaymentCaptured.setAt("201" + i + "-03-22T06:12:27Z");
             payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-            PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "424" + i, "56789" + i)), "sessionId");
+            PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "424" + i, "56789" + i)));
             paymentResourcePayer.setEmail("abc" + i + "@mail.ru");
             payment.setPayer(Payer.payment_resource(paymentResourcePayer));
             payment.setAmount(123L + i);
@@ -95,7 +95,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
         invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
         payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")), "sessionId");
+        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
         paymentResourcePayer.setEmail("xyz@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
@@ -110,19 +110,13 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         given(statisticService.getPurposes(any(), any(), any(), any()))
                 .willReturn(purposes);
 
-        Map<String, String> shops = new HashMap<>();
-        shops.put("shopId0", "http://0ch.ru/b");
-        shops.put("shopId1", "http://1ch.ru/b");
-        shops.put("shopId2", "http://2ch.ru/b");
 
-        given(partyService.getShopUrls(any(), any(), any()))
-                .willReturn(shops);
+        given(partyService.getShopUrl(any(), any(), any())).willReturn("http://0ch.ru/b");
 
         Report report = new Report(random(Long.class), LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusDays(1), random(LocalDateTime.class), random(String.class), random(String.class), random(ReportStatus.class), "Europe/Moscow", random(ReportType.class));
-        ContractMeta contractMeta = random(ContractMeta.class);
 
         try {
-            templateService.processReportTemplate(report, contractMeta, Files.newOutputStream(tempFile));
+            templateService.processReportTemplate(report, Files.newOutputStream(tempFile));
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));
             Sheet sheet = wb.getSheetAt(0);
 

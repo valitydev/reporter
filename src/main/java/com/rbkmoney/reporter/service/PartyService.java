@@ -52,9 +52,8 @@ public interface PartyService {
 
     PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, PartyRevisionParam partyRevisionParam) throws ContractNotFoundException, PartyNotFoundException;
 
-    Map<String, String> getShopUrls(String partyId, String contractId, Instant timestamp) throws PartyNotFoundException, ContractNotFoundException;
+    String getShopUrl(String partyId, String shopId, Instant timestamp) throws PartyNotFoundException, ShopNotFoundException;
 
     Value getMetaData(String partyId, String namespace) throws NotFoundException;
 
-    boolean needSign(String partyId, String contractId) throws NotFoundException;
 }

@@ -161,16 +161,8 @@ public class ReportService {
         log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                 report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         try {
-            Shop shop = partyService.getShop(report.getPartyId(), report.getPartyShopId());
-            String contractId = shop.getContractId();
-            ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId);
-            if (contractMeta == null) {
-                throw new NotFoundException(String.format("Failed to find meta data for contract, partyId='%s', contractId='%s', reportType='%s'",
-                        report.getPartyId(), contractId, report.getType()));
-            }
-            List<FileMeta> reportFiles = processSignAndUpload(report, contractMeta);
+            List<FileMeta> reportFiles = processSignAndUpload(report);
             finishedReportTask(report.getId(), reportFiles);
-            contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getCreatedAt());
             log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         } catch (ValidationException ex) {
@@ -213,26 +205,15 @@ public class ReportService {
         }
     }
 
-    public List<FileMeta> processSignAndUpload(Report report, ContractMeta contractMeta) throws IOException {
-        boolean needSign = partyService.needSign(report.getPartyId(), contractMeta.getContractId());
+    public List<FileMeta> processSignAndUpload(Report report) throws IOException {
         List<FileMeta> files = new ArrayList<>();
         for (TemplateService templateService : templateServices) {
-            if (templateService.accept(report.getType(), contractMeta)) {
+            if (templateService.accept(report.getType())) {
                 Path reportFile = Files.createTempFile(report.getType() + "_", "_report.xlsx");
                 try {
-                    templateService.processReportTemplate(
-                            report,
-                            contractMeta,
-                            Files.newOutputStream(reportFile)
-                    );
+                    templateService.processReportTemplate(report, Files.newOutputStream(reportFile));
                     FileMeta reportFileModel = storageService.saveFile(reportFile);
                     files.add(reportFileModel);
-
-                    if (needSign) {
-                        byte[] sign = signService.sign(reportFile);
-                        FileMeta signFileModel = storageService.saveFile(reportFile.getFileName().toString() + ".sgn", sign);
-                        files.add(signFileModel);
-                    }
                 } finally {
                     Files.deleteIfExists(reportFile);
                 }

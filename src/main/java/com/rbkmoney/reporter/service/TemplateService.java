@@ -14,9 +14,9 @@ import java.io.OutputStream;
 @Service
 public interface TemplateService {
 
-    boolean accept(ReportType reportType, ContractMeta contractMeta);
+    boolean accept(ReportType reportType);
 
-    void processReportTemplate(Report report, ContractMeta contractMeta, OutputStream outputStream) throws IOException;
+    void processReportTemplate(Report report, OutputStream outputStream) throws IOException;
 
     default void processTemplate(Context context, InputStream templateStream, OutputStream outputStream) throws IOException {
         JxlsHelper.getInstance()

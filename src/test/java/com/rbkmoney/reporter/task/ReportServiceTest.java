@@ -125,11 +125,6 @@ public class ReportServiceTest extends AbstractIntegrationTest {
                 .willReturn(party);
         given(partyManagementClient.getMetaData(any(), any(), any()))
                 .willReturn(Value.b(true));
-        given(signService.sign(any(Path.class)))
-                .willAnswer(
-                        (Answer<byte[]>) invocation -> Base64.getEncoder().encode(Files.readAllBytes(invocation.getArgumentAt(0, Path.class)))
-                );
-
         ShopAccountingModel shopAccountingModel = random(ShopAccountingModel.class);
         given(statisticService.getShopAccounting(anyString(), anyString(), anyString(), any(Instant.class)))
                 .willReturn(shopAccountingModel);
@@ -164,7 +159,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
 
         assertEquals(ReportStatus.created, report.getStatus());
         List<FileMeta> reportFiles = reportService.getReportFiles(report.getId());
-        assertEquals(4, reportFiles.size());
+        assertEquals(2, reportFiles.size());
         for (FileMeta fileMeta : reportFiles) {
             URL url = reportService.generatePresignedUrl(fileMeta.getFileId(), LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
             assertNotNull(url);

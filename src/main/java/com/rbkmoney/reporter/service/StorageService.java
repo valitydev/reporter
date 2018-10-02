@@ -14,6 +14,4 @@ public interface StorageService {
 
     FileMeta saveFile(Path file) throws FileStorageException;
 
-    FileMeta saveFile(String filename, byte[] bytes) throws FileStorageException;
-
 }

@@ -213,10 +213,14 @@ public class TaskServiceImpl implements TaskService {
         log.info("Trying to deregister provision of service job, partyId='{}', contractId='{}'", partyId, contractId);
         try {
             ContractMeta contractMeta = contractMetaDao.get(partyId, contractId);
-            contractMetaDao.disableContract(partyId, contractId);
-            removeJob(contractMeta);
-            log.info("Provision of service job have been successfully disabled, partyId='{}', contractId='{}', scheduleId='{}', calendarId='{}'",
-                    partyId, contractId, contractMeta.getScheduleId(), contractMeta.getCalendarId());
+            if (contractMeta != null) {
+                contractMetaDao.disableContract(partyId, contractId);
+                removeJob(contractMeta);
+                log.info("Provision of service job have been successfully disabled, partyId='{}', contractId='{}', scheduleId='{}', calendarId='{}'",
+                        partyId, contractId, contractMeta.getScheduleId(), contractMeta.getCalendarId());
+            } else {
+                log.warn("Not possible to disable provision of service job, contract meta not found, partyId='{}', contractId='{}'", partyId, contractId);
+            }
         } catch (DaoException ex) {
             throw new StorageException(
                     String.format("Failed to disable provision of service job on storage, partyId='%s', contractId='%s'",

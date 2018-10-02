@@ -4,8 +4,10 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
+import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.impl.ProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.util.FormatUtil;
@@ -44,6 +46,9 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
     @Autowired
     private ProvisionOfServiceTemplateImpl templateService;
 
+    @Autowired
+    private ContractMetaDao contractMetaDao;
+
     @MockBean
     private PartyManagementSrv.Iface partyManagementClient;
 
@@ -51,7 +56,7 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
     private StatisticService statisticService;
 
     @Test
-    public void generateProvisionOfServiceReportTest() throws IOException, TException {
+    public void generateProvisionOfServiceReportTest() throws DaoException, IOException, TException {
         Path tempFile = Files.createTempFile("provision_of_service_", "_test_report.xlsx");
         System.out.println("Provision of service report generated on " + tempFile.toAbsolutePath().toString());
 
@@ -62,6 +67,10 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
         Party party = new Party();
         party.setId(report.getPartyId());
         Contract contract = new Contract();
+        Shop shop = new Shop();
+        shop.setId(report.getPartyId());
+        shop.setContractId(contractId);
+        party.setShops(Collections.singletonMap(report.getPartyShopId(), shop));
         contract.setId(contractId);
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
         russianLegalEntity.setRegisteredName(random(String.class));
@@ -82,13 +91,12 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
                 .willReturn(currentAccounting);
 
         ContractMeta contractMeta = random(ContractMeta.class, "lastClosingBalance");
+        contractMeta.setPartyId(report.getPartyId());
         contractMeta.setContractId(contractId);
+        contractMetaDao.save(contractMeta);
+
         try {
-            templateService.processReportTemplate(
-                    report,
-                    contractMeta,
-                    Files.newOutputStream(tempFile)
-            );
+            templateService.processReportTemplate(report, Files.newOutputStream(tempFile));
 
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));
             Sheet sheet = wb.getSheetAt(0);
