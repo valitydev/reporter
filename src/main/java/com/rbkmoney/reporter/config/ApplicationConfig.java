@@ -34,14 +34,23 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public PartyManagementSrv.Iface partyManagementClient(@Value("${partyManagement.url}") Resource resource) throws IOException {
+    public PartyManagementSrv.Iface partyManagementClient(
+            @Value("${partyManagement.url}") Resource resource,
+            @Value("${partyManagement.timeout}") int timeout
+    ) throws IOException {
         return new THSpawnClientBuilder()
-                .withAddress(resource.getURI()).build(PartyManagementSrv.Iface.class);
+                .withAddress(resource.getURI())
+                .withNetworkTimeout(timeout)
+                .build(PartyManagementSrv.Iface.class);
     }
 
     @Bean
-    public SignerSrv.Iface signerClient(@Value("${signer.url}") Resource resource) throws IOException {
+    public SignerSrv.Iface signerClient(
+            @Value("${signer.url}") Resource resource,
+            @Value("${signer.timeout}") int timeout
+            ) throws IOException {
         return new THSpawnClientBuilder()
+                .withNetworkTimeout(timeout)
                 .withAddress(resource.getURI()).build(SignerSrv.Iface.class);
     }
 

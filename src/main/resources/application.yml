@@ -2,6 +2,7 @@ server:
   port: @server.port@
 partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt
+  timeout: 5000
 magista:
   url: http://magista:8022/stat
   timeout: 60000
@@ -14,6 +15,7 @@ bustermaze:
     housekeeperTimeout: 15000
 signer:
   url: http://signer:8022/signer
+  timeout: 5000
 domainConfig:
   url: http://dominant:8022/v1/domain/repository
   timeout: 5000
