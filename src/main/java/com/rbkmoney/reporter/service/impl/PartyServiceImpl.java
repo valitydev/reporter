@@ -75,7 +75,18 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public Shop getShop(String partyId, String shopId) throws ShopNotFoundException, PartyNotFoundException {
-        return getShop(partyId, shopId, Instant.now());
+        log.info("Trying to get shop, partyId='{}', shopId='{}'", partyId, shopId);
+        try {
+            Shop shop = partyManagementClient.getShop(userInfo, partyId, shopId);
+            log.info("Shop has been found, partyId='{}', shopId='{}'", partyId, shopId);
+            return shop;
+        } catch (PartyNotFound ex) {
+            throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId), ex);
+        } catch (ShopNotFound ex) {
+            throw new ShopNotFoundException(String.format("Shop not found, partyId='%s', shopId='%s'", partyId, shopId));
+        } catch (TException ex) {
+            throw new RuntimeException(String.format("Failed to get shop, partyId='%s', shopId='%s'", partyId, shopId), ex);
+        }
     }
 
     @Override
@@ -103,7 +114,18 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public Contract getContract(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
-        return getContract(partyId, contractId, Instant.now());
+        log.info("Trying to get contract, partyId='{}', contractId='{}'", partyId, contractId);
+        try {
+            Contract contract = partyManagementClient.getContract(userInfo, partyId, contractId);
+            log.info("Contract has been found, partyId='{}', contractId='{}'", partyId, contractId);
+            return contract;
+        } catch (PartyNotFound ex) {
+            throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId), ex);
+        } catch (ContractNotFound ex) {
+            throw new ContractNotFoundException(String.format("Contract not found, partyId='%s', contractId='%s'", partyId, contractId));
+        } catch (TException ex) {
+            throw new RuntimeException(String.format("Failed to get contract, partyId='%s', contractId='%s'", partyId, contractId), ex);
+        }
     }
 
     @Override
