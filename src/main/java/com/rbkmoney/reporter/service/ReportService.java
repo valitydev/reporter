@@ -1,11 +1,8 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.domain.Shop;
-import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
-import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.*;
@@ -39,35 +36,26 @@ public class ReportService {
 
     private final ReportDao reportDao;
 
-    private final PartyService partyService;
-
     private final List<TemplateService> templateServices;
 
     private final StorageService storageService;
 
-    private final SignService signService;
-
-    private final ContractMetaDao contractMetaDao;
-
     private final ZoneId defaultTimeZone;
 
-    @Autowired
+    private final int batchSize;
+    
     public ReportService(
             ReportDao reportDao,
-            PartyService partyService,
             List<TemplateService> templateServices,
             StorageService storageService,
-            SignService signService,
-            ContractMetaDao contractMetaDao,
-            @Value("${report.defaultTimeZone}") ZoneId defaultTimeZone
+            @Value("${report.defaultTimeZone}") ZoneId defaultTimeZone,
+            @Value("${report.batchSize}") int batchSize
     ) {
         this.reportDao = reportDao;
-        this.partyService = partyService;
         this.templateServices = templateServices;
         this.storageService = storageService;
-        this.signService = signService;
-        this.contractMetaDao = contractMetaDao;
         this.defaultTimeZone = defaultTimeZone;
+        this.batchSize = batchSize;
     }
 
     public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException {
@@ -88,7 +76,7 @@ public class ReportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Report> getPendingReports() throws StorageException {
         try {
-            return reportDao.getPendingReports();
+            return reportDao.getPendingReports(batchSize);
         } catch (DaoException ex) {
             throw new StorageException("Failed to get pending reports", ex);
         }
@@ -201,7 +189,7 @@ public class ReportService {
 
             reportDao.changeReportStatus(reportId, ReportStatus.created);
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to finish report task, reportId='%d'", reportId));
+            throw new StorageException(String.format("Failed to finish report task, reportId='%d'", reportId), ex);
         }
     }
 

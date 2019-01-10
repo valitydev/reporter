@@ -89,9 +89,10 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public List<Report> getPendingReports() throws DaoException {
+    public List<Report> getPendingReports(int limit) throws DaoException {
         Query query = getDslContext().selectFrom(REPORT)
                 .where(REPORT.STATUS.eq(ReportStatus.pending))
+                .limit(limit)
                 .forUpdate();
 
         return fetch(query, reportRowMapper);

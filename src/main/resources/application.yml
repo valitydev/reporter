@@ -31,6 +31,7 @@ spring:
       idle-timeout: 30000
 report:
   defaultTimeZone: Europe/Moscow
+  batchSize: 1
 storage:
   endpoint: localhost
   signingRegion: RU

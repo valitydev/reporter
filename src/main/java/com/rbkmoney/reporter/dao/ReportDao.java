@@ -1,7 +1,7 @@
 package com.rbkmoney.reporter.dao;
 
-import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
@@ -21,7 +21,7 @@ public interface ReportDao extends GenericDao {
 
     String attachFile(long reportId, FileMeta file) throws DaoException;
 
-    List<Report> getPendingReports() throws DaoException;
+    List<Report> getPendingReports(int limit) throws DaoException;
 
     List<Report> getPendingReportsByType(ReportType reportType) throws DaoException;
 
