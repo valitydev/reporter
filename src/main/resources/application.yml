@@ -1,5 +1,33 @@
+info:
+  version: @project.version@
+  stage: dev
 server:
   port: @server.port@
+management:
+  metrics:
+    export:
+      statsd:
+        flavor: etsy
+        enabled: false
+  security:
+    flag: false
+spring:
+  application:
+    name: @project.name@
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: @db.url@
+    username: @db.user@
+    password: @db.password@
+    hikari:
+      idle-timeout: 30000
+      maximum-pool-size: 3
+  flyway:
+    schemas: @db.schema@
+  output:
+    ansi:
+      enabled: always
 partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt
   timeout: 5000
@@ -19,16 +47,6 @@ signer:
 domainConfig:
   url: http://dominant:8022/v1/domain/repository
   timeout: 5000
-spring:
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: org.postgresql.Driver
-    url: @db.url@
-    username: @db.user@
-    password: @db.password@
-    hikari:
-      maximum-pool-size: 3
-      idle-timeout: 30000
 report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1

@@ -1,7 +1,10 @@
 package com.rbkmoney.reporter.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
+import com.rbkmoney.damsel.merch_stat.StatRequest;
+import com.rbkmoney.damsel.merch_stat.StatResponse;
+import com.rbkmoney.damsel.merch_stat.StatResponseData;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.dsl.DslUtil;
 import org.apache.thrift.TException;
@@ -18,8 +21,8 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
 
 public class StatisticServiceTest extends AbstractIntegrationTest {
 
@@ -63,7 +66,7 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
         statisticResponse.put("funds_paid_out", "-5");
         statisticResponse.put("funds_refunded", "-20");
 
-        given(merchantStatisticsClient.getStatistics(new StatRequest(anyString())))
+        given(merchantStatisticsClient.getStatistics(any()))
                 .willReturn(new StatResponse(StatResponseData.records(Arrays.asList(statisticResponse))));
 
         try {

@@ -1,0 +1,64 @@
+version: '2.3'
+services:
+  reporter:
+    build: target/
+    image: reporter:1.0.23-SNAPSHOT
+    networks:
+      - reporternet
+    ports:
+      - "8022:8022"
+    depends_on:
+      - postgresql
+      - ceph
+      - kafka
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/reporter
+
+  postgresql:
+    image: postgres:9.6
+    networks:
+      - reporternet
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reporter
+  #    volumes:
+  #      - /tmp/docker/postgresql/data:/var/lib/postgresql
+
+  ceph:
+    image: dr.rbkmoney.com/ceph-demo:latest
+    networks:
+      - reporternet
+    ports:
+      - 42827:80
+    environment:
+      SERVICE_NAME: ceph
+      RGW_NAME: localhost
+      NETWORK_AUTO_DETECT: 4
+      CEPH_DEMO_UID: ceph-test
+      CEPH_DEMO_ACCESS_KEY: test
+      CEPH_DEMO_SECRET_KEY: test
+      CEPH_DEMO_BUCKET: test
+
+networks:
+  reporternet:
+
+#  file-storage:
+#    image: dr.rbkmoney.com/rbkmoney/file-storage:replace_me_on_last_tag
+#    depends_on:
+#      - ceph
+#    container_name: file-storage
+#    hostname: file-storage
+#    network_mode: host
+#    environment:
+#      SERVICE_NAME: file-storage
+#      server.port: 42826
+#      storage.endpoint: localhost:42827
+#      storage.signingRegion: RU
+#      storage.accessKey: test
+#      storage.secretKey: test
+#      storage.clientProtocol: HTTP
+#      storage.client.maxErrorRetry: 10
+#      storage.bucketName: test

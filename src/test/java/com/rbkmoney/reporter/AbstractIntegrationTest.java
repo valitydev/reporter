@@ -2,9 +2,8 @@ package com.rbkmoney.reporter;
 
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
@@ -22,7 +21,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ContextConfiguration(classes = ReporterApplication.class, initializers = AbstractIntegrationTest.Initializer.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
 
     public static String AWS_ACCESS_KEY = "test";
     public static String AWS_SECRET_KEY = "test";
@@ -51,7 +50,7 @@ public class AbstractIntegrationTest {
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            EnvironmentTestUtils.addEnvironment("testcontainers", configurableApplicationContext.getEnvironment(),
+            TestPropertyValues.of(
                     "spring.datasource.url=" + postgres.getJdbcUrl(),
                     "spring.datasource.username=" + postgres.getUsername(),
                     "spring.datasource.password=" + postgres.getPassword(),
@@ -63,12 +62,9 @@ public class AbstractIntegrationTest {
                     "storage.bucketName=" + BUCKET_NAME,
                     "storage.accessKey=" + AWS_ACCESS_KEY,
                     "storage.secretKey=" + AWS_SECRET_KEY
-            );
+            )
+                    .applyTo(configurableApplicationContext);
         }
     }
-
-    @LocalServerPort
-    protected int port;
-
 
 }
