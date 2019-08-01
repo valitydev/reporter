@@ -1,8 +1,7 @@
 version: '2.3'
 services:
   reporter:
-    build: target/
-    image: reporter:1.0.23-SNAPSHOT
+    image: dr2.rbkmoney.com/rbkmoney/reporter:32fbf98125de1782c88333f344b0a97cbaeb6710
     networks:
       - reporternet
     ports:
@@ -10,9 +9,15 @@ services:
     depends_on:
       - postgresql
       - ceph
-      - kafka
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/reporter
+      - STORAGE_ENDPOINT=ceph:80
+      - STORAGE_SIGNINGREGION=RU
+      - STORAGE_ACCESSKEY=TEST
+      - STORAGE_SECRETKEY=TEST
+      - STORAGE_CLIENTPROTOCOL=HTTP
+      - STORAGE_CLIENT.MAXERRORRETRY=10
+      - STORAGE_BUCKETNAME=TEST
 
   postgresql:
     image: postgres:9.6

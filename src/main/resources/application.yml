@@ -51,9 +51,12 @@ report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
 storage:
-  endpoint: localhost
+  endpoint: localhost:42827
   signingRegion: RU
-  bucketName: "reports"
+  bucketName: test
   client:
     maxErrorRetry: 10
+  accessKey: test
+  secretKey: test
+  clientProtocol: HTTP
 
