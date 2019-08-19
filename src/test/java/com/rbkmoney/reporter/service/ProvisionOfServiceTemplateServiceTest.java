@@ -138,51 +138,51 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
             Cell openingBalanceCell = sheet.getRow(23).getCell(3);
             assertEquals("#,##0.00", openingBalanceCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(previousAccounting.getAvailableFunds())),
-                    BigDecimal.valueOf(openingBalanceCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(previousAccounting.getAvailableFunds()),
+                    openingBalanceCell.getStringCellValue()
             );
 
             Cell fundsPaidOutCell = sheet.getRow(26).getCell(3);
             assertEquals("#,##0.00", fundsPaidOutCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(currentAccounting.getFundsPaidOut())),
-                    BigDecimal.valueOf(fundsPaidOutCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(currentAccounting.getFundsPaidOut()),
+                    fundsPaidOutCell.getStringCellValue()
             );
 
             Cell fundsRefundedCell = sheet.getRow(28).getCell(3);
             assertEquals("#,##0.00", fundsRefundedCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(currentAccounting.getFundsRefunded())),
-                    BigDecimal.valueOf(fundsRefundedCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(currentAccounting.getFundsRefunded()),
+                    fundsRefundedCell.getStringCellValue()
             );
 
             Cell closingBalanceCell = sheet.getRow(29).getCell(3);
             assertEquals("#,##0.00", closingBalanceCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(previousAccounting.getAvailableFunds() + currentAccounting.getAvailableFunds())),
-                    BigDecimal.valueOf(closingBalanceCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(previousAccounting.getAvailableFunds() + currentAccounting.getAvailableFunds()),
+                    closingBalanceCell.getStringCellValue()
             );
 
             Cell fundsAcquiredCell = sheet.getRow(17).getCell(3);
             assertEquals("#,##0.00", fundsAcquiredCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(currentAccounting.getFundsAcquired())),
-                    BigDecimal.valueOf(fundsAcquiredCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(currentAccounting.getFundsAcquired()),
+                    fundsAcquiredCell.getStringCellValue()
             );
             assertEquals(
-                    BigDecimal.valueOf(fundsAcquiredCell.getNumericCellValue()),
-                    BigDecimal.valueOf(sheet.getRow(24).getCell(3).getNumericCellValue())
+                    fundsAcquiredCell.getStringCellValue(),
+                    sheet.getRow(24).getCell(3).getStringCellValue()
             );
 
             Cell feeChargedCell = sheet.getRow(19).getCell(3);
             assertEquals("#,##0.00", feeChargedCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    BigDecimal.valueOf(FormatUtil.formatCurrency(currentAccounting.getFeeCharged())),
-                    BigDecimal.valueOf(feeChargedCell.getNumericCellValue())
+                    FormatUtil.formatCurrency(currentAccounting.getFeeCharged()),
+                    feeChargedCell.getStringCellValue()
             );
             assertEquals(
-                    BigDecimal.valueOf(feeChargedCell.getNumericCellValue()),
-                    BigDecimal.valueOf(sheet.getRow(25).getCell(3).getNumericCellValue())
+                    feeChargedCell.getStringCellValue(),
+                    sheet.getRow(25).getCell(3).getStringCellValue()
             );
 
             assertEquals(
