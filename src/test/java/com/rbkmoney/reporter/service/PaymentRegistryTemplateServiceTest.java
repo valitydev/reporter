@@ -11,6 +11,7 @@ import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -70,6 +71,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             payment.setAmount(123L + i);
             payment.setFee(2L + i);
             payment.setShopId("shopId" + i);
+            payment.setCurrencySymbolicCode("RUB");
             paymentList.add(payment);
         }
 
@@ -82,6 +84,9 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             refund.setStatus(InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded("201" + i + "-03-22T06:12:27Z")));
             refund.setAmount(123L + i);
             refund.setShopId("shopId" + i);
+            refund.setId("" + i);
+            refund.setCurrencySymbolicCode("RUB");
+            refund.setReason("You are the reason of my life");
             refundList.add(refund);
         }
 
@@ -127,16 +132,25 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             Cell paymentsHeaderCell = sheet.getRow(0).getCell(0);
             assertEquals(String.format("Платежи за период с %s по %s", from, to), paymentsHeaderCell.getStringCellValue());
 
+            Row paymentsFirstRow = sheet.getRow(2);
+            assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
+            assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
+
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
             long expectedSum = paymentList.stream().mapToLong(StatPayment::getAmount).sum();
-            assertTrue(FormatUtil.formatCurrency(expectedSum) - paymentsTotalSum.getNumericCellValue() < 0.00001);
+            assertEquals(FormatUtil.formatCurrency(expectedSum), paymentsTotalSum.getStringCellValue());
 
             Cell refundsHeaderCell = sheet.getRow(8).getCell(0);
             assertEquals(String.format("Возвраты за период с %s по %s", from, to), refundsHeaderCell.getStringCellValue());
 
+            Row refundsFirstRow = sheet.getRow(10);
+            assertEquals("0", refundsFirstRow.getCell(8).getStringCellValue());
+            assertEquals("You are the reason of my life", refundsFirstRow.getCell(9).getStringCellValue());
+            assertEquals("RUB", refundsFirstRow.getCell(10).getStringCellValue());
+
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
             long expectedRefundSum = refundList.stream().mapToLong(StatRefund::getAmount).sum();
-            assertTrue(FormatUtil.formatCurrency(expectedRefundSum) - refundsTotalSum.getNumericCellValue() < 0.00001);
+            assertEquals(FormatUtil.formatCurrency(expectedRefundSum), refundsTotalSum.getStringCellValue());
 
         } finally {
             Files.deleteIfExists(tempFile);

@@ -75,7 +75,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         int rownum = 0;
         Row rowFirstPayments = sh.createRow(rownum++);
 
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 10; ++i) {
             rowFirstPayments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
@@ -90,20 +90,22 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         CellStyle greyStyle = wb.createCellStyle();
         greyStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
         greyStyle.setFillPattern(FillPatternType.LESS_DOTS);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 10; ++i) {
             Cell cell = rowSecondPayments.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(greyStyle);
             CellUtil.setFont(cell, font);
         }
-        rowSecondPayments.getCell(0).setCellValue("Дата");
-        rowSecondPayments.getCell(1).setCellValue("Id платежа");
+        rowSecondPayments.getCell(0).setCellValue("Id платежа");
+        rowSecondPayments.getCell(1).setCellValue("Дата");
         rowSecondPayments.getCell(2).setCellValue("Метод оплаты");
         rowSecondPayments.getCell(3).setCellValue("Сумма платежа");
         rowSecondPayments.getCell(4).setCellValue("Сумма к выводу");
         rowSecondPayments.getCell(5).setCellValue("Email плательщика");
         rowSecondPayments.getCell(6).setCellValue("URL магазина");
         rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
+        rowSecondPayments.getCell(8).setCellValue("Комиссия");
+        rowSecondPayments.getCell(9).setCellValue("Валюта");
 
         while (paymentsIterator.hasNext()) {
             StatPayment p = paymentsIterator.next();
@@ -125,6 +127,8 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 purpose = invoice.getProduct();
             }
             row.createCell(7).setCellValue(purpose);
+            row.createCell(8).setCellValue(FormatUtil.formatCurrency(p.getFee()));
+            row.createCell(9).setCellValue(p.getCurrencySymbolicCode());
         }
 
         CellStyle borderStyle = wb.createCellStyle();
@@ -152,7 +156,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         sh.createRow(rownum++);
 
         Row rowFirstRefunds = sh.createRow(rownum++);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 11; ++i) {
             rowFirstRefunds.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
@@ -161,7 +165,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
         CellUtil.setFont(cellFirstRefunds, font);
         Row rowSecondRefunds = sh.createRow(rownum++);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 11; ++i) {
             Cell cell = rowSecondRefunds.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(greyStyle);
@@ -175,6 +179,9 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         rowSecondRefunds.getCell(5).setCellValue("Email плательщика");
         rowSecondRefunds.getCell(6).setCellValue("URL магазина");
         rowSecondRefunds.getCell(7).setCellValue("Назначение платежа");
+        rowSecondRefunds.getCell(8).setCellValue("Id возврата");
+        rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
+        rowSecondRefunds.getCell(10).setCellValue("Валюта");
 
         AtomicLong totalRefundAmnt = new AtomicLong();
         Iterator<StatRefund> refundsIterator = statisticService.getRefundsIterator(
@@ -210,6 +217,9 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 purpose = invoice.getProduct();
             }
             row.createCell(7).setCellValue(purpose);
+            row.createCell(8).setCellValue(r.getId());
+            row.createCell(9).setCellValue(r.getReason());
+            row.createCell(10).setCellValue(r.getCurrencySymbolicCode());
         }
 
         //---- total refund amount ---------
