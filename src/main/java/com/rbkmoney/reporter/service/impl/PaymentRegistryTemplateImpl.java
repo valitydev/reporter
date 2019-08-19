@@ -96,8 +96,8 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
             cell.setCellStyle(greyStyle);
             CellUtil.setFont(cell, font);
         }
-        rowSecondPayments.getCell(0).setCellValue("Дата");
-        rowSecondPayments.getCell(1).setCellValue("Id платежа");
+        rowSecondPayments.getCell(0).setCellValue("Id платежа");
+        rowSecondPayments.getCell(1).setCellValue("Дата");
         rowSecondPayments.getCell(2).setCellValue("Метод оплаты");
         rowSecondPayments.getCell(3).setCellValue("Сумма платежа");
         rowSecondPayments.getCell(4).setCellValue("Сумма к выводу");

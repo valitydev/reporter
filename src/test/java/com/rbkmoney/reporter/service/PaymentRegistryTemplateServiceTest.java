@@ -147,7 +147,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
             assertEquals("0", refundsFirstRow.getCell(8).getStringCellValue());
             assertEquals("You are the reason of my life", refundsFirstRow.getCell(9).getStringCellValue());
             assertEquals("RUB", refundsFirstRow.getCell(10).getStringCellValue());
-            
+
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
             long expectedRefundSum = refundList.stream().mapToLong(StatRefund::getAmount).sum();
             assertEquals(FormatUtil.formatCurrency(expectedRefundSum), refundsTotalSum.getStringCellValue());
