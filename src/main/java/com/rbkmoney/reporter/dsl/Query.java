@@ -18,6 +18,9 @@ public class Query {
     @JsonProperty("payments_for_report")
     private PaymentsForReportQuery paymentsForReportQuery;
 
+    @JsonProperty("refunds_for_report")
+    private RefundsForReportQuery refundsForReportQuery;
+
     @JsonProperty("refunds")
     private RefundsQuery refundsQuery;
 
@@ -49,6 +52,14 @@ public class Query {
         this.paymentsForReportQuery = paymentsForReportQuery;
     }
 
+    public RefundsForReportQuery getRefundsForReportQuery() {
+        return refundsForReportQuery;
+    }
+
+    public void setRefundsForReportQuery(RefundsForReportQuery refundsForReportQuery) {
+        this.refundsForReportQuery = refundsForReportQuery;
+    }
+
     public RefundsQuery getRefundsQuery() {
         return refundsQuery;
     }
@@ -76,30 +87,33 @@ public class Query {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Query)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Query query = (Query) o;
-        return getFrom() == query.getFrom() &&
-                getSize() == query.getSize() &&
-                Objects.equals(getShopAccountingQuery(), query.getShopAccountingQuery()) &&
-                Objects.equals(getInvoicesQuery(), query.getInvoicesQuery()) &&
-                Objects.equals(getPaymentsForReportQuery(), query.getPaymentsForReportQuery()) &&
-                Objects.equals(getRefundsQuery(), query.getRefundsQuery());
+        return Objects.equals(shopAccountingQuery, query.shopAccountingQuery) &&
+                Objects.equals(invoicesQuery, query.invoicesQuery) &&
+                Objects.equals(paymentsForReportQuery, query.paymentsForReportQuery) &&
+                Objects.equals(refundsForReportQuery, query.refundsForReportQuery) &&
+                Objects.equals(refundsQuery, query.refundsQuery) &&
+                Objects.equals(from, query.from) &&
+                Objects.equals(size, query.size);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getShopAccountingQuery(), getInvoicesQuery(), getPaymentsForReportQuery(), getRefundsQuery(), getFrom(), getSize());
+        return Objects.hash(shopAccountingQuery, invoicesQuery, paymentsForReportQuery, refundsForReportQuery, refundsQuery, from, size);
     }
 
     @Override
     public String toString() {
-        return "Query{" +
-                "shopAccountingQuery=" + shopAccountingQuery +
-                ", invoicesQuery=" + invoicesQuery +
-                ", paymentsForReportQuery=" + paymentsForReportQuery +
-                ", refundsQuery=" + refundsQuery +
-                ", from=" + from +
-                ", size=" + size +
-                '}';
+        final StringBuilder sb = new StringBuilder("Query{");
+        sb.append("shopAccountingQuery=").append(shopAccountingQuery);
+        sb.append(", invoicesQuery=").append(invoicesQuery);
+        sb.append(", paymentsForReportQuery=").append(paymentsForReportQuery);
+        sb.append(", refundsForReportQuery=").append(refundsForReportQuery);
+        sb.append(", refundsQuery=").append(refundsQuery);
+        sb.append(", from=").append(from);
+        sb.append(", size=").append(size);
+        sb.append('}');
+        return sb.toString();
     }
 }

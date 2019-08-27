@@ -26,6 +26,6 @@ public interface StatisticService {
 
     StatPayment getCapturedPayment(String partyId, String shopId, String invoiceId, String paymentId);
 
-    Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status);
+    Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime);
 
 }

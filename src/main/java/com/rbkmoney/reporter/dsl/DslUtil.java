@@ -25,6 +25,21 @@ public class DslUtil {
         return createStatRequest(statisticDsl, continuationToken, objectMapper);
     }
 
+    public static StatRequest createRefundsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, Optional<String> continuationToken, int size, ObjectMapper objectMapper) {
+        StatisticDsl statisticDsl = new StatisticDsl();
+        Query query = new Query();
+        RefundsForReportQuery refundsForReportQuery = new RefundsForReportQuery();
+        refundsForReportQuery.setMerchantId(partyId);
+        refundsForReportQuery.setShopId(shopId);
+        refundsForReportQuery.setFromTime(fromTime);
+        refundsForReportQuery.setToTime(toTime);
+        query.setRefundsForReportQuery(refundsForReportQuery);
+        query.setSize(size);
+        statisticDsl.setQuery(query);
+
+        return createStatRequest(statisticDsl, continuationToken, objectMapper);
+    }
+
     public static StatRequest createInvoicesRequest(String partyId, String shopId, Instant fromTime, Instant toTime, Optional<String> continuationToken, int size, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();

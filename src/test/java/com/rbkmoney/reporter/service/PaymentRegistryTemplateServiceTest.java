@@ -93,7 +93,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
         given(statisticService.getCapturedPaymentsIterator(any(), any(), any(), any()))
                 .willReturn(paymentList.iterator());
 
-        given(statisticService.getRefundsIterator(any(), any(), any(), any(), any()))
+        given(statisticService.getRefundsIterator(any(), any(), any(), any()))
                 .willReturn(refundList.iterator());
 
         StatPayment payment = new StatPayment();

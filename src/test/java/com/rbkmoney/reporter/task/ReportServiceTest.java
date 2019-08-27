@@ -84,7 +84,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
                 }
         );
 
-        given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any(), any())).willReturn(
+        given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any())).willReturn(
                 new Iterator<StatRefund>() {
                     @Override
                     public boolean hasNext() {

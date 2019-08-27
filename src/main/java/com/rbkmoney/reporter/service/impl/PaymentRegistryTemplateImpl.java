@@ -188,8 +188,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 report.getPartyId(),
                 report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC),
-                InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded())
+                report.getToTime().toInstant(ZoneOffset.UTC)
         );
         while (refundsIterator.hasNext()) {
             StatRefund r = refundsIterator.next();

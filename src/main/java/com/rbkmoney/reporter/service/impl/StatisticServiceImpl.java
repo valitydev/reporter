@@ -95,7 +95,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Override
     public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
-        return new Iterator<StatPayment>() {
+        return new Iterator<>() {
             private Optional<String> continuationToken = Optional.empty();
             private final int size = 1000;
             private Iterator<StatPayment> iterator = null;
@@ -136,22 +136,19 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status) {
-        return new Iterator<StatRefund>() {
-            private long from = 0;
-            private int size = 1000;
-            private Iterator<StatRefund> iterator;
-            private int refundsSize = 0;
+    public Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
+        return new Iterator<>() {
+            private Optional<String> continuationToken = Optional.empty();
+            private final int size = 1000;
+            private Iterator<StatRefund> iterator = null;
 
             @Override
             public boolean hasNext() {
-                if (iterator == null || ((!iterator.hasNext()) && refundsSize == size)) {
+                if (iterator == null || ((!iterator.hasNext()) && continuationToken.isPresent())) {
                     try {
-                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, shopId, fromTime, toTime, status, from, size, objectMapper));
-                        List<StatRefund> refunds = statResponse.getData().getRefunds();
-                        refundsSize = refunds.size();
-                        iterator = refunds.iterator();
-                        from += size;
+                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
+                        iterator = statResponse.getData().getRefunds().iterator();
+                        continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
                     } catch (TException e) {
                         throw new RuntimeException(e);
                     }
