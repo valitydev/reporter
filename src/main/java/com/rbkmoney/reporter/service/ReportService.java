@@ -6,11 +6,10 @@ import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +25,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by tolkonepiu on 17/07/2017.
- */
+@Slf4j
 @Service
 public class ReportService {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final ReportDao reportDao;
 
@@ -43,7 +38,7 @@ public class ReportService {
     private final ZoneId defaultTimeZone;
 
     private final int batchSize;
-    
+
     public ReportService(
             ReportDao reportDao,
             List<TemplateService> templateServices,
@@ -90,9 +85,14 @@ public class ReportService {
         }
     }
 
-    public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
+    public Report getReport(String partyId, String shopId, long reportId, boolean withLock) throws ReportNotFoundException, StorageException {
         try {
-            Report report = reportDao.getReport(partyId, shopId, reportId);
+            Report report;
+            if (withLock) {
+                report = reportDao.getReportDoUpdate(partyId, shopId, reportId);
+            } else {
+                report = reportDao.getReport(partyId, shopId, reportId);
+            }
             if (report == null) {
                 throw new ReportNotFoundException(String.format("Report not found, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId));
             }
@@ -144,15 +144,18 @@ public class ReportService {
         return storageService.getFileUrl(file.getFileId(), file.getBucketId(), expiresIn);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void generateReport(Report report) {
         log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                 report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         try {
-            List<FileMeta> reportFiles = processSignAndUpload(report);
-            finishedReportTask(report.getId(), reportFiles);
-            log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+            Report forUpdateReport = reportDao.getReportDoUpdateSkipLocked(report.getPartyId(), report.getPartyShopId(), report.getId());
+            if (forUpdateReport != null && forUpdateReport.getStatus() == ReportStatus.pending) {
+                List<FileMeta> reportFiles = processSignAndUpload(report);
+                finishedReportTask(report.getId(), reportFiles);
+                log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                        report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+            }
         } catch (ValidationException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
             changeReportStatus(report, ReportStatus.cancelled);
@@ -162,12 +165,14 @@ public class ReportService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
         log.info("Trying to cancel report, reportId='{}'", reportId);
-        Report report = getReport(partyId, shopId, reportId);
-        changeReportStatus(report, ReportStatus.cancelled);
-        log.info("Report have been cancelled, reportId='{}'", reportId);
+        Report report = getReport(partyId, shopId, reportId, true);
+        if (report.getStatus() != ReportStatus.cancelled) {
+            changeReportStatus(report, ReportStatus.cancelled);
+            log.info("Report have been cancelled, reportId='{}'", reportId);
+        }
     }
 
     public void changeReportStatus(Report report, ReportStatus reportStatus) {

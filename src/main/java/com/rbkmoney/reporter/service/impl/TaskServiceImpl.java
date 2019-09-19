@@ -12,33 +12,30 @@ import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.exception.ScheduleProcessingException;
 import com.rbkmoney.reporter.exception.StorageException;
+import com.rbkmoney.reporter.handler.ReportGeneratorHandler;
 import com.rbkmoney.reporter.job.GenerateReportJob;
-import com.rbkmoney.reporter.service.DomainConfigService;
-import com.rbkmoney.reporter.service.PartyService;
-import com.rbkmoney.reporter.service.ReportService;
-import com.rbkmoney.reporter.service.TaskService;
+import com.rbkmoney.reporter.service.*;
 import com.rbkmoney.reporter.trigger.FreezeTimeCronScheduleBuilder;
 import com.rbkmoney.reporter.util.SchedulerUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.calendar.HolidayCalendar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
-public class TaskServiceImpl implements TaskService {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+@RequiredArgsConstructor
+public class TaskServiceImpl implements TaskService, ScheduleReports {
 
     private final Scheduler scheduler;
 
@@ -50,22 +47,11 @@ public class TaskServiceImpl implements TaskService {
 
     private final DomainConfigService domainConfigService;
 
-    @Autowired
-    public TaskServiceImpl(
-            Scheduler scheduler,
-            ContractMetaDao contractMetaDao,
-            ReportService reportService,
-            PartyService partyService,
-            DomainConfigService domainConfigService
-    ) {
-        this.scheduler = scheduler;
-        this.contractMetaDao = contractMetaDao;
-        this.reportService = reportService;
-        this.partyService = partyService;
-        this.domainConfigService = domainConfigService;
-    }
+    private final ExecutorService reportsThreadPool;
 
+    @Override
     @Scheduled(fixedDelay = 60 * 1000)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public void syncJobs() {
         try {
             log.info("Starting synchronization of jobs...");
@@ -76,7 +62,12 @@ public class TaskServiceImpl implements TaskService {
             }
 
             for (ContractMeta contractMeta : activeContracts) {
-                JobKey jobKey = buildJobKey(contractMeta.getPartyId(), contractMeta.getContractId(), contractMeta.getCalendarId(), contractMeta.getScheduleId());
+                JobKey jobKey = buildJobKey(
+                        contractMeta.getPartyId(),
+                        contractMeta.getContractId(),
+                        contractMeta.getCalendarId(),
+                        contractMeta.getScheduleId()
+                );
                 List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                 if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
                     if (scheduler.checkExists(jobKey)) {
@@ -152,8 +143,10 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    private void createJob(String partyId, String contractId, CalendarRef calendarRef, BusinessScheduleRef scheduleRef) throws ScheduleProcessingException {
-        log.info("Trying to create job, partyId='{}', contractId='{}', calendarRef='{}', scheduleRef='{}'", partyId, contractId, calendarRef, scheduleRef);
+    private void createJob(String partyId, String contractId, CalendarRef calendarRef, BusinessScheduleRef scheduleRef)
+            throws ScheduleProcessingException {
+        log.info("Trying to create job, partyId='{}', contractId='{}', calendarRef='{}', scheduleRef='{}'",
+                partyId, contractId, calendarRef, scheduleRef);
         try {
             BusinessSchedule schedule = domainConfigService.getBusinessSchedule(scheduleRef);
             Calendar calendar = domainConfigService.getCalendar(calendarRef);
@@ -251,14 +244,31 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @Override
     @Scheduled(fixedDelay = 5000)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processPendingReports() {
-        List<Report> reports = reportService.getPendingReports();
-        log.debug("Trying to process {} pending reports", reports.size());
-        for (Report report : reports) {
-            reportService.generateReport(report);
+        log.info("Processing pending reports get started");
+
+        try {
+            List<Report> reports = reportService.getPendingReports();
+            log.debug("Trying to process {} pending reports", reports.size());
+
+            List<Callable<Long>> callables = reports.stream()
+                    .map(this::transformReportToCallable)
+                    .collect(Collectors.toList());
+            reportsThreadPool.invokeAll(callables);
+        } catch (InterruptedException ex) {
+            log.error("Received InterruptedException while thread executed report", ex);
+            Thread.currentThread().interrupt();
+        } catch (Exception ex) {
+            log.error("Received exception while scheduler processed pending reports", ex);
         }
+
+        log.info("Pending reports were processed");
+    }
+
+    private Callable<Long> transformReportToCallable(Report report) {
+        return () -> new ReportGeneratorHandler(reportService).handle(report);
     }
 
     private JobKey buildJobKey(String partyId, String contractId, int calendarId, int scheduleId) {

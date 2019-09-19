@@ -98,7 +98,7 @@ public class ReportsHandler implements ReportingSrv.Iface {
     public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
         try {
             return DamselUtil.toDamselReport(
-                    reportService.getReport(partyId, shopId, reportId),
+                    reportService.getReport(partyId, shopId, reportId, false),
                     reportService.getReportFiles(reportId)
             );
         } catch (ReportNotFoundException ex) {

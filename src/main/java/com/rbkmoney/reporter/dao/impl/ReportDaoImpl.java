@@ -47,6 +47,27 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
+    public Report getReportDoUpdate(String partyId, String shopId, long reportId) throws DaoException {
+        Query query = getDslContext().selectFrom(REPORT).where(
+                REPORT.ID.eq(reportId)
+                        .and(REPORT.PARTY_ID.eq(partyId))
+                        .and(REPORT.PARTY_SHOP_ID.eq(shopId)))
+                .forUpdate();
+        return fetchOne(query, reportRowMapper);
+    }
+
+    @Override
+    public Report getReportDoUpdateSkipLocked(String partyId, String shopId, long reportId) throws DaoException {
+        Query query = getDslContext().selectFrom(REPORT).where(
+                REPORT.ID.eq(reportId)
+                        .and(REPORT.PARTY_ID.eq(partyId))
+                        .and(REPORT.PARTY_SHOP_ID.eq(shopId)))
+                .forUpdate()
+                .skipLocked();
+        return fetchOne(query, reportRowMapper);
+    }
+
+    @Override
     public List<FileMeta> getReportFiles(long reportId) throws DaoException {
         Query query = getDslContext().selectFrom(FILE_META)
                 .where(
@@ -93,7 +114,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
         Query query = getDslContext().selectFrom(REPORT)
                 .where(REPORT.STATUS.eq(ReportStatus.pending))
                 .limit(limit)
-                .forUpdate();
+                .forUpdate()
+                .skipLocked();
 
         return fetch(query, reportRowMapper);
     }
@@ -103,7 +125,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
         Query query = getDslContext().selectFrom(REPORT)
                 .where(REPORT.STATUS.eq(ReportStatus.pending))
                 .and(REPORT.TYPE.eq(reportType))
-                .forUpdate();
+                .forUpdate()
+                .skipLocked();
 
         return fetch(query, reportRowMapper);
     }

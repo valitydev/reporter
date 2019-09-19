@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.config;
 
 import com.rbkmoney.reporter.factory.AutowiringSpringBeanJobFactory;
+import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,8 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import javax.sql.DataSource;
+import java.util.Properties;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,13 +41,23 @@ public class TaskConfig {
     }
 
     @Bean
-    public SchedulerFactoryBean schedulerFactory(ApplicationContext applicationContext) {
+    @DependsOn("flyway")
+    public SchedulerFactoryBean schedulerFactory(ApplicationContext applicationContext,
+                                                 DataSource dataSource,
+                                                 QuartzProperties quartzProperties) {
         SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
         jobFactory.setApplicationContext(applicationContext);
 
         factoryBean.setJobFactory(jobFactory);
         factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
+        factoryBean.setOverwriteExistingJobs(true);
+        factoryBean.setDataSource(dataSource);
+
+        final Properties properties = new Properties();
+        properties.putAll(quartzProperties.getProperties());
+        factoryBean.setQuartzProperties(properties);
+
         return factoryBean;
     }
 

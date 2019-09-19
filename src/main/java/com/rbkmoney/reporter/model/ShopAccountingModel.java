@@ -32,9 +32,6 @@ public class ShopAccountingModel {
     @Min(0)
     private long fundsRefunded;
 
-    public ShopAccountingModel() {
-    }
-
     public ShopAccountingModel(String merchantId, String shopId, String currencyCode) {
         this.merchantId = merchantId;
         this.shopId = shopId;

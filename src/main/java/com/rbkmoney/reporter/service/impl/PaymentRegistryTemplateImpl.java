@@ -69,174 +69,176 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 report.getToTime().toInstant(ZoneOffset.UTC)
         );
 
-        SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
-        Sheet sh = wb.createSheet();
-        sh.setDefaultColumnWidth(20);
-        int rownum = 0;
-        Row rowFirstPayments = sh.createRow(rownum++);
+        try (SXSSFWorkbook wb = new SXSSFWorkbook(100)) { // keep 100 rows in memory, exceeding rows will be flushed to disk
+            Sheet sh = wb.createSheet();
+            sh.setDefaultColumnWidth(20);
+            int rownum = 0;
+            Row rowFirstPayments = sh.createRow(rownum++);
 
-        for (int i = 0; i < 10; ++i) {
-            rowFirstPayments.createCell(i);
-        }
-        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
-        Cell cellFirstPayments = rowFirstPayments.getCell(0);
-        cellFirstPayments.setCellValue(String.format("Платежи за период с %s по %s", fromTime, toTime));
-        CellUtil.setAlignment(cellFirstPayments, HorizontalAlignment.CENTER);
-        Font font = wb.createFont();
-        font.setBold(true);
-        CellUtil.setFont(cellFirstPayments, font);
-
-        Row rowSecondPayments = sh.createRow(rownum++);
-        CellStyle greyStyle = wb.createCellStyle();
-        greyStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        greyStyle.setFillPattern(FillPatternType.LESS_DOTS);
-        for (int i = 0; i < 10; ++i) {
-            Cell cell = rowSecondPayments.createCell(i);
-            CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
-            cell.setCellStyle(greyStyle);
-            CellUtil.setFont(cell, font);
-        }
-        rowSecondPayments.getCell(0).setCellValue("Id платежа");
-        rowSecondPayments.getCell(1).setCellValue("Дата");
-        rowSecondPayments.getCell(2).setCellValue("Метод оплаты");
-        rowSecondPayments.getCell(3).setCellValue("Сумма платежа");
-        rowSecondPayments.getCell(4).setCellValue("Сумма к выводу");
-        rowSecondPayments.getCell(5).setCellValue("Email плательщика");
-        rowSecondPayments.getCell(6).setCellValue("URL магазина");
-        rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
-        rowSecondPayments.getCell(8).setCellValue("Комиссия");
-        rowSecondPayments.getCell(9).setCellValue("Валюта");
-
-        while (paymentsIterator.hasNext()) {
-            StatPayment p = paymentsIterator.next();
-            Row row = sh.createRow(rownum++);
-            row.createCell(0).setCellValue(p.getInvoiceId() + "." + p.getId());
-            row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(p.getStatus().getCaptured().getAt(), reportZoneId));
-            PaymentTool paymentTool = getPaymentTool(p.getPayer());
-            row.createCell(2).setCellValue(paymentTool.getSetField().getFieldName());
-            row.createCell(3).setCellValue(FormatUtil.formatCurrency(p.getAmount()));
-            row.createCell(4).setCellValue(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
-            totalAmnt.addAndGet(p.getAmount());
-            totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
-            String payerEmail = getEmail(p.getPayer());
-            row.createCell(5).setCellValue(payerEmail);
-            row.createCell(6).setCellValue(shopUrl);
-            String purpose = purposes.get(p.getInvoiceId());
-            if (purpose == null) {
-                StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
-                purpose = invoice.getProduct();
+            for (int i = 0; i < 10; ++i) {
+                rowFirstPayments.createCell(i);
             }
-            row.createCell(7).setCellValue(purpose);
-            row.createCell(8).setCellValue(FormatUtil.formatCurrency(p.getFee()));
-            row.createCell(9).setCellValue(p.getCurrencySymbolicCode());
-        }
+            sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
+            Cell cellFirstPayments = rowFirstPayments.getCell(0);
+            cellFirstPayments.setCellValue(String.format("Платежи за период с %s по %s", fromTime, toTime));
+            CellUtil.setAlignment(cellFirstPayments, HorizontalAlignment.CENTER);
+            Font font = wb.createFont();
+            font.setBold(true);
+            CellUtil.setFont(cellFirstPayments, font);
 
-        CellStyle borderStyle = wb.createCellStyle();
-        borderStyle.setBorderBottom(BorderStyle.MEDIUM);
-        borderStyle.setBorderTop(BorderStyle.MEDIUM);
-        borderStyle.setBorderRight(BorderStyle.MEDIUM);
-        borderStyle.setBorderLeft(BorderStyle.MEDIUM);
-
-        //---- total amount ---------
-        Row rowTotalPaymentAmount = sh.createRow(rownum++);
-        for (int i = 0; i < 5; ++i) {
-            Cell cell = rowTotalPaymentAmount.createCell(i);
-            cell.setCellStyle(borderStyle);
-            CellUtil.setFont(cell, font);
-        }
-        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
-        Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
-        cellTotalPaymentAmount.setCellValue("Сумма");
-        CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
-        rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAmnt.longValue()));
-        rowTotalPaymentAmount.getCell(4).setCellValue(FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
-
-        //-----skip rows -------
-        sh.createRow(rownum++);
-        sh.createRow(rownum++);
-
-        Row rowFirstRefunds = sh.createRow(rownum++);
-        for (int i = 0; i < 11; ++i) {
-            rowFirstRefunds.createCell(i);
-        }
-        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
-        Cell cellFirstRefunds = rowFirstRefunds.getCell(0);
-        cellFirstRefunds.setCellValue(String.format("Возвраты за период с %s по %s", fromTime, toTime));
-        CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
-        CellUtil.setFont(cellFirstRefunds, font);
-        Row rowSecondRefunds = sh.createRow(rownum++);
-        for (int i = 0; i < 11; ++i) {
-            Cell cell = rowSecondRefunds.createCell(i);
-            CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
-            cell.setCellStyle(greyStyle);
-            CellUtil.setFont(cell, font);
-        }
-        rowSecondRefunds.getCell(0).setCellValue("Дата возврата");
-        rowSecondRefunds.getCell(1).setCellValue("Дата платежа");
-        rowSecondRefunds.getCell(2).setCellValue("Id платежа");
-        rowSecondRefunds.getCell(3).setCellValue("Сумма возврата");
-        rowSecondRefunds.getCell(4).setCellValue("Метод оплаты");
-        rowSecondRefunds.getCell(5).setCellValue("Email плательщика");
-        rowSecondRefunds.getCell(6).setCellValue("URL магазина");
-        rowSecondRefunds.getCell(7).setCellValue("Назначение платежа");
-        rowSecondRefunds.getCell(8).setCellValue("Id возврата");
-        rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
-        rowSecondRefunds.getCell(10).setCellValue("Валюта");
-
-        AtomicLong totalRefundAmnt = new AtomicLong();
-        Iterator<StatRefund> refundsIterator = statisticService.getRefundsIterator(
-                report.getPartyId(),
-                report.getPartyShopId(),
-                report.getFromTime().toInstant(ZoneOffset.UTC),
-                report.getToTime().toInstant(ZoneOffset.UTC)
-        );
-        while (refundsIterator.hasNext()) {
-            StatRefund r = refundsIterator.next();
-            Row row = sh.createRow(rownum++);
-            StatPayment statPayment = statisticService.getCapturedPayment(report.getPartyId(), report.getPartyShopId(), r.getInvoiceId(), r.getPaymentId());
-            row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
-            row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
-            row.createCell(2).setCellValue(r.getInvoiceId() + "." + r.getPaymentId());
-            row.createCell(3).setCellValue(FormatUtil.formatCurrency(r.getAmount()));
-            String paymentTool = null;
-            if (statPayment.getPayer().isSetPaymentResource()) {
-                paymentTool = statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName();
+            Row rowSecondPayments = sh.createRow(rownum++);
+            CellStyle greyStyle = wb.createCellStyle();
+            greyStyle.setFillBackgroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            greyStyle.setFillPattern(FillPatternType.LESS_DOTS);
+            for (int i = 0; i < 10; ++i) {
+                Cell cell = rowSecondPayments.createCell(i);
+                CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+                cell.setCellStyle(greyStyle);
+                CellUtil.setFont(cell, font);
             }
-            row.createCell(4).setCellValue(paymentTool);
-            totalRefundAmnt.addAndGet(r.getAmount());
-            String payerEmail = null;
-            if (statPayment.getPayer().isSetPaymentResource()) {
-                payerEmail = statPayment.getPayer().getPaymentResource().getEmail();
+            rowSecondPayments.getCell(0).setCellValue("Id платежа");
+            rowSecondPayments.getCell(1).setCellValue("Дата");
+            rowSecondPayments.getCell(2).setCellValue("Метод оплаты");
+            rowSecondPayments.getCell(3).setCellValue("Сумма платежа");
+            rowSecondPayments.getCell(4).setCellValue("Сумма к выводу");
+            rowSecondPayments.getCell(5).setCellValue("Email плательщика");
+            rowSecondPayments.getCell(6).setCellValue("URL магазина");
+            rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
+            rowSecondPayments.getCell(8).setCellValue("Комиссия");
+            rowSecondPayments.getCell(9).setCellValue("Валюта");
+
+            while (paymentsIterator.hasNext()) {
+                StatPayment p = paymentsIterator.next();
+                Row row = sh.createRow(rownum++);
+                row.createCell(0).setCellValue(p.getInvoiceId() + "." + p.getId());
+                row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(p.getStatus().getCaptured().getAt(), reportZoneId));
+                PaymentTool paymentTool = getPaymentTool(p.getPayer());
+                row.createCell(2).setCellValue(paymentTool.getSetField().getFieldName());
+                row.createCell(3).setCellValue(FormatUtil.formatCurrency(p.getAmount()));
+                row.createCell(4).setCellValue(FormatUtil.formatCurrency(p.getAmount() - p.getFee()));
+                totalAmnt.addAndGet(p.getAmount());
+                totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
+                String payerEmail = getEmail(p.getPayer());
+                row.createCell(5).setCellValue(payerEmail);
+                row.createCell(6).setCellValue(shopUrl);
+                String purpose = purposes.get(p.getInvoiceId());
+                if (purpose == null) {
+                    StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
+                    purpose = invoice.getProduct();
+                }
+                row.createCell(7).setCellValue(purpose);
+                row.createCell(8).setCellValue(FormatUtil.formatCurrency(p.getFee()));
+                row.createCell(9).setCellValue(p.getCurrencySymbolicCode());
             }
-            row.createCell(5).setCellValue(payerEmail);
-            row.createCell(6).setCellValue(shopUrl);
-            String purpose = purposes.get(r.getInvoiceId());
-            if (purpose == null) {
-                StatInvoice invoice = statisticService.getInvoice(r.getInvoiceId());
-                purpose = invoice.getProduct();
+
+            CellStyle borderStyle = wb.createCellStyle();
+            borderStyle.setBorderBottom(BorderStyle.MEDIUM);
+            borderStyle.setBorderTop(BorderStyle.MEDIUM);
+            borderStyle.setBorderRight(BorderStyle.MEDIUM);
+            borderStyle.setBorderLeft(BorderStyle.MEDIUM);
+
+            //---- total amount ---------
+            Row rowTotalPaymentAmount = sh.createRow(rownum++);
+            for (int i = 0; i < 5; ++i) {
+                Cell cell = rowTotalPaymentAmount.createCell(i);
+                cell.setCellStyle(borderStyle);
+                CellUtil.setFont(cell, font);
             }
-            row.createCell(7).setCellValue(purpose);
-            row.createCell(8).setCellValue(r.getId());
-            row.createCell(9).setCellValue(r.getReason());
-            row.createCell(10).setCellValue(r.getCurrencySymbolicCode());
+            sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
+            Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
+            cellTotalPaymentAmount.setCellValue("Сумма");
+            CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
+            rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAmnt.longValue()));
+            rowTotalPaymentAmount.getCell(4).setCellValue(FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
+
+            //-----skip rows -------
+            sh.createRow(rownum++);
+            sh.createRow(rownum++);
+
+            Row rowFirstRefunds = sh.createRow(rownum++);
+            for (int i = 0; i < 11; ++i) {
+                rowFirstRefunds.createCell(i);
+            }
+            sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 7));
+            Cell cellFirstRefunds = rowFirstRefunds.getCell(0);
+            cellFirstRefunds.setCellValue(String.format("Возвраты за период с %s по %s", fromTime, toTime));
+            CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
+            CellUtil.setFont(cellFirstRefunds, font);
+            Row rowSecondRefunds = sh.createRow(rownum++);
+            for (int i = 0; i < 11; ++i) {
+                Cell cell = rowSecondRefunds.createCell(i);
+                CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+                cell.setCellStyle(greyStyle);
+                CellUtil.setFont(cell, font);
+            }
+            rowSecondRefunds.getCell(0).setCellValue("Дата возврата");
+            rowSecondRefunds.getCell(1).setCellValue("Дата платежа");
+            rowSecondRefunds.getCell(2).setCellValue("Id платежа");
+            rowSecondRefunds.getCell(3).setCellValue("Сумма возврата");
+            rowSecondRefunds.getCell(4).setCellValue("Метод оплаты");
+            rowSecondRefunds.getCell(5).setCellValue("Email плательщика");
+            rowSecondRefunds.getCell(6).setCellValue("URL магазина");
+            rowSecondRefunds.getCell(7).setCellValue("Назначение платежа");
+            rowSecondRefunds.getCell(8).setCellValue("Id возврата");
+            rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
+            rowSecondRefunds.getCell(10).setCellValue("Валюта");
+
+            AtomicLong totalRefundAmnt = new AtomicLong();
+            Iterator<StatRefund> refundsIterator = statisticService.getRefundsIterator(
+                    report.getPartyId(),
+                    report.getPartyShopId(),
+                    report.getFromTime().toInstant(ZoneOffset.UTC),
+                    report.getToTime().toInstant(ZoneOffset.UTC)
+            );
+            while (refundsIterator.hasNext()) {
+                StatRefund r = refundsIterator.next();
+                Row row = sh.createRow(rownum++);
+                StatPayment statPayment = statisticService.getCapturedPayment(report.getPartyId(), report.getPartyShopId(), r.getInvoiceId(), r.getPaymentId());
+                row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
+                row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
+                row.createCell(2).setCellValue(r.getInvoiceId() + "." + r.getPaymentId());
+                row.createCell(3).setCellValue(FormatUtil.formatCurrency(r.getAmount()));
+                String paymentTool = null;
+                if (statPayment.getPayer().isSetPaymentResource()) {
+                    paymentTool = statPayment.getPayer().getPaymentResource().getPaymentTool().getSetField().getFieldName();
+                }
+                row.createCell(4).setCellValue(paymentTool);
+                totalRefundAmnt.addAndGet(r.getAmount());
+                String payerEmail = null;
+                if (statPayment.getPayer().isSetPaymentResource()) {
+                    payerEmail = statPayment.getPayer().getPaymentResource().getEmail();
+                }
+                row.createCell(5).setCellValue(payerEmail);
+                row.createCell(6).setCellValue(shopUrl);
+                String purpose = purposes.get(r.getInvoiceId());
+                if (purpose == null) {
+                    StatInvoice invoice = statisticService.getInvoice(r.getInvoiceId());
+                    purpose = invoice.getProduct();
+                }
+                row.createCell(7).setCellValue(purpose);
+                row.createCell(8).setCellValue(r.getId());
+                row.createCell(9).setCellValue(r.getReason());
+                row.createCell(10).setCellValue(r.getCurrencySymbolicCode());
+            }
+
+            //---- total refund amount ---------
+            Row rowTotalRefundAmount = sh.createRow(rownum++);
+            for (int i = 0; i < 4; ++i) {
+                Cell cell = rowTotalRefundAmount.createCell(i);
+                cell.setCellStyle(borderStyle);
+                CellUtil.setFont(cell, font);
+            }
+            sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
+            Cell cellTotalRefundAmount = rowTotalRefundAmount.getCell(0);
+            cellTotalRefundAmount.setCellValue("Сумма");
+            CellUtil.setAlignment(cellTotalRefundAmount, HorizontalAlignment.CENTER);
+            rowTotalRefundAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
+
+            wb.write(outputStream);
+            outputStream.close();
+            wb.dispose();
         }
 
-        //---- total refund amount ---------
-        Row rowTotalRefundAmount = sh.createRow(rownum++);
-        for (int i = 0; i < 4; ++i) {
-            Cell cell = rowTotalRefundAmount.createCell(i);
-            cell.setCellStyle(borderStyle);
-            CellUtil.setFont(cell, font);
-        }
-        sh.addMergedRegion(new CellRangeAddress(rownum - 1, rownum - 1, 0, 2));
-        Cell cellTotalRefundAmount = rowTotalRefundAmount.getCell(0);
-        cellTotalRefundAmount.setCellValue("Сумма");
-        CellUtil.setAlignment(cellTotalRefundAmount, HorizontalAlignment.CENTER);
-        rowTotalRefundAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
-
-        wb.write(outputStream);
-        outputStream.close();
-        wb.dispose();
     }
 
     private PaymentTool getPaymentTool(Payer payer) {

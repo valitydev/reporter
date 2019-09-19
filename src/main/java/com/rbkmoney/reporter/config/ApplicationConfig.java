@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
@@ -18,6 +19,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Configuration
 public class ApplicationConfig {
@@ -74,6 +78,15 @@ public class ApplicationConfig {
                 .registerModule(new ParameterNamesModule())
                 .registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule());
+    }
+
+    @Bean
+    public ExecutorService reportsThreadPool(@Value("${report.batchSize}") int threadPoolSize) {
+        final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("report-exec-%d")
+                .setDaemon(true)
+                .build();
+        return Executors.newFixedThreadPool(threadPoolSize, threadFactory);
     }
 
 }

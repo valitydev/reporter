@@ -83,7 +83,9 @@ public class ContractMetaDaoImpl extends AbstractGenericDao implements ContractM
     public List<ContractMeta> getAllActiveContracts() throws DaoException {
         Query query = getDslContext().selectFrom(CONTRACT_META)
                 .where(CONTRACT_META.SCHEDULE_ID.isNotNull()
-                        .and(CONTRACT_META.CALENDAR_ID.isNotNull()));
+                        .and(CONTRACT_META.CALENDAR_ID.isNotNull()))
+                .forUpdate()
+                .skipLocked();
 
         return fetch(query, contractMetaRowMapper);
     }

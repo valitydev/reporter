@@ -25,6 +25,25 @@ spring:
       maximum-pool-size: 3
   flyway:
     schemas: @db.schema@
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org.quartz:
+        jobStore:
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+          isClustered: true
+          misfireThreshold: 60000
+          useProperties: true
+        plugin:
+          shutdownHook:
+            class: org.quartz.plugins.management.ShutdownHookPlugin
+            cleanShutdown: false
+        scheduler:
+          instanceId: AUTO
+          instanceName: reporter-scheduler
+    jdbc:
+      initialize-schema: always
   output:
     ansi:
       enabled: always
@@ -59,4 +78,3 @@ storage:
   accessKey: test
   secretKey: test
   clientProtocol: HTTP
-
