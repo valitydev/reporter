@@ -51,7 +51,6 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
 
     @Override
     @Scheduled(fixedDelay = 60 * 1000)
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public void syncJobs() {
         try {
             log.info("Starting synchronization of jobs...");
