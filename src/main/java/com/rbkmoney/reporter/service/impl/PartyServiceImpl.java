@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class PartyServiceImpl implements PartyService {
@@ -38,12 +36,7 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public Party getParty(String partyId) throws PartyNotFoundException {
-        return getParty(partyId, Instant.now());
-    }
-
-    @Override
-    public Party getParty(String partyId, Instant timestamp) throws PartyNotFoundException {
-        return getParty(partyId, PartyRevisionParam.timestamp(TypeUtil.temporalToString(timestamp)));
+        return getParty(partyId, getPartyRevision(partyId));
     }
 
     @Override
@@ -76,27 +69,18 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public Shop getShop(String partyId, String shopId) throws ShopNotFoundException, PartyNotFoundException {
         log.info("Trying to get shop, partyId='{}', shopId='{}'", partyId, shopId);
-        try {
-            Shop shop = partyManagementClient.getShop(userInfo, partyId, shopId);
-            log.info("Shop has been found, partyId='{}', shopId='{}'", partyId, shopId);
-            return shop;
-        } catch (PartyNotFound ex) {
-            throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId), ex);
-        } catch (ShopNotFound ex) {
+        Party party = getParty(partyId);
+        Shop shop = party.getShops().get(shopId);
+        if (shop == null) {
             throw new ShopNotFoundException(String.format("Shop not found, partyId='%s', shopId='%s'", partyId, shopId));
-        } catch (TException ex) {
-            throw new RuntimeException(String.format("Failed to get shop, partyId='%s', shopId='%s'", partyId, shopId), ex);
         }
+        log.info("Shop has been found, partyId='{}', shopId='{}'", partyId, shopId);
+        return shop;
     }
 
     @Override
     public Shop getShop(String partyId, String shopId, long partyRevision) throws ShopNotFoundException, PartyNotFoundException {
         return getShop(partyId, shopId, PartyRevisionParam.revision(partyRevision));
-    }
-
-    @Override
-    public Shop getShop(String partyId, String shopId, Instant timestamp) throws ShopNotFoundException, PartyNotFoundException {
-        return getShop(partyId, shopId, PartyRevisionParam.timestamp(TypeUtil.temporalToString(timestamp)));
     }
 
     @Override
@@ -113,29 +97,34 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public Contract getContract(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
-        log.info("Trying to get contract, partyId='{}', contractId='{}'", partyId, contractId);
+    public long getPartyRevision(String partyId) {
         try {
-            Contract contract = partyManagementClient.getContract(userInfo, partyId, contractId);
-            log.info("Contract has been found, partyId='{}', contractId='{}'", partyId, contractId);
-            return contract;
+            log.info("Trying to get revision, partyId='{}'", partyId);
+            long revision = partyManagementClient.getRevision(userInfo, partyId);
+            log.info("Revision has been found, partyId='{}', revision='{}'", partyId, revision);
+            return revision;
         } catch (PartyNotFound ex) {
             throw new PartyNotFoundException(String.format("Party not found, partyId='%s'", partyId), ex);
-        } catch (ContractNotFound ex) {
-            throw new ContractNotFoundException(String.format("Contract not found, partyId='%s', contractId='%s'", partyId, contractId));
         } catch (TException ex) {
-            throw new RuntimeException(String.format("Failed to get contract, partyId='%s', contractId='%s'", partyId, contractId), ex);
+            throw new RuntimeException(String.format("Failed to get party revision, partyId='%s'", partyId), ex);
         }
+    }
+
+    @Override
+    public Contract getContract(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
+        log.info("Trying to get contract, partyId='{}', contractId='{}'", partyId, contractId);
+        Party party = getParty(partyId);
+        Contract contract = party.getContracts().get(contractId);
+        if (contract == null) {
+            throw new ContractNotFoundException(String.format("Contract not found, partyId='%s', contractId='%s'", partyId, contractId));
+        }
+        log.info("Contract has been found, partyId='{}', contractId='{}'", partyId, contractId);
+        return contract;
     }
 
     @Override
     public Contract getContract(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException {
         return getContract(partyId, contractId, PartyRevisionParam.revision(partyRevision));
-    }
-
-    @Override
-    public Contract getContract(String partyId, String contractId, Instant timestamp) throws ContractNotFoundException, PartyNotFoundException {
-        return getContract(partyId, contractId, PartyRevisionParam.timestamp(TypeUtil.temporalToString(timestamp)));
     }
 
     @Override
@@ -153,17 +142,12 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
-        return getPaymentInstitutionRef(partyId, contractId, Instant.now());
+        return getPaymentInstitutionRef(partyId, contractId, getPartyRevision(partyId));
     }
 
     @Override
     public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException {
         return getPaymentInstitutionRef(partyId, contractId, PartyRevisionParam.revision(partyRevision));
-    }
-
-    @Override
-    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, Instant timestamp) throws ContractNotFoundException, PartyNotFoundException {
-        return getPaymentInstitutionRef(partyId, contractId, PartyRevisionParam.timestamp(TypeUtil.temporalToString(timestamp)));
     }
 
     @Override
@@ -181,8 +165,8 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public String getShopUrl(String partyId, String shopId, Instant timestamp) throws PartyNotFoundException, ShopNotFoundException {
-        Shop shop = getShop(partyId, shopId, timestamp);
+    public String getShopUrl(String partyId, String shopId) throws PartyNotFoundException, ShopNotFoundException {
+        Shop shop = getShop(partyId, shopId);
         if (shop.getLocation().isSetUrl()) {
             return shop.getLocation().getUrl();
         } else {

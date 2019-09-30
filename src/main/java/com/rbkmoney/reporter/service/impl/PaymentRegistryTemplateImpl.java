@@ -51,7 +51,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
         String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
 
-        String shopUrl = partyService.getShopUrl(report.getPartyId(), report.getPartyShopId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
+        String shopUrl = partyService.getShopUrl(report.getPartyId(), report.getPartyShopId());
 
         Map<String, String> purposes = statisticService.getPurposes(
                 report.getPartyId(),

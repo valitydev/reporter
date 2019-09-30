@@ -60,7 +60,7 @@ public class GenerateReportJob implements Job {
             ZoneId zoneId = trigger.getTimeZone().toZoneId();
             Instant fromTime = YearMonth.from(toLocalDateTime(toTime, zoneId)).minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
 
-            List<Shop> shops = partyService.getParty(partyId, Instant.now()).getShops().values()
+            List<Shop> shops = partyService.getParty(partyId).getShops().values()
                     .stream().filter(shop -> shop.getContractId().equals(contractId))
                     .collect(Collectors.toList());
 

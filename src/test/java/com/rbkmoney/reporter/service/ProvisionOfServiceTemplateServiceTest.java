@@ -81,6 +81,8 @@ public class ProvisionOfServiceTemplateServiceTest extends AbstractIntegrationTe
         party.setContracts(Collections.singletonMap(contractId, contract));
         given(partyManagementClient.checkout(any(), any(), any()))
                 .willReturn(party);
+        given(partyManagementClient.getRevision(any(), any()))
+                .willReturn(1L);
 
         ShopAccountingModel previousAccounting = random(ShopAccountingModel.class);
         given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC)))

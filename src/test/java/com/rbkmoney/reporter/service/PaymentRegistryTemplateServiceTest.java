@@ -116,7 +116,7 @@ public class PaymentRegistryTemplateServiceTest extends AbstractIntegrationTest 
                 .willReturn(purposes);
 
 
-        given(partyService.getShopUrl(any(), any(), any())).willReturn("http://0ch.ru/b");
+        given(partyService.getShopUrl(any(), any())).willReturn("http://0ch.ru/b");
 
         Report report = new Report(random(Long.class), LocalDateTime.now().minusMonths(1), LocalDateTime.now().plusDays(1), random(LocalDateTime.class), random(String.class), random(String.class), random(ReportStatus.class), "Europe/Moscow", random(ReportType.class));
 

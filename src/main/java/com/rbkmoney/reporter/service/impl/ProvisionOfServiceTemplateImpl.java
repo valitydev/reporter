@@ -61,7 +61,7 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
     @Override
     public void processReportTemplate(Report report, OutputStream outputStream) throws IOException {
         try {
-            Party party = partyService.getParty(report.getPartyId(), report.getCreatedAt().toInstant(ZoneOffset.UTC));
+            Party party = partyService.getParty(report.getPartyId());
             Shop shop = party.getShops().get(report.getPartyShopId());
             if (shop == null) {
                 throw new NotFoundException(String.format("Failed to find shop for provision of service report, partyId='%s', shopId='%s'",
