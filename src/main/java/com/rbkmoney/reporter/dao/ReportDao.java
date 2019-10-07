@@ -15,6 +15,10 @@ public interface ReportDao extends GenericDao {
 
     Report getReportDoUpdate(String partyId, String shopId, long reportId) throws DaoException;
 
+    Report getReport(long reportId) throws DaoException;
+
+    Report getReportDoUpdate(long reportId) throws DaoException;
+
     Report getReportDoUpdateSkipLocked(String partyId, String shopId, long reportId) throws DaoException;
 
     List<FileMeta> getReportFiles(long reportId) throws DaoException;
