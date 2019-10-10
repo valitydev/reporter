@@ -1,35 +1,29 @@
 package com.rbkmoney.reporter.job;
 
-import com.rbkmoney.damsel.domain.Contract;
-import com.rbkmoney.damsel.domain.Party;
 import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.exception.StorageException;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportService;
-import com.rbkmoney.reporter.trigger.FreezeTimeCronTrigger;
+import com.rbkmoney.reporter.trigger.FreezeTimeCronTriggerImpl;
 import com.rbkmoney.woody.api.flow.error.WRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.rbkmoney.geck.common.util.TypeUtil.toLocalDateTime;
 
+@Slf4j
 @Component
 public class GenerateReportJob implements Job {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public static final String PARTY_ID = "party_id";
 
@@ -46,7 +40,7 @@ public class GenerateReportJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDetail jobDetail = jobExecutionContext.getJobDetail();
-        FreezeTimeCronTrigger trigger = (FreezeTimeCronTrigger) jobExecutionContext.getTrigger();
+        FreezeTimeCronTriggerImpl trigger = (FreezeTimeCronTriggerImpl) jobExecutionContext.getTrigger();
 
         JobDataMap jobDataMap = jobDetail.getJobDataMap();
         String partyId = jobDataMap.getString(PARTY_ID);

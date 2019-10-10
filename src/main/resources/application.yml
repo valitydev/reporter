@@ -42,6 +42,9 @@ spring:
         scheduler:
           instanceId: AUTO
           instanceName: reporter-scheduler
+        threadPool:
+          makeThreadsDaemons: true
+          threadNamePrefix: Scheduler
     jdbc:
       initialize-schema: always
   output:

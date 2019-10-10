@@ -15,7 +15,7 @@ import com.rbkmoney.reporter.exception.StorageException;
 import com.rbkmoney.reporter.handler.ReportGeneratorHandler;
 import com.rbkmoney.reporter.job.GenerateReportJob;
 import com.rbkmoney.reporter.service.*;
-import com.rbkmoney.reporter.trigger.FreezeTimeCronScheduleBuilder;
+import com.rbkmoney.reporter.trigger.*;
 import com.rbkmoney.reporter.util.SchedulerUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,15 @@ import org.quartz.*;
 import org.quartz.impl.calendar.HolidayCalendar;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import static com.rbkmoney.reporter.util.QuartzJobUtil.buildJobKey;
+import static com.rbkmoney.reporter.util.QuartzJobUtil.buildTriggerKey;
 
 @Slf4j
 @Service
@@ -163,7 +164,7 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                     .usingJobData(GenerateReportJob.REPORT_TYPE, ReportType.provision_of_service.toString())
                     .build();
 
-            Set<Trigger> triggers = new HashSet<>();
+            Set<FreezeTimeCronTrigger> triggers = new HashSet<>();
             List<String> cronList = SchedulerUtil.buildCron(schedule.getSchedule());
             for (int triggerId = 0; triggerId < cronList.size(); triggerId++) {
                 String cron = cronList.get(triggerId);
@@ -181,7 +182,7 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                             .withSeconds(timeSpan.getSeconds());
                 }
 
-                Trigger trigger = TriggerBuilder.newTrigger()
+                FreezeTimeCronTrigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(buildTriggerKey(partyId, contractId, calendarRef.getId(), scheduleRef.getId(), triggerId))
                         .withDescription(schedule.getDescription())
                         .forJob(jobDetail)
@@ -270,21 +271,4 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
         return () -> new ReportGeneratorHandler(reportService).handle(report);
     }
 
-    private JobKey buildJobKey(String partyId, String contractId, int calendarId, int scheduleId) {
-        return JobKey.jobKey(
-                String.format("job-%s-%s", partyId, contractId),
-                buildGroupKey(calendarId, scheduleId)
-        );
-    }
-
-    private TriggerKey buildTriggerKey(String partyId, String contractId, int calendarId, int scheduleId, int triggerId) {
-        return TriggerKey.triggerKey(
-                String.format("trigger-%s-%s-%d", partyId, contractId, triggerId),
-                buildGroupKey(calendarId, scheduleId)
-        );
-    }
-
-    private String buildGroupKey(int calendarId, int scheduleId) {
-        return String.format("group-%d-%d", calendarId, scheduleId);
-    }
 }

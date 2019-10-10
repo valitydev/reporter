@@ -1,15 +1,12 @@
 package com.rbkmoney.reporter.task;
 
-import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
-import com.rbkmoney.damsel.domain_config.VersionedObject;
 import com.rbkmoney.damsel.merch_stat.StatPayment;
 import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.damsel.msgpack.Value;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.eventstock.client.EventPublisher;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
@@ -37,11 +34,11 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.rbkmoney.reporter.util.TestDataUtil.*;
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -105,8 +102,8 @@ public class ReportServiceTest extends AbstractIntegrationTest {
                 }
         );
 
-        String partyId = random(String.class);
-        String shopId = random(String.class);
+        String partyId = "TestPartyID";
+        String shopId = "TestShopID";
         String contractId = random(String.class);
         Instant fromTime = random(Instant.class);
         Instant toTime = random(Instant.class);
@@ -162,83 +159,6 @@ public class ReportServiceTest extends AbstractIntegrationTest {
                 }
             }
         }
-    }
-
-    private VersionedObject buildPaymentCalendarObject(CalendarRef calendarRef) {
-        Calendar calendar = new Calendar("calendar", "Europe/Moscow", Collections.emptyMap());
-
-        return new VersionedObject(
-                1,
-                DomainObject.calendar(new CalendarObject(
-                        calendarRef,
-                        calendar
-                ))
-        );
-    }
-
-    private VersionedObject buildPaymentInstitutionObject(PaymentInstitutionRef paymentInstitutionRef) {
-        PaymentInstitution paymentInstitution = new PaymentInstitution();
-        paymentInstitution.setCalendar(new CalendarRef(1));
-
-        return new VersionedObject(
-                1,
-                DomainObject.payment_institution(new PaymentInstitutionObject(
-                        paymentInstitutionRef,
-                        paymentInstitution
-                ))
-        );
-    }
-
-    private VersionedObject buildPayoutScheduleObject(BusinessScheduleRef payoutScheduleRef) {
-        ScheduleEvery nth5 = new ScheduleEvery();
-        nth5.setNth((byte) 5);
-
-        BusinessSchedule payoutSchedule = new BusinessSchedule();
-        payoutSchedule.setName("schedule");
-        payoutSchedule.setSchedule(new Schedule(
-                ScheduleYear.every(new ScheduleEvery()),
-                ScheduleMonth.every(new ScheduleEvery()),
-                ScheduleFragment.every(new ScheduleEvery()),
-                ScheduleDayOfWeek.every(new ScheduleEvery()),
-                ScheduleFragment.every(new ScheduleEvery()),
-                ScheduleFragment.every(new ScheduleEvery()),
-                ScheduleFragment.every(new ScheduleEvery(nth5))
-        ));
-        payoutSchedule.setPolicy(new PayoutCompilationPolicy(new TimeSpan()));
-
-        return new VersionedObject(
-                1,
-                DomainObject.business_schedule(new BusinessScheduleObject(
-                        payoutScheduleRef,
-                        payoutSchedule
-                ))
-        );
-    }
-
-    private static Party getTestParty(String partyId, String shopId, String contractId) {
-        Party party = new Party();
-        party.setId(partyId);
-
-        Contract contract = new Contract();
-        contract.setId(contractId);
-        contract.setPaymentInstitution(new PaymentInstitutionRef(1));
-        RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
-        russianLegalEntity.setRegisteredName(random(String.class));
-        russianLegalEntity.setRepresentativePosition(random(String.class));
-        russianLegalEntity.setRepresentativeFullName(random(String.class));
-        contract.setContractor(Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
-        contract.setLegalAgreement(new LegalAgreement(TypeUtil.temporalToString(Instant.now()), random(String.class)));
-        party.setShops(Collections.singletonMap(shopId, getTestShop(shopId, contractId)));
-        party.setContracts(Collections.singletonMap(contractId, contract));
-        return party;
-    }
-
-    private static Shop getTestShop(String shopId, String contractId) {
-        Shop shop = new Shop();
-        shop.setId(shopId);
-        shop.setContractId(contractId);
-        shop.setLocation(ShopLocation.url("http://2ch.hk/"));
-        return shop;
     }
 
 }
