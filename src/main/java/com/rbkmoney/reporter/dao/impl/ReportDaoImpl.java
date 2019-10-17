@@ -39,28 +39,9 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public Report getReport(String partyId, String shopId, long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(
-                REPORT.ID.eq(reportId)
-                        .and(REPORT.PARTY_ID.eq(partyId))
-                        .and(REPORT.PARTY_SHOP_ID.eq(shopId))
-        );
-        return fetchOne(query, reportRowMapper);
-    }
-
-    @Override
-    public Report getReportDoUpdate(String partyId, String shopId, long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(
-                REPORT.ID.eq(reportId)
-                        .and(REPORT.PARTY_ID.eq(partyId))
-                        .and(REPORT.PARTY_SHOP_ID.eq(shopId)))
-                .forUpdate();
-        return fetchOne(query, reportRowMapper);
-    }
-
-    @Override
     public Report getReport(long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(REPORT.ID.eq(reportId));
+        Query query = getDslContext().selectFrom(REPORT).where(
+                REPORT.ID.eq(reportId));
         return fetchOne(query, reportRowMapper);
     }
 
@@ -72,11 +53,9 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public Report getReportDoUpdateSkipLocked(String partyId, String shopId, long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(
-                REPORT.ID.eq(reportId)
-                        .and(REPORT.PARTY_ID.eq(partyId))
-                        .and(REPORT.PARTY_SHOP_ID.eq(shopId)))
+    public Report getReportDoUpdateSkipLocked(long reportId) throws DaoException {
+        Query query = getDslContext().selectFrom(REPORT)
+                .where(REPORT.ID.eq(reportId))
                 .forUpdate()
                 .skipLocked();
         return fetchOne(query, reportRowMapper);

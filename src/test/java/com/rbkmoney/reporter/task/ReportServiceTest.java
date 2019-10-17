@@ -140,7 +140,7 @@ public class ReportServiceTest extends AbstractIntegrationTest {
         int retryCount = 0;
         do {
             TimeUnit.SECONDS.sleep(5L);
-            report = reportDao.getReport(partyId, shopId, reportId);
+            report = reportDao.getReport(reportId);
             retryCount++;
         } while (report != null && report.getStatus() != ReportStatus.created && retryCount <= 10);
 

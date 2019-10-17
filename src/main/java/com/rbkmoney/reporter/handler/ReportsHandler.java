@@ -12,6 +12,7 @@ import com.rbkmoney.reporter.exception.ShopNotFoundException;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportService;
 import com.rbkmoney.reporter.util.DamselUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import static com.rbkmoney.reporter.util.DamselUtil.buildInvalidRequest;
 /**
  * Created by tolkonepiu on 18/07/2017.
  */
+@Slf4j
 @Component
 public class ReportsHandler implements ReportingSrv.Iface {
 
@@ -97,10 +99,12 @@ public class ReportsHandler implements ReportingSrv.Iface {
     @Override
     public Report getReport(String partyId, String shopId, long reportId) throws ReportNotFound, TException {
         try {
-            return DamselUtil.toDamselReport(
-                    reportService.getReport(partyId, shopId, reportId, false),
-                    reportService.getReportFiles(reportId)
-            );
+            com.rbkmoney.reporter.domain.tables.pojos.Report report = reportService.getReport(reportId, false);
+            if (partyId == null || !partyId.equals(report.getPartyId())) {
+                log.warn("Not enough rights to execute the report {} for party id {}", reportId, partyId);
+                throw new ReportNotFoundException();
+            }
+            return DamselUtil.toDamselReport(report, reportService.getReportFiles(reportId));
         } catch (ReportNotFoundException ex) {
             throw new ReportNotFound();
         }

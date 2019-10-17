@@ -11,15 +11,11 @@ import java.util.List;
 
 public interface ReportDao extends GenericDao {
 
-    Report getReport(String partyId, String shopId, long reportId) throws DaoException;
-
-    Report getReportDoUpdate(String partyId, String shopId, long reportId) throws DaoException;
-
     Report getReport(long reportId) throws DaoException;
 
     Report getReportDoUpdate(long reportId) throws DaoException;
 
-    Report getReportDoUpdateSkipLocked(String partyId, String shopId, long reportId) throws DaoException;
+    Report getReportDoUpdateSkipLocked(long reportId) throws DaoException;
 
     List<FileMeta> getReportFiles(long reportId) throws DaoException;
 

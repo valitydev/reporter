@@ -85,20 +85,21 @@ public class ReportService {
         }
     }
 
-    public Report getReport(String partyId, String shopId, long reportId, boolean withLock) throws ReportNotFoundException, StorageException {
+    public Report getReport(long reportId, boolean withLock) throws ReportNotFoundException, StorageException {
         try {
             Report report;
             if (withLock) {
-                report = reportDao.getReportDoUpdate(partyId, shopId, reportId);
+                report = reportDao.getReportDoUpdate(reportId);
             } else {
-                report = reportDao.getReport(partyId, shopId, reportId);
+                report = reportDao.getReport(reportId);
             }
             if (report == null) {
-                throw new ReportNotFoundException(String.format("Report not found, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId));
+                log.info("Report with id {} not found", reportId);
+                throw new ReportNotFoundException();
             }
             return report;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report from storage, partyId='%s', shopId='%s', reportId='%d'", partyId, shopId, reportId), ex);
+            throw new StorageException(String.format("Failed to get report with id '%d' from storage", reportId), ex);
         }
     }
 
@@ -149,7 +150,7 @@ public class ReportService {
         log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                 report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
         try {
-            Report forUpdateReport = reportDao.getReportDoUpdateSkipLocked(report.getPartyId(), report.getPartyShopId(), report.getId());
+            Report forUpdateReport = reportDao.getReportDoUpdateSkipLocked(report.getId());
             if (forUpdateReport != null && forUpdateReport.getStatus() == ReportStatus.pending) {
                 List<FileMeta> reportFiles = processSignAndUpload(report);
                 finishedReportTask(report.getId(), reportFiles);
@@ -168,7 +169,7 @@ public class ReportService {
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
         log.info("Trying to cancel report, reportId='{}'", reportId);
-        Report report = getReport(partyId, shopId, reportId, true);
+        Report report = getReport(reportId, true);
         if (report.getStatus() != ReportStatus.cancelled) {
             changeReportStatus(report, ReportStatus.cancelled);
             log.info("Report have been cancelled, reportId='{}'", reportId);

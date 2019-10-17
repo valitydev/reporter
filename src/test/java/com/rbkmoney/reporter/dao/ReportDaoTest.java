@@ -35,9 +35,8 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         LocalDateTime createdAt = random(LocalDateTime.class);
 
         long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
-        assertNull(reportDao.getReport("is", "null", reportId));
 
-        Report report = reportDao.getReport(partyId, shopId, reportId);
+        Report report = reportDao.getReport(reportId);
         assertEquals(reportId, report.getId().longValue());
         assertEquals(partyId, report.getPartyId());
         assertEquals(shopId, report.getPartyShopId());
@@ -71,7 +70,7 @@ public class ReportDaoTest extends AbstractIntegrationTest {
         long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
         reportDao.changeReportStatus(reportId, ReportStatus.created);
 
-        reportDao.getReport(partyId, shopId, reportId);
+        reportDao.getReport(reportId);
     }
 
     @Test
