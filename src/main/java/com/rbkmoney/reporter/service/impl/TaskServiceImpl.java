@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.base.TimeSpan;
-import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain.Calendar;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.domain.enums.ReportType;
@@ -15,7 +15,8 @@ import com.rbkmoney.reporter.exception.StorageException;
 import com.rbkmoney.reporter.handler.ReportGeneratorHandler;
 import com.rbkmoney.reporter.job.GenerateReportJob;
 import com.rbkmoney.reporter.service.*;
-import com.rbkmoney.reporter.trigger.*;
+import com.rbkmoney.reporter.trigger.FreezeTimeCronScheduleBuilder;
+import com.rbkmoney.reporter.trigger.FreezeTimeCronTrigger;
 import com.rbkmoney.reporter.util.SchedulerUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -49,54 +53,6 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
     private final DomainConfigService domainConfigService;
 
     private final ExecutorService reportsThreadPool;
-
-    @Override
-    @Scheduled(fixedDelay = 60 * 1000)
-    public void syncJobs() {
-        try {
-            log.info("Starting synchronization of jobs...");
-            List<ContractMeta> activeContracts = contractMetaDao.getAllActiveContracts();
-            if (activeContracts.isEmpty()) {
-                log.info("No active contracts found, nothing to do");
-                return;
-            }
-
-            for (ContractMeta contractMeta : activeContracts) {
-                JobKey jobKey = buildJobKey(
-                        contractMeta.getPartyId(),
-                        contractMeta.getContractId(),
-                        contractMeta.getCalendarId(),
-                        contractMeta.getScheduleId()
-                );
-                List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-                if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
-                    if (scheduler.checkExists(jobKey)) {
-                        log.warn("Inactive job found, please check it manually. Job will be restored, contractMeta='{}'", contractMeta);
-                    }
-                    createJob(
-                            contractMeta.getPartyId(),
-                            contractMeta.getContractId(),
-                            new CalendarRef(contractMeta.getCalendarId()),
-                            new BusinessScheduleRef(contractMeta.getScheduleId())
-                    );
-                }
-            }
-        } catch (DaoException | SchedulerException ex) {
-            throw new ScheduleProcessingException("Failed to sync jobs", ex);
-        } finally {
-            log.info("End synchronization of jobs");
-        }
-    }
-
-    private boolean isTriggerOnNormalState(Trigger trigger) {
-        try {
-            Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-            log.debug("Trigger '{}' on '{}' state", trigger, triggerState);
-            return triggerState == Trigger.TriggerState.NORMAL;
-        } catch (SchedulerException ex) {
-            throw new ScheduleProcessingException(String.format("Failed to get trigger state, triggerKey='%s'", trigger.getKey()), ex);
-        }
-    }
 
     @Override
     @Transactional

@@ -4,6 +4,4 @@ public interface ScheduleReports {
 
     void processPendingReports();
 
-    void syncJobs();
-
 }
