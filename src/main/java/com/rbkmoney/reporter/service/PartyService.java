@@ -48,6 +48,8 @@ public interface PartyService {
 
     String getShopUrl(String partyId, String shopId) throws PartyNotFoundException, ShopNotFoundException;
 
+    Map<String, String> getShopUrls(String partyId) throws PartyNotFoundException;
+
     Value getMetaData(String partyId, String namespace) throws NotFoundException;
 
 }

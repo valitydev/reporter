@@ -51,7 +51,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
         String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
 
-        String shopUrl = partyService.getShopUrl(report.getPartyId(), report.getPartyShopId());
+        Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId());
 
         Map<String, String> purposes = statisticService.getPurposes(
                 report.getPartyId(),
@@ -120,7 +120,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                 totalPayoutAmnt.addAndGet(p.getAmount() - p.getFee());
                 String payerEmail = getEmail(p.getPayer());
                 row.createCell(5).setCellValue(payerEmail);
-                row.createCell(6).setCellValue(shopUrl);
+                row.createCell(6).setCellValue(shopUrls.get(p.getShopId()));
                 String purpose = purposes.get(p.getInvoiceId());
                 if (purpose == null) {
                     StatInvoice invoice = statisticService.getInvoice(p.getInvoiceId());
@@ -209,7 +209,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
                     payerEmail = statPayment.getPayer().getPaymentResource().getEmail();
                 }
                 row.createCell(5).setCellValue(payerEmail);
-                row.createCell(6).setCellValue(shopUrl);
+                row.createCell(6).setCellValue(shopUrls.get(r.getShopId()));
                 String purpose = purposes.get(r.getInvoiceId());
                 if (purpose == null) {
                     StatInvoice invoice = statisticService.getInvoice(r.getInvoiceId());

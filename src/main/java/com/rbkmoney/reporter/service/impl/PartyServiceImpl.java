@@ -6,7 +6,6 @@ import com.rbkmoney.damsel.domain.PaymentInstitutionRef;
 import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.damsel.msgpack.Value;
 import com.rbkmoney.damsel.payment_processing.*;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.exception.ContractNotFoundException;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
@@ -18,7 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PartyServiceImpl implements PartyService {
@@ -172,6 +172,19 @@ public class PartyServiceImpl implements PartyService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Map<String, String> getShopUrls(String partyId) throws PartyNotFoundException {
+        Party party = getParty(partyId);
+        return party.getShops().values().stream()
+                .collect(Collectors.toMap(Shop::getId, shop -> {
+                    if (shop.getLocation().isSetUrl()) {
+                        return shop.getLocation().getUrl();
+                    } else {
+                        return null;
+                    }
+                }));
     }
 
     @Override
