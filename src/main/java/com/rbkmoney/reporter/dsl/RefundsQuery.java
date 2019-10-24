@@ -1,7 +1,6 @@
 package com.rbkmoney.reporter.dsl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.rbkmoney.damsel.merch_stat.InvoicePaymentRefundStatus;
 
 import java.time.Instant;
 import java.util.Objects;

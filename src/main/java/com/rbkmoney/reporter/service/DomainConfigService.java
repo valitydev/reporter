@@ -1,17 +1,14 @@
 package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain_config.*;
 import com.rbkmoney.damsel.domain_config.Reference;
+import com.rbkmoney.damsel.domain_config.*;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class DomainConfigService {

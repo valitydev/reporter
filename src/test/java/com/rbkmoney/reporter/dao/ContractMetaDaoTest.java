@@ -1,7 +1,6 @@
 package com.rbkmoney.reporter.dao;
 
 import com.rbkmoney.reporter.AbstractIntegrationTest;
-import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.junit.Test;

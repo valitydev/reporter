@@ -5,7 +5,6 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.AbstractIntegrationTest;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
-import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.util.FormatUtil;
@@ -33,7 +32,6 @@ import java.util.Map;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 

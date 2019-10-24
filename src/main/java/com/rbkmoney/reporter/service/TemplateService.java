@@ -1,7 +1,6 @@
 package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.reporter.domain.enums.ReportType;
-import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;

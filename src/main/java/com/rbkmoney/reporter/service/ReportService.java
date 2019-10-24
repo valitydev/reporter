@@ -53,7 +53,8 @@ public class ReportService {
         this.batchSize = batchSize;
     }
 
-    public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException {
+    public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes,
+                                          Instant fromTime, Instant toTime) throws StorageException {
         try {
             return reportDao.getReportsByRange(
                     partyId,

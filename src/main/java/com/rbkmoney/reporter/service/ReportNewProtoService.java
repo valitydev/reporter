@@ -15,7 +15,8 @@ public interface ReportNewProtoService {
 
     Report getReport(long reportId, boolean withLock);
 
-    List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes, Instant fromTime, Instant toTime) throws StorageException;
+    List<Report> getReportsWithToken(String partyId, String shopId, List<ReportType> reportTypes,
+                                     Instant fromTime, Instant toTime, Instant createdAfter, int limit) throws StorageException;
 
     void cancelReport(long reportId) throws ReportNotFoundException, StorageException;
 

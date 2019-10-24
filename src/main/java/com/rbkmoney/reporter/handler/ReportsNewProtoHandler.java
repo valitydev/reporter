@@ -11,6 +11,7 @@ import com.rbkmoney.reporter.exception.ReportNotFoundException;
 import com.rbkmoney.reporter.exception.ShopNotFoundException;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportNewProtoService;
+import com.rbkmoney.reporter.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -28,6 +29,8 @@ import static com.rbkmoney.reporter.util.NewProtoUtil.toNewProtoReport;
 @RequiredArgsConstructor
 @Slf4j
 public class ReportsNewProtoHandler implements ReportingSrv.Iface {
+
+    private static final int REPORTS_LIMIT = 100;
 
     private final PartyService partyService;
     private final ReportNewProtoService reportService;
@@ -63,8 +66,11 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
     }
 
     @Override
-    public List<Report> getReports(ReportRequest reportRequest, List<String> reportTypes) throws DatasetTooBig, InvalidRequest, TException {
+    public StatReportResponse getReports(StatReportRequest statReportRequest) throws DatasetTooBig, InvalidRequest, BadToken, TException {
         try {
+            ReportRequest reportRequest = statReportRequest.getRequest();
+            List<String> reportTypes = statReportRequest.getReportTypes();
+            String continuationToken = statReportRequest.getContinuationToken();
             Instant fromTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getFromTime());
             Instant toTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getToTime());
 
@@ -72,16 +78,30 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
                 throw buildInvalidRequest("fromTime must be less that toTime");
             }
 
-            return reportService.getReportsByRange(
+            if (statReportRequest.isSetContinuationToken() && !TokenUtil.isValid(statReportRequest)) {
+                throw new BadToken();
+            }
+
+            List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
                     reportRequest.getPartyId(),
                     reportRequest.getShopId(),
                     reportTypes(reportTypes),
                     fromTime,
-                    toTime
-            ).stream()
+                    toTime,
+                    statReportRequest.isSetContinuationToken() ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
+                    REPORTS_LIMIT
+            );
+            List<Report> reportsFiltered = reports.stream()
                     .filter(report -> report.getStatus() != ReportStatus.cancelled)
                     .map(report -> toNewProtoReport(report, reportService.getReportFiles(report.getId())))
                     .collect(Collectors.toList());
+
+            StatReportResponse statReportResponse = new StatReportResponse(reportsFiltered);
+            if (reports.size() >= REPORTS_LIMIT) {
+                String nextCreatedAfter = TypeUtil.temporalToString(reports.get(reports.size() - 1).getCreatedAt());
+                statReportResponse.setContinuationToken(TokenUtil.buildToken(reportRequest, reportTypes, nextCreatedAfter));
+            }
+            return statReportResponse;
         } catch (IllegalArgumentException ex) {
             throw buildInvalidRequest(ex);
         }

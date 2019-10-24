@@ -1,7 +1,10 @@
 package com.rbkmoney.reporter.trigger;
 
 import lombok.Getter;
-import org.quartz.*;
+import org.quartz.Calendar;
+import org.quartz.CronExpression;
+import org.quartz.ScheduleBuilder;
+import org.quartz.Trigger;
 import org.quartz.impl.triggers.AbstractTrigger;
 import org.quartz.impl.triggers.CoreTrigger;
 
@@ -16,7 +19,6 @@ import java.util.TimeZone;
 
 import static com.rbkmoney.geck.common.util.TypeUtil.toLocalDateTime;
 import static java.time.temporal.ChronoUnit.*;
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Getter
 public class FreezeTimeCronTriggerImpl

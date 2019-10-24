@@ -2,11 +2,9 @@ package com.rbkmoney.reporter.dao.impl;
 
 import com.rbkmoney.reporter.dao.AbstractGenericDao;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
-import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.jooq.Query;
-import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;

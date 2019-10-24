@@ -1,13 +1,13 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.damsel.merch_stat.StatInvoice;
+import com.rbkmoney.damsel.merch_stat.StatPayment;
+import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 
 import java.time.Instant;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by tolkonepiu on 11/07/2017.

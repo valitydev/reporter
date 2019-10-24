@@ -1,7 +1,6 @@
 package com.rbkmoney.reporter.handler;
 
 import com.rbkmoney.damsel.base.InvalidRequest;
-import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.damsel.reports.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
