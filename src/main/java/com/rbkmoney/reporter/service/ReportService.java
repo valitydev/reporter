@@ -53,22 +53,6 @@ public class ReportService {
         this.batchSize = batchSize;
     }
 
-    public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes,
-                                          Instant fromTime, Instant toTime) throws StorageException {
-        try {
-            return reportDao.getReportsByRange(
-                    partyId,
-                    shopId,
-                    reportTypes,
-                    LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
-                    LocalDateTime.ofInstant(toTime, ZoneOffset.UTC)
-            );
-        } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get reports by range, partyId='%s', shopId='%s', reportTypes='%s', fromTime='%s', toTime='%s'",
-                    partyId, shopId, reportTypes, fromTime, toTime), ex);
-        }
-    }
-
     @Transactional(propagation = Propagation.REQUIRED)
     public List<Report> getPendingReports() throws StorageException {
         try {
@@ -83,24 +67,6 @@ public class ReportService {
             return reportDao.getReportFiles(reportId);
         } catch (DaoException ex) {
             throw new StorageException(String.format("Failed to get report files from storage, reportId='%d'", reportId), ex);
-        }
-    }
-
-    public Report getReport(long reportId, boolean withLock) throws ReportNotFoundException, StorageException {
-        try {
-            Report report;
-            if (withLock) {
-                report = reportDao.getReportDoUpdate(reportId);
-            } else {
-                report = reportDao.getReport(reportId);
-            }
-            if (report == null) {
-                log.info("Report with id {} not found", reportId);
-                throw new ReportNotFoundException();
-            }
-            return report;
-        } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report with id '%d' from storage", reportId), ex);
         }
     }
 
@@ -164,16 +130,6 @@ public class ReportService {
         } catch (Throwable throwable) {
             log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                     report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime(), throwable);
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
-    public void cancelReport(String partyId, String shopId, long reportId) throws ReportNotFoundException, StorageException {
-        log.info("Trying to cancel report, reportId='{}'", reportId);
-        Report report = getReport(reportId, true);
-        if (report.getStatus() != ReportStatus.cancelled) {
-            changeReportStatus(report, ReportStatus.cancelled);
-            log.info("Report have been cancelled, reportId='{}'", reportId);
         }
     }
 
