@@ -85,7 +85,7 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
             List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
                     reportRequest.getPartyId(),
                     reportRequest.getShopId(),
-                    reportTypes(reportTypes),
+                    reportTypes != null ? reportTypes(reportTypes) : null,
                     fromTime,
                     toTime,
                     statReportRequest.isSetContinuationToken() ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
