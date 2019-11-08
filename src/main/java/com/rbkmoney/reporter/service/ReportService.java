@@ -124,7 +124,7 @@ public class ReportService {
                 log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
                         report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
             }
-        } catch (ValidationException ex) {
+        } catch (ValidationException | NotFoundException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
             changeReportStatus(report, ReportStatus.cancelled);
         } catch (Throwable throwable) {
