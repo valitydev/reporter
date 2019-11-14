@@ -54,6 +54,53 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
 
     private final ExecutorService reportsThreadPool;
 
+    @Scheduled(fixedDelay = 60 * 1000)
+    public void syncJobs() {
+        try {
+            log.info("Starting synchronization of jobs...");
+            List<ContractMeta> activeContracts = contractMetaDao.getAllActiveContracts();
+            if (activeContracts.isEmpty()) {
+                log.info("No active contracts found, nothing to do");
+                return;
+            }
+
+            for (ContractMeta contractMeta : activeContracts) {
+                JobKey jobKey = buildJobKey(
+                        contractMeta.getPartyId(),
+                        contractMeta.getContractId(),
+                        contractMeta.getCalendarId(),
+                        contractMeta.getScheduleId()
+                );
+                List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+                if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
+                    if (scheduler.checkExists(jobKey)) {
+                        log.warn("Inactive job found, please check it manually. Job will be restored, contractMeta='{}'", contractMeta);
+                    }
+                    createJob(
+                            contractMeta.getPartyId(),
+                            contractMeta.getContractId(),
+                            new CalendarRef(contractMeta.getCalendarId()),
+                            new BusinessScheduleRef(contractMeta.getScheduleId())
+                    );
+                }
+            }
+        } catch (DaoException | SchedulerException ex) {
+            throw new ScheduleProcessingException("Failed to sync jobs", ex);
+        } finally {
+            log.info("End synchronization of jobs");
+        }
+    }
+
+    private boolean isTriggerOnNormalState(Trigger trigger) {
+        try {
+            Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+            log.debug("Trigger '{}' on '{}' state", trigger, triggerState);
+            return triggerState == Trigger.TriggerState.NORMAL;
+        } catch (SchedulerException ex) {
+            throw new ScheduleProcessingException(String.format("Failed to get trigger state, triggerKey='%s'", trigger.getKey()), ex);
+        }
+    }
+
     @Override
     @Transactional
     public void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId, BusinessScheduleRef scheduleRef, Representative signer) throws ScheduleProcessingException, NotFoundException, StorageException {
