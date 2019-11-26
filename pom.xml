@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.0.32-SNAPSHOT</version>
+    <version>1.0.33-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -20,11 +20,12 @@
     <properties>
         <postgresql.version>42.2.5</postgresql.version>
         <lombok.version>1.18.4</lombok.version>
-        <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.reportPath>target/sites/jacoco/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.cobertura.reportPath>target/site/cobertura/coverage.xml</sonar.cobertura.reportPath>
         <hikari.version>3.1.0</hikari.version>
         <spring.kafka.version>2.2.3.RELEASE</spring.kafka.version>
-        <jxls.version>2.4.0</jxls.version>
-        <jxls.poi.version>1.0.14</jxls.poi.version>
+        <jxls.version>2.7.1</jxls.version>
+        <jxls.poi.version>1.3.1</jxls.poi.version>
         <!---->
         <server.port>8022</server.port>
         <exposed.ports>${server.port}</exposed.ports>
