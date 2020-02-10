@@ -1,19 +1,16 @@
-package com.rbkmoney.reporter.util;
+package com.rbkmoney.reporter.utils;
 
 import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain_config.VersionedObject;
 import com.rbkmoney.geck.common.util.TypeUtil;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.Collections;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class TestDataUtil {
+public class TestDataUtil {
 
     public static Party getTestParty(String partyId, String shopId, String contractId) {
         Party party = new Party();
@@ -91,5 +88,4 @@ public final class TestDataUtil {
                 ))
         );
     }
-
 }

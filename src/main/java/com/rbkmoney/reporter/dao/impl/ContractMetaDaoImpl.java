@@ -1,9 +1,10 @@
 package com.rbkmoney.reporter.dao.impl;
 
-import com.rbkmoney.reporter.dao.AbstractGenericDao;
+import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.exception.DaoException;
+import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.Query;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -24,7 +24,7 @@ public class ContractMetaDaoImpl extends AbstractGenericDao implements ContractM
     private final RowMapper<ContractMeta> contractMetaRowMapper;
 
     @Autowired
-    public ContractMetaDaoImpl(DataSource dataSource) {
+    public ContractMetaDaoImpl(HikariDataSource dataSource) {
         super(dataSource);
         contractMetaRowMapper = BeanPropertyRowMapper.newInstance(ContractMeta.class);
     }

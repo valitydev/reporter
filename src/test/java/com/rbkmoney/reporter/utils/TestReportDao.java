@@ -1,6 +1,6 @@
-package com.rbkmoney.reporter.task.dao;
+package com.rbkmoney.reporter.utils;
 
-import com.rbkmoney.reporter.dao.AbstractGenericDao;
+import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
@@ -44,8 +44,7 @@ public class TestReportDao extends AbstractGenericDao {
                 .set(REPORT.STATUS, ReportStatus.pending)
                 .returning(REPORT.ID);
 
-        executeOneWithReturn(query, keyHolder);
+        execute(query, keyHolder);
         return keyHolder.getKey().longValue();
     }
-
 }

@@ -1,6 +1,6 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.reporter.AbstractIntegrationTest;
+import com.rbkmoney.reporter.config.AbstractStorageServiceConfig;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
@@ -18,14 +18,13 @@ import java.time.ZoneOffset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class StorageServiceTest extends AbstractIntegrationTest {
+public class StorageServiceTest extends AbstractStorageServiceConfig {
 
     @Autowired
-    StorageService storageService;
+    private StorageService storageService;
 
     @Test
     public void saveFileTest() throws IOException {
-
         Path expectedFile = Files.createTempFile("reporter_", "_expected_file");
         Path actualFile = Files.createTempFile("reporter_", "_actual_file");
 

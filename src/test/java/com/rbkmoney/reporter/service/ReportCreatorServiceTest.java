@@ -1,11 +1,12 @@
-package com.rbkmoney.reporter.service.impl;
+package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.merch_stat.StatPayment;
 import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
-import com.rbkmoney.reporter.service.BuildUtils;
-import com.rbkmoney.reporter.service.StatisticService;
+import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
+import com.rbkmoney.reporter.service.impl.StatisticServiceImpl;
+import com.rbkmoney.reporter.utils.BuildUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
@@ -23,11 +24,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-public class ReportCreatorServiceImplTest {
+public class ReportCreatorServiceTest {
 
     @Test
     public void createBigSizeReportTest() throws IOException {
-
         StatisticService statisticsService = Mockito.mock(StatisticServiceImpl.class);
         when(statisticsService.getCapturedPayment(any(String.class), any(String.class), any(String.class), any(String.class)))
                 .thenReturn(BuildUtils.buildStatPayment(1));
@@ -50,12 +50,19 @@ public class ReportCreatorServiceImplTest {
             purposes.put("invoiceId" + i, "Keksik");
         });
 
-
         Path tempFile = Files.createTempFile("check_limit", ".xlsx");
         try {
-            ReportCreatorDto reportCreatorDto = new ReportCreatorDto("2019-03-22T06:12:27Z", "2019-04-22T06:12:27Z",
-                    paymentsIterator, refundsIterator, report,
-                    Files.newOutputStream(tempFile), shopUrls, purposes, statisticsService);
+            ReportCreatorDto reportCreatorDto = new ReportCreatorDto(
+                    "2019-03-22T06:12:27Z",
+                    "2019-04-22T06:12:27Z",
+                    paymentsIterator,
+                    refundsIterator,
+                    report,
+                    Files.newOutputStream(tempFile),
+                    shopUrls,
+                    purposes,
+                    statisticsService
+            );
 
             ReportCreatorServiceImpl reportCreatorServiceImpl = new ReportCreatorServiceImpl();
             reportCreatorServiceImpl.setLimit(10);

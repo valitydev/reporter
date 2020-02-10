@@ -1,16 +1,22 @@
 info:
   version: @project.version@
   stage: dev
+
 server:
   port: @server.port@
+
 management:
+  endpoint:
+    health:
+      show-details: ALWAYS
   metrics:
     export:
       statsd:
-        flavor: etsy
+        flavor: ETSY
         enabled: false
   security:
     flag: false
+
 spring:
   application:
     name: @project.name@
@@ -26,7 +32,7 @@ spring:
   flyway:
     schemas: @db.schema@
   quartz:
-    job-store-type: jdbc
+    job-store-type: JDBC
     properties:
       org.quartz:
         jobStore:
@@ -46,16 +52,19 @@ spring:
           makeThreadsDaemons: true
           threadNamePrefix: Scheduler
     jdbc:
-      initialize-schema: always
+      initialize-schema: ALWAYS
   output:
     ansi:
-      enabled: always
+      enabled: ALWAYS
+
 partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt
   timeout: 5000
+
 magista:
   url: http://magista:8022/stat
   timeout: 60000
+
 bustermaze:
   url: http://bustermaze:8022/repo
   polling:
@@ -63,15 +72,19 @@ bustermaze:
     retryDelay: 1000
     maxPoolSize: 1
     housekeeperTimeout: 15000
+
 signer:
   url: http://signer:8022/signer
   timeout: 5000
+
 domainConfig:
   url: http://dominant:8022/v1/domain/repository
   timeout: 5000
+
 report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
+
 storage:
   endpoint: localhost:42827
   signingRegion: RU

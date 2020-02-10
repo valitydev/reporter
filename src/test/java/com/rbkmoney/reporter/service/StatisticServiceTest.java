@@ -1,16 +1,14 @@
 package com.rbkmoney.reporter.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
 import com.rbkmoney.damsel.merch_stat.StatRequest;
 import com.rbkmoney.damsel.merch_stat.StatResponse;
 import com.rbkmoney.damsel.merch_stat.StatResponseData;
-import com.rbkmoney.reporter.AbstractIntegrationTest;
+import com.rbkmoney.reporter.config.AbstractStatisticServiceConfig;
 import com.rbkmoney.reporter.dsl.DslUtil;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -24,22 +22,19 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-public class StatisticServiceTest extends AbstractIntegrationTest {
+public class StatisticServiceTest extends AbstractStatisticServiceConfig {
 
     @Autowired
-    StatisticService statisticService;
+    private StatisticService statisticService;
 
     @Autowired
-    ObjectMapper objectMapper;
-
-    @MockBean
-    MerchantStatisticsSrv.Iface merchantStatisticsClient;
+    private ObjectMapper objectMapper;
 
     @Test
     public void testCreatePaymentRequest() {
         assertEquals(
                 new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
-                DslUtil.createPaymentRequest("partyId", "shopId","invoiceId", "paymentId", objectMapper)
+                DslUtil.createPaymentRequest("partyId", "shopId", "invoiceId", "paymentId", objectMapper)
         );
         assertEquals(
                 new StatRequest("{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"from_time\":\"2018-10-28T09:15:00Z\",\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
@@ -77,5 +72,4 @@ public class StatisticServiceTest extends AbstractIntegrationTest {
             assertEquals(5, constraintViolations.size());
         }
     }
-
 }

@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service;
+package com.rbkmoney.reporter.utils;
 
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.geck.common.util.TypeUtil;

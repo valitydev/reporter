@@ -1,6 +1,6 @@
 package com.rbkmoney.reporter.dao.impl;
 
-import com.rbkmoney.reporter.dao.AbstractGenericDao;
+import com.rbkmoney.dao.impl.AbstractGenericDao;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
@@ -151,7 +151,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
                                             LocalDateTime toTime, LocalDateTime createdAfter, int limit) throws DaoException {
         Condition condition = buildCondition(partyId, shopId, reportTypes, fromTime, toTime);
         if (createdAfter != null) {
-           condition = condition.and(REPORT.CREATED_AT.greaterThan(createdAfter));
+            condition = condition.and(REPORT.CREATED_AT.greaterThan(createdAfter));
         }
         Query query = getDslContext().selectFrom(REPORT)
                 .where(condition)
@@ -175,7 +175,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
                 .set(REPORT.CREATED_AT, createdAt)
                 .returning(REPORT.ID);
 
-        executeOneWithReturn(query, keyHolder);
+        execute(query, keyHolder);
         return keyHolder.getKey().longValue();
     }
 }

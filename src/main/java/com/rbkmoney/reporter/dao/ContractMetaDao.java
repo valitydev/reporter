@@ -6,7 +6,7 @@ import com.rbkmoney.reporter.exception.DaoException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ContractMetaDao extends GenericDao {
+public interface ContractMetaDao {
 
     Long getLastEventId() throws DaoException;
 

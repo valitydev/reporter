@@ -9,7 +9,7 @@ import com.rbkmoney.reporter.exception.DaoException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ReportDao extends GenericDao {
+public interface ReportDao {
 
     Report getReport(long reportId) throws DaoException;
 
