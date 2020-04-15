@@ -19,6 +19,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -58,7 +59,7 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
         try {
             return reportDao.getReportsWithToken(
                     partyId,
-                    shopId,
+                    Collections.singletonList(shopId),
                     reportTypes,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
@@ -69,6 +70,31 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
             throw new StorageException(String.format("Failed to get reports with token, " +
                             "partyId='%s', shopId='%s', reportTypes='%s', fromTime='%s', toTime='%s', createdAfter='%s'",
                     partyId, shopId, reportTypes, fromTime, toTime, createdAfter), ex);
+        }
+    }
+
+    @Override
+    public List<Report> getReportsWithToken(String partyId,
+                                            List<String> shopIds,
+                                            List<ReportType> reportTypes,
+                                            Instant fromTime,
+                                            Instant toTime,
+                                            Instant createdAfter,
+                                            int limit) throws StorageException {
+        try {
+            return reportDao.getReportsWithToken(
+                    partyId,
+                    shopIds,
+                    reportTypes,
+                    LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
+                    LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
+                    createdAfter != null ? LocalDateTime.ofInstant(createdAfter, ZoneOffset.UTC) : null,
+                    limit
+            );
+        } catch (DaoException ex) {
+            throw new StorageException(String.format("Failed to get reports with token, " +
+                            "partyId='%s', shopIds='%s', reportTypes='%s', fromTime='%s', toTime='%s', createdAfter='%s'",
+                    partyId, shopIds, reportTypes, fromTime, toTime, createdAfter), ex);
         }
     }
 

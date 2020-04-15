@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>reporter-proto</artifactId>
-            <version>1.5-c5ac89c</version>
+            <version>1.6-c08071f</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney</groupId>
