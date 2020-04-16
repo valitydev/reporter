@@ -10,7 +10,6 @@ import com.rbkmoney.easyway.AbstractTestUtils;
 import com.rbkmoney.easyway.TestContainers;
 import com.rbkmoney.easyway.TestContainersBuilder;
 import com.rbkmoney.easyway.TestContainersParameters;
-import com.rbkmoney.eventstock.client.EventPublisher;
 import com.rbkmoney.reporter.dao.impl.ContractMetaDaoImpl;
 import com.rbkmoney.reporter.dao.impl.ReportDaoImpl;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
@@ -89,9 +88,6 @@ public abstract class AbstractSchedulerConfig extends AbstractTestUtils {
 
     @MockBean
     protected StorageService storageService;
-
-    @MockBean
-    protected EventPublisher eventPublisher;
 
     @MockBean
     protected PaymentRegistryTemplateImpl paymentRegistryTemplate;

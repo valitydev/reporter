@@ -13,7 +13,6 @@ import com.rbkmoney.easyway.AbstractTestUtils;
 import com.rbkmoney.easyway.TestContainers;
 import com.rbkmoney.easyway.TestContainersBuilder;
 import com.rbkmoney.easyway.TestContainersParameters;
-import com.rbkmoney.eventstock.client.EventPublisher;
 import com.rbkmoney.reporter.ReporterApplication;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.StatisticService;
@@ -55,18 +54,16 @@ public abstract class AbstractIntegrationConfig extends AbstractTestUtils {
     private StatisticService statisticService;
 
     @MockBean
-    private EventPublisher eventPublisher;
-
-    @MockBean
     private RepositoryClientSrv.Iface dominantClient;
 
     @MockBean
     private PartyManagementSrv.Iface partyManagementClient;
 
-    private static TestContainers testContainers = TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
-            .addPostgresqlTestContainer()
-            .addCephTestContainer()
-            .build();
+    private static TestContainers testContainers =
+            TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
+                    .addPostgresqlTestContainer()
+                    .addCephTestContainer()
+                    .build();
 
     protected String partyId = "TestPartyID";
     protected String shopId = "TestShopID";

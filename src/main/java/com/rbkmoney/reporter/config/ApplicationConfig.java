@@ -10,8 +10,13 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
+import com.rbkmoney.damsel.payment_processing.PartyEventData;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.damsel.signer.SignerSrv;
+import com.rbkmoney.sink.common.parser.impl.MachineEventParser;
+import com.rbkmoney.sink.common.parser.impl.PartyEventDataMachineEventParser;
+import com.rbkmoney.sink.common.serialization.BinaryDeserializer;
+import com.rbkmoney.sink.common.serialization.impl.PartyEventDataDeserializer;
 import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +92,16 @@ public class ApplicationConfig {
                 .setDaemon(true)
                 .build();
         return Executors.newFixedThreadPool(threadPoolSize, threadFactory);
+    }
+
+    @Bean
+    public MachineEventParser<PartyEventData> partyEventDataMachineEventParser(BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer) {
+        return new PartyEventDataMachineEventParser(partyEventDataBinaryDeserializer);
+    }
+
+    @Bean
+    public BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer() {
+        return new PartyEventDataDeserializer();
     }
 
 }

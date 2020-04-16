@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.handler;
+package com.rbkmoney.reporter.handler.report;
 
 import com.rbkmoney.damsel.domain.Shop;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -11,9 +11,11 @@ import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.handler.ReportsNewProtoHandler;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -26,7 +28,11 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-public class HandlerTest extends AbstractHandlerConfig {
+@ContextConfiguration(
+        classes = ReportsNewProtoHandler.class,
+        initializers = AbstractHandlerConfig.Initializer.class
+)
+public class ReportHandlersTest extends AbstractHandlerConfig {
 
     @Autowired
     private ReportsNewProtoHandler handler;
