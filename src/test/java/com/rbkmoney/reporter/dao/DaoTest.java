@@ -7,22 +7,21 @@ import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
-import com.rbkmoney.reporter.utils.TestReportDao;
-import com.zaxxer.hikari.HikariDataSource;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -37,16 +36,11 @@ public class DaoTest extends AbstractDaoConfig {
     @Autowired
     private ContractMetaDao contractMetaDao;
 
-    @Autowired
-    private HikariDataSource dataSource;
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(2);
-
-    private static final int REPORTS_COUNT = 500;
-
     @Before
     public void setUp() throws Exception {
         jdbcTemplate.execute("truncate rpt.report cascade");
+        jdbcTemplate.execute("truncate rpt.file_meta cascade");
+        jdbcTemplate.execute("truncate rpt.contract_meta cascade");
     }
 
     @Test
@@ -119,7 +113,7 @@ public class DaoTest extends AbstractDaoConfig {
     @Test
     public void testGetReportsWithToken() throws DaoException {
         LocalDateTime currMoment = LocalDateTime.now();
-        createReports(currMoment);
+        createReports(15, currMoment);
 
         List<Report> reports = reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
                 currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
@@ -132,7 +126,7 @@ public class DaoTest extends AbstractDaoConfig {
     @Test
     public void testGetReportsWithTokenByShopIds() throws DaoException {
         LocalDateTime currMoment = LocalDateTime.now();
-        createReports(currMoment);
+        createReports(15, currMoment);
 
         List<Report> reports = reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
                 currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
@@ -187,33 +181,42 @@ public class DaoTest extends AbstractDaoConfig {
     }
 
     @Test
-    public void severalInstancesReportServiceTest() throws DaoException, ExecutionException, InterruptedException {
-        TestReportDao testReportDao = new TestReportDao(dataSource);
+    @Ignore("disable db lock test, the test lasts more than 2 minutes")
+    public void severalInstancesReportServiceTest() throws ExecutionException, InterruptedException {
+        Awaitility.setDefaultPollInterval(10, TimeUnit.MILLISECONDS);
+        Awaitility.setDefaultPollDelay(Duration.ZERO);
+        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
+        int count = 3000;
+        createReports(count, LocalDateTime.now());
 
-        for (int i = 0; i < REPORTS_COUNT; i++) {
-            testReportDao.createPendingReport(random(String.class), random(String.class), LocalDateTime.now(),
-                    LocalDateTime.now(), ReportType.payment_registry, "UTC", LocalDateTime.now());
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        Future<List<Report>> firstFuture = executorService.submit(() -> reportDao.getPendingReports(count));
+        Future<List<Report>> secondFuture = executorService.submit(() -> reportDao.getPendingReports(count));
+
+        await().until(firstFuture::isDone);
+        await().until(secondFuture::isDone);
+
+        assertFalse(firstFuture.get().isEmpty());
+        assertFalse(secondFuture.get().isEmpty());
+    }
+
+    private void createReports(int count, LocalDateTime currMoment) {
+        IntStream.rangeClosed(1, count).forEach(i -> createReport(currMoment, i));
+    }
+
+    private void createReport(LocalDateTime currMoment, int i) {
+        try {
+            reportDao.createReport(
+                    "partyId",
+                    "shopId",
+                    currMoment.minusSeconds(i),
+                    currMoment.plusSeconds(i),
+                    random(ReportType.class),
+                    random(TimeZone.class).getID(),
+                    currMoment.plusSeconds(i)
+            );
+        } catch (DaoException e) {
+            throw new RuntimeException();
         }
-
-        Future<List<Report>> firstFuture = executor.submit(() -> reportDao.getPendingReports(REPORTS_COUNT));
-        Future<List<Report>> secondFuture = executor.submit(() -> reportDao.getPendingReports(REPORTS_COUNT));
-        List<Report> firstReportList = firstFuture.get();
-        List<Report> secondReportList = secondFuture.get();
-
-        boolean isError = firstReportList == null || firstReportList.isEmpty()
-                || secondReportList == null || secondReportList.isEmpty();
-        assertFalse("One of the report lists is empty", isError);
     }
-
-    private void createReports(LocalDateTime currMoment) {
-        IntStream.rangeClosed(1, 15).forEach(i -> {
-            try {
-                reportDao.createReport("partyId", "shopId", currMoment.minusSeconds(i), currMoment.plusSeconds(i),
-                        random(ReportType.class), random(TimeZone.class).getID(), currMoment.plusSeconds(i));
-            } catch (DaoException e) {
-                throw new RuntimeException();
-            }
-        });
-    }
-
 }

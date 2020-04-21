@@ -8,8 +8,10 @@ import com.rbkmoney.damsel.merch_stat.Payer;
 import com.rbkmoney.damsel.merch_stat.PaymentResourcePayer;
 import com.rbkmoney.damsel.merch_stat.PaymentTool;
 import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.config.AbstractTemplateConfig;
+import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
@@ -27,6 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,6 +46,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 public class TemplateTest extends AbstractTemplateConfig {
+
+    @MockBean
+    private StatisticService statisticService;
+
+    @MockBean
+    private ContractMetaDao contractMetaDao;
+
+    @MockBean
+    private PartyManagementSrv.Iface partyManagementClient;
 
     @Autowired
     private PaymentRegistryTemplateImpl paymentRegistryTemplate;

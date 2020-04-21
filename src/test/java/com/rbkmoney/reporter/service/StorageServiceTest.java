@@ -3,6 +3,7 @@ package com.rbkmoney.reporter.service;
 import com.rbkmoney.reporter.config.AbstractStorageServiceConfig;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +25,7 @@ public class StorageServiceTest extends AbstractStorageServiceConfig {
     private StorageService storageService;
 
     @Test
+    @Ignore("disable test with ceph usage, if needed check it locally")
     public void saveFileTest() throws IOException {
         Path expectedFile = Files.createTempFile("reporter_", "_expected_file");
         Path actualFile = Files.createTempFile("reporter_", "_actual_file");
@@ -45,5 +47,4 @@ public class StorageServiceTest extends AbstractStorageServiceConfig {
             Files.deleteIfExists(actualFile);
         }
     }
-
 }

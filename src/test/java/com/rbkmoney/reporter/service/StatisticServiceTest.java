@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
 import com.rbkmoney.damsel.merch_stat.StatRequest;
 import com.rbkmoney.damsel.merch_stat.StatResponse;
 import com.rbkmoney.damsel.merch_stat.StatResponseData;
@@ -9,6 +10,7 @@ import com.rbkmoney.reporter.dsl.DslUtil;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -23,6 +25,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 public class StatisticServiceTest extends AbstractStatisticServiceConfig {
+
+    @MockBean
+    private MerchantStatisticsSrv.Iface merchantStatisticsClient;
 
     @Autowired
     private StatisticService statisticService;

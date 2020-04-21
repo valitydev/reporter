@@ -5,7 +5,6 @@ import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.config.AbstractHandlerConfig;
 import com.rbkmoney.reporter.service.TaskService;
-import com.rbkmoney.reporter.service.impl.S3StorageServiceImpl;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,6 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
 
     @MockBean
     private TaskService taskService;
-
-    @MockBean
-    private S3StorageServiceImpl s3StorageService;
 
     private final static String CONTRACT_EFFECT_CREATED = "created";
 

@@ -12,9 +12,12 @@ import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.handler.ReportsNewProtoHandler;
+import com.rbkmoney.reporter.service.PartyService;
+import com.rbkmoney.reporter.service.ReportNewProtoService;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
@@ -33,6 +36,12 @@ import static org.mockito.Mockito.when;
         initializers = AbstractHandlerConfig.Initializer.class
 )
 public class ReportHandlersTest extends AbstractHandlerConfig {
+
+    @MockBean
+    private PartyService partyService;
+
+    @MockBean
+    private ReportNewProtoService reportNewProtoService;
 
     @Autowired
     private ReportsNewProtoHandler handler;
