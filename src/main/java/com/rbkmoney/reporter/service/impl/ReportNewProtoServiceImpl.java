@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +60,7 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
         try {
             return reportDao.getReportsWithToken(
                     partyId,
-                    Objects.requireNonNullElse(Collections.singletonList(shopId), Collections.emptyList()),
+                    Optional.ofNullable(shopId).map(Collections::singletonList).orElse(Collections.emptyList()),
                     reportTypes,
                     LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
                     LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
