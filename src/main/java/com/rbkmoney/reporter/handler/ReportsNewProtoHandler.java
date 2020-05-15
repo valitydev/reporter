@@ -141,34 +141,6 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
         }
     }
 
-    private void getReporterWithToken(ReportRequest reportRequest,
-                                      List<String> reportTypes,
-                                      Instant fromTime,
-                                      Instant toTime,
-                                      String continuationToken) {
-        if (reportRequest.isSetShopIds()) {
-            List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
-                    reportRequest.getPartyId(),
-                    reportRequest.getShopIds(),
-                    reportTypes != null ? reportTypes(reportTypes) : null,
-                    fromTime,
-                    toTime,
-                    continuationToken != null ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
-                    REPORTS_LIMIT
-            );
-        } else {
-            List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
-                    reportRequest.getPartyId(),
-                    reportRequest.getShopId(),
-                    reportTypes != null ? reportTypes(reportTypes) : null,
-                    fromTime,
-                    toTime,
-                    continuationToken != null ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
-                    REPORTS_LIMIT
-            );
-        }
-    }
-
     private List<ReportType> reportTypes(List<String> reportTypes) {
         return reportTypes.stream()
                 .map(ReportType::valueOf)

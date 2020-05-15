@@ -397,7 +397,7 @@
                     <schemas>
                         <schema>${db.embedded.schema}</schema>
                     </schemas>
-                    <userName>${db.embedded.name}</userName>
+                    <userName>${db.embedded.user}</userName>
                     <password>${db.embedded.password}</password>
                     <port>${db.embedded.port}</port>
                 </configuration>

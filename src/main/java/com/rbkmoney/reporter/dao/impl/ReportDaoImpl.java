@@ -129,8 +129,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     private Condition buildCondition(String partyId, String shopId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) {
         Condition condition = REPORT.PARTY_ID.eq(partyId)
                 .and(ofNullable(shopId).map(REPORT.PARTY_SHOP_ID::eq).orElse(trueCondition()))
-                .and(REPORT.FROM_TIME.ge(fromTime))
-                .and(REPORT.TO_TIME.le(toTime));
+                .and(REPORT.CREATED_AT.ge(fromTime))
+                .and(REPORT.CREATED_AT.le(toTime));
 
         if (!CollectionUtils.isEmpty(reportTypes)) {
             condition = condition.and(REPORT.TYPE.in(reportTypes));
@@ -155,8 +155,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
                                             LocalDateTime createdAfter,
                                             int limit) throws DaoException {
         Condition condition = REPORT.PARTY_ID.eq(partyId)
-                .and(REPORT.FROM_TIME.ge(fromTime))
-                .and(REPORT.TO_TIME.le(toTime));
+                .and(REPORT.CREATED_AT.ge(fromTime))
+                .and(REPORT.CREATED_AT.le(toTime));
         if (!CollectionUtils.isEmpty(reportTypes)) {
             condition = condition.and(REPORT.TYPE.in(reportTypes));
         }

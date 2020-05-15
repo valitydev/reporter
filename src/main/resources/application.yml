@@ -6,7 +6,7 @@ server:
   port: @server.port@
 spring:
   application:
-    name: @project.name@
+    name: '@project.name@'
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver

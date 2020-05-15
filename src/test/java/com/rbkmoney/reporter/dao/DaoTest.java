@@ -81,11 +81,11 @@ public class DaoTest extends AbstractDaoConfig {
     public void insertAndGetReportTest() throws DaoException {
         String partyId = random(String.class);
         String shopId = random(String.class);
-        LocalDateTime fromTime = random(LocalDateTime.class);
-        LocalDateTime toTime = random(LocalDateTime.class);
+        LocalDateTime fromTime = LocalDateTime.now().minusDays(1);
+        LocalDateTime toTime = LocalDateTime.now().plusDays(1);
         ReportType reportType = random(ReportType.class);
         String timezone = random(TimeZone.class).getID();
-        LocalDateTime createdAt = random(LocalDateTime.class);
+        LocalDateTime createdAt = LocalDateTime.now();
 
         long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
 
