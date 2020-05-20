@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -51,6 +52,7 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
         String partyId = "partyId";
         String shopId = "shopId";
         String reportType = "provision_of_service";
+        List<String> shopIds = Collections.singletonList(shopId);
         Random random = new Random();
 
         when(partyService.getShop(anyString(), anyString())).thenReturn(new Shop());
@@ -78,13 +80,13 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
                 }
         );
 
-        when(reportNewProtoService.getReportsWithToken(eq(partyId), eq(shopId), any(), any(), any(), any(), eq(100)))
+        when(reportNewProtoService.getReportsWithToken(eq(partyId), eq(shopIds), any(), any(), any(), any(), eq(100)))
                 .thenReturn(getReports(100));
         when(reportNewProtoService.getReportFiles(anyLong())).thenReturn(randomListOf(1, FileMeta.class));
 
         ReportRequest request = new ReportRequest()
                 .setPartyId(partyId)
-                .setShopId(shopId)
+                .setShopIds(shopIds)
                 .setTimeRange(
                         new ReportTimeRange(
                                 TypeUtil.temporalToString(currMoment.minusDays(1)),
@@ -98,7 +100,7 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
         assertNotNull(statReportResponseFirst.getContinuationToken());
 
 
-        when(reportNewProtoService.getReportsWithToken(eq(partyId), eq(shopId), any(), any(), any(), any(), eq(100)))
+        when(reportNewProtoService.getReportsWithToken(eq(partyId), eq(shopIds), any(), any(), any(), any(), eq(100)))
                 .thenReturn(getReports(30));
         when(reportNewProtoService.getReportFiles(anyLong())).thenReturn(randomListOf(1, FileMeta.class));
 

@@ -19,9 +19,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,26 +49,6 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
             return report;
         } catch (DaoException ex) {
             throw new StorageException(String.format("Failed to get report from storage, reportId='%d'", reportId), ex);
-        }
-    }
-
-    @Override
-    public List<Report> getReportsWithToken(String partyId, String shopId, List<ReportType> reportTypes,
-                                            Instant fromTime, Instant toTime, Instant createdAfter, int limit) throws StorageException {
-        try {
-            return reportDao.getReportsWithToken(
-                    partyId,
-                    Optional.ofNullable(shopId).map(Collections::singletonList).orElse(Collections.emptyList()),
-                    reportTypes,
-                    LocalDateTime.ofInstant(fromTime, ZoneOffset.UTC),
-                    LocalDateTime.ofInstant(toTime, ZoneOffset.UTC),
-                    createdAfter != null ? LocalDateTime.ofInstant(createdAfter, ZoneOffset.UTC) : null,
-                    limit
-            );
-        } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get reports with token, " +
-                            "partyId='%s', shopId='%s', reportTypes='%s', fromTime='%s', toTime='%s', createdAfter='%s'",
-                    partyId, shopId, reportTypes, fromTime, toTime, createdAfter), ex);
         }
     }
 

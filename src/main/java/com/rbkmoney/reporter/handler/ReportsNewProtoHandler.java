@@ -19,7 +19,9 @@ import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.rbkmoney.reporter.util.NewProtoUtil.buildInvalidRequest;
@@ -84,7 +86,9 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
 
             List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
                     reportRequest.getPartyId(),
-                    reportRequest.getShopId(),
+                    reportRequest.isSetShopIds()
+                            ? reportRequest.getShopIds()
+                            : Optional.ofNullable(reportRequest.getShopId()).map(Collections::singletonList).orElseGet(Collections::emptyList),
                     reportTypes != null ? reportTypes(reportTypes) : null,
                     fromTime,
                     toTime,
