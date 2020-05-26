@@ -38,7 +38,7 @@
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <metrics.version>1.1.0</metrics.version>
         <shared.resources.version>0.3.6</shared.resources.version>
-        <damsel.version>1.382-718ab96</damsel.version>
+        <damsel.version>1.414-f49cb86</damsel.version>
         <!---->
         <db.name>reporter</db.name>
         <db.schema>rpt</db.schema>
