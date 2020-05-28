@@ -4,7 +4,9 @@ import com.rbkmoney.kafka.common.serialization.ThriftSerializer;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import com.rbkmoney.reporter.config.AbstractKafkaConfig;
-import com.rbkmoney.reporter.service.PartyManagementService;
+import com.rbkmoney.reporter.service.EventService;
+import com.rbkmoney.reporter.service.impl.InvoicingService;
+import com.rbkmoney.reporter.service.impl.PartyManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -31,20 +33,34 @@ public class PartyManagementKafkaListenerTest extends AbstractKafkaConfig {
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    @Value("${kafka.topics.invoicing.id}")
+    public String invoicingTopic;
+
     @Value("${kafka.topics.party-management.id}")
-    public String topic;
+    public String partyTopic;
 
     @MockBean
-    private PartyManagementService partyManagementService;
+    private EventService eventService;
 
     @Test
-    public void listenEmptyChanges() {
+    public void listenInvoicingChanges() throws Exception {
         SinkEvent sinkEvent = new SinkEvent();
         sinkEvent.setEvent(createMessage());
 
-        writeToTopic(topic, sinkEvent);
+        writeToTopic(invoicingTopic, sinkEvent);
 
-        verify(partyManagementService, timeout(DEFAULT_KAFKA_SYNC_TIMEOUT).times(1))
+        verify(eventService, timeout(DEFAULT_KAFKA_SYNC_TIMEOUT).times(1))
+                .handleEvents(anyList());
+    }
+
+    @Test
+    public void listenPartyChanges() throws Exception {
+        SinkEvent sinkEvent = new SinkEvent();
+        sinkEvent.setEvent(createMessage());
+
+        writeToTopic(partyTopic, sinkEvent);
+
+        verify(eventService, timeout(DEFAULT_KAFKA_SYNC_TIMEOUT).times(1))
                 .handleEvents(anyList());
     }
 

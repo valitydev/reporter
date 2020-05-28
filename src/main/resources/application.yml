@@ -69,6 +69,27 @@ kafka:
     party-management:
       id: mg-events-party
       enabled: false
+      concurrency: 1
+    invoicing:
+      id: mg-invoice-100-2
+      enabled: false
+      concurrency: 1
+
+bustermaze:
+  payout:
+    polling:
+      url: http://localhost:8026/repo/payout
+      housekeeperTimeout: 15000
+      maxPoolSize: 1
+      maxQuerySize: 1000
+      delay: 10000
+      retryDelay: 1000
+      enabled: false
+
+hellgate:
+  invoicing:
+    url: http://localhost:8023/v1/invoicing
+    timeout: 30000
 
 partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt

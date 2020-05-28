@@ -1,6 +1,7 @@
-package com.rbkmoney.reporter.handler;
+package com.rbkmoney.reporter.handler.report;
 
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.handler.Handler;
 import com.rbkmoney.reporter.service.ReportService;
 import lombok.RequiredArgsConstructor;
 

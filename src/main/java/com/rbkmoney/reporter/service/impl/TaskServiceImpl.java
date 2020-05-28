@@ -12,7 +12,7 @@ import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.exception.ScheduleProcessingException;
 import com.rbkmoney.reporter.exception.StorageException;
-import com.rbkmoney.reporter.handler.ReportGeneratorHandler;
+import com.rbkmoney.reporter.handler.report.ReportGeneratorHandler;
 import com.rbkmoney.reporter.job.GenerateReportJob;
 import com.rbkmoney.reporter.service.*;
 import com.rbkmoney.reporter.trigger.FreezeTimeCronScheduleBuilder;

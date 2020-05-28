@@ -6,6 +6,7 @@ import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.*;
+import com.rbkmoney.reporter.template.ReportTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +32,7 @@ public class ReportService {
 
     private final ReportDao reportDao;
 
-    private final List<TemplateService> templateServices;
+    private final List<ReportTemplate> reportTemplates;
 
     private final StorageService storageService;
 
@@ -42,13 +42,13 @@ public class ReportService {
 
     public ReportService(
             ReportDao reportDao,
-            List<TemplateService> templateServices,
+            List<ReportTemplate> reportTemplates,
             StorageService storageService,
             @Value("${report.defaultTimeZone}") ZoneId defaultTimeZone,
             @Value("${report.batchSize}") int batchSize
     ) {
         this.reportDao = reportDao;
-        this.templateServices = templateServices;
+        this.reportTemplates = reportTemplates;
         this.storageService = storageService;
         this.defaultTimeZone = defaultTimeZone;
         this.batchSize = batchSize;
@@ -159,11 +159,11 @@ public class ReportService {
 
     public List<FileMeta> processSignAndUpload(Report report) throws IOException {
         List<FileMeta> files = new ArrayList<>();
-        for (TemplateService templateService : templateServices) {
-            if (templateService.accept(report.getType())) {
+        for (ReportTemplate reportTemplate : reportTemplates) {
+            if (reportTemplate.isAccept(report.getType())) {
                 Path reportFile = Files.createTempFile(report.getType() + "_", "_report.xlsx");
                 try {
-                    templateService.processReportTemplate(report, Files.newOutputStream(reportFile));
+                    reportTemplate.processReportTemplate(report, Files.newOutputStream(reportFile));
                     FileMeta reportFileModel = storageService.saveFile(reportFile);
                     files.add(reportFileModel);
                 } finally {

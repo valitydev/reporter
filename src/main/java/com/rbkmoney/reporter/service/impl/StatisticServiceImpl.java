@@ -7,8 +7,8 @@ import com.rbkmoney.reporter.exception.InvoiceNotFoundException;
 import com.rbkmoney.reporter.exception.PaymentNotFoundException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.StatisticService;
+import lombok.RequiredArgsConstructor;
 import org.apache.thrift.TException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
@@ -19,19 +19,14 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class StatisticServiceImpl implements StatisticService {
 
     private final MerchantStatisticsSrv.Iface merchantStatisticsClient;
 
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    public StatisticServiceImpl(MerchantStatisticsSrv.Iface merchantStatisticsClient, ObjectMapper objectMapper) {
-        this.merchantStatisticsClient = merchantStatisticsClient;
-        this.objectMapper = objectMapper;
-    }
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 
     @Override
     public ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant toTime) {

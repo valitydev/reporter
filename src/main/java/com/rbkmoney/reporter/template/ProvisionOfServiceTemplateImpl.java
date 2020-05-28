@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service.impl;
+package com.rbkmoney.reporter.template;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
@@ -11,7 +11,6 @@ import com.rbkmoney.reporter.exception.StorageException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.StatisticService;
-import com.rbkmoney.reporter.service.TemplateService;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.jxls.common.Context;
@@ -27,7 +26,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 @Component
-public class ProvisionOfServiceTemplateImpl implements TemplateService {
+public class ProvisionOfServiceTemplateImpl implements ReportTemplate {
 
     public static final String DEFAULT_REPORT_CURRENCY_CODE = "RUB";
 
@@ -53,7 +52,7 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
     }
 
     @Override
-    public boolean accept(ReportType reportType) {
+    public boolean isAccept(ReportType reportType) {
         return reportType == ReportType.provision_of_service;
     }
 
@@ -63,15 +62,15 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
             Party party = partyService.getParty(report.getPartyId());
             Shop shop = party.getShops().get(report.getPartyShopId());
             if (shop == null) {
-                throw new NotFoundException(String.format("Failed to find shop for provision of service report, partyId='%s', shopId='%s'",
-                        report.getPartyId(), report.getPartyShopId()));
+                throw new NotFoundException(String.format("Failed to find shop for provision of service report " +
+                                "(partyId='%s', shopId='%s')", report.getPartyId(), report.getPartyShopId()));
             }
 
             String contractId = shop.getContractId();
             ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId);
             if (contractMeta == null) {
-                throw new NotFoundException(String.format("Failed to find meta data for provision of service report, partyId='%s', contractId='%s'",
-                        report.getPartyId(), contractId));
+                throw new NotFoundException(String.format("Failed to find meta data for provision of service report " +
+                                "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
             }
             contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getCreatedAt());
 
@@ -80,20 +79,24 @@ public class ProvisionOfServiceTemplateImpl implements TemplateService {
             context.putVar("party_id", report.getPartyId());
             context.putVar("shop_id", report.getPartyShopId());
             context.putVar("contract_id", contractMeta.getContractId());
-            context.putVar("created_at", TimeUtil.toLocalizedDate(report.getCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
-            context.putVar("from_time", TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId));
-            context.putVar("to_time", TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
+            context.putVar("created_at",
+                    TimeUtil.toLocalizedDate(report.getCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
+            context.putVar("from_time",
+                    TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId));
+            context.putVar("to_time",
+                    TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
 
             Contract contract = party.getContracts().get(contractId);
             if (contract == null) {
-                throw new NotFoundException(String.format("Failed to find contract for provision of service report, partyId='%s', contractId='%s'",
-                        report.getPartyId(), contractId));
+                throw new NotFoundException(String.format("Failed to find contract for provision of service report" +
+                                "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
             }
 
             if (contract.isSetLegalAgreement()) {
                 LegalAgreement legalAgreement = contract.getLegalAgreement();
                 context.putVar("legal_agreement_id", legalAgreement.getLegalAgreementId());
-                context.putVar("legal_agreement_signed_at", TimeUtil.toLocalizedDate(legalAgreement.getSignedAt(), reportZoneId));
+                context.putVar("legal_agreement_signed_at",
+                        TimeUtil.toLocalizedDate(legalAgreement.getSignedAt(), reportZoneId));
             }
 
             if (contract.isSetContractor()

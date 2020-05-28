@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.handler;
+package com.rbkmoney.reporter.handler.report;
 
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.*;

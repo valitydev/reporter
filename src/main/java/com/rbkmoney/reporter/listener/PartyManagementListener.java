@@ -2,7 +2,8 @@ package com.rbkmoney.reporter.listener;
 
 import com.rbkmoney.kafka.common.util.LogUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
-import com.rbkmoney.reporter.service.PartyManagementService;
+import com.rbkmoney.reporter.service.EventService;
+import com.rbkmoney.reporter.service.impl.PartyManagementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -16,10 +17,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PartyManagementListener {
 
-    private final PartyManagementService partyManagementService;
+    private final EventService partyManagementService;
 
     @KafkaListener(topics = "${kafka.topics.party-management.id}", containerFactory = "kafkaListenerContainerFactory")
-    public void handle(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) {
+    public void handle(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
         log.info("Got partyManagement machineEvent batch with size: {}", messages.size());
         partyManagementService.handleEvents(
                 messages.stream()

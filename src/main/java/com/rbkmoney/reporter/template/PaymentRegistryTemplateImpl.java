@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service.impl;
+package com.rbkmoney.reporter.template;
 
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.domain.enums.ReportType;
@@ -7,10 +7,8 @@ import com.rbkmoney.reporter.model.ReportCreatorDto;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportCreatorService;
 import com.rbkmoney.reporter.service.StatisticService;
-import com.rbkmoney.reporter.service.TemplateService;
 import com.rbkmoney.reporter.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,7 +20,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class PaymentRegistryTemplateImpl implements TemplateService {
+public class PaymentRegistryTemplateImpl implements ReportTemplate {
 
     private final StatisticService statisticService;
 
@@ -31,7 +29,7 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
     private final ReportCreatorService reportCreatorService;
 
     @Override
-    public boolean accept(ReportType reportType) {
+    public boolean isAccept(ReportType reportType) {
         return reportType == ReportType.payment_registry || reportType == ReportType.provision_of_service;
     }
 
@@ -60,8 +58,18 @@ public class PaymentRegistryTemplateImpl implements TemplateService {
         Map<String, String> purposes = statisticService.getPurposes(report.getPartyId(), report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC));
 
-        ReportCreatorDto reportCreatorDto = new ReportCreatorDto(fromTime, toTime, paymentsIterator, refundsIterator, report,
-                outputStream, shopUrls, purposes, statisticService);
+        ReportCreatorDto reportCreatorDto = ReportCreatorDto.builder()
+                .fromTime(fromTime)
+                .toTime(toTime)
+                .paymentsIterator(paymentsIterator)
+                .refundsIterator(refundsIterator)
+                .report(report)
+                .outputStream(outputStream)
+                .shopUrls(shopUrls)
+                .purposes(purposes)
+                .statisticService(statisticService)
+                .build();
+
         reportCreatorService.createReport(reportCreatorDto);
     }
 }

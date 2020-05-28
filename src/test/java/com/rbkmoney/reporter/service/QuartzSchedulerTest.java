@@ -14,8 +14,8 @@ import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.job.GenerateReportJob;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
-import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
-import com.rbkmoney.reporter.service.impl.ProvisionOfServiceTemplateImpl;
+import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
+import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.trigger.FreezeTimeCronScheduleBuilder;
 import com.rbkmoney.reporter.trigger.FreezeTimeCronTrigger;
 import lombok.extern.slf4j.Slf4j;
@@ -97,10 +97,10 @@ public class QuartzSchedulerTest extends AbstractSchedulerConfig {
         when(storageService.saveFile(any())).thenAnswer(i -> random(FileMeta.class));
         when(storageService.getFileUrl(anyString(), anyString(), any())).thenReturn(new URL("http://IP:4567/foldername/1234?abc=xyz"));
 
-        when(paymentRegistryTemplate.accept(any())).thenCallRealMethod();
+        when(paymentRegistryTemplate.isAccept(any())).thenCallRealMethod();
         doNothing().when(paymentRegistryTemplate).processReportTemplate(any(), any());
 
-        when(provisionOfServiceTemplate.accept(any())).thenCallRealMethod();
+        when(provisionOfServiceTemplate.isAccept(any())).thenCallRealMethod();
         doNothing().when(provisionOfServiceTemplate).processReportTemplate(any(), any());
 
         given(partyManagementClient.checkout(any(), any(), any()))

@@ -2,8 +2,8 @@ package com.rbkmoney.reporter.config;
 
 import com.rbkmoney.easyway.AbstractTestUtils;
 import com.rbkmoney.reporter.service.impl.PartyServiceImpl;
-import com.rbkmoney.reporter.service.impl.PaymentRegistryTemplateImpl;
-import com.rbkmoney.reporter.service.impl.ProvisionOfServiceTemplateImpl;
+import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
+import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.runner.RunWith;

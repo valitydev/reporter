@@ -82,6 +82,7 @@ public abstract class AbstractKafkaConfig extends AbstractTestUtils {
     private static Consumer<EnvironmentProperties> getEnvironmentPropertiesConsumer() {
         return environmentProperties -> {
             environmentProperties.put("kafka.topics.party-management.enabled", "true");
+            environmentProperties.put("kafka.topics.invoicing.enabled", "true");
         };
     }
 }

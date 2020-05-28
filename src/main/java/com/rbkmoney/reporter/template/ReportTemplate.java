@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service;
+package com.rbkmoney.reporter.template;
 
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
@@ -11,13 +11,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @Service
-public interface TemplateService {
+public interface ReportTemplate {
 
-    boolean accept(ReportType reportType);
+    boolean isAccept(ReportType reportType);
 
     void processReportTemplate(Report report, OutputStream outputStream) throws IOException;
 
-    default void processTemplate(Context context, InputStream templateStream, OutputStream outputStream) throws IOException {
+    default void processTemplate(Context context,
+                                 InputStream templateStream,
+                                 OutputStream outputStream) throws IOException {
         JxlsHelper.getInstance()
                 .processTemplate(
                         templateStream,

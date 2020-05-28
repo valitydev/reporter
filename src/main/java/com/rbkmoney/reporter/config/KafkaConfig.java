@@ -46,8 +46,10 @@ public class KafkaConfig {
 
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
-    @Value("${kafka.consumer.party-management.concurrency}")
-    private int concurrency;
+    @Value("${kafka.topics.invoicing.concurrency}")
+    private int invoicingConcurrency;
+    @Value("${kafka.topics.party-management.concurrency}")
+    private int partyConcurrency;
     @Value("${retry-policy.maxAttempts}")
     int maxAttempts;
 
@@ -90,7 +92,26 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MachineEvent>> kafkaListenerContainerFactory(
-                    ConsumerFactory<String, MachineEvent> consumerFactory
+            ConsumerFactory<String, MachineEvent> consumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
+                createDefaultListenerContainerFactory(consumerFactory);
+        factory.setConcurrency(partyConcurrency);
+        return factory;
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MachineEvent>> kafkaInvoicingListenerContainerFactory(
+            ConsumerFactory<String, MachineEvent> consumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
+                createDefaultListenerContainerFactory(consumerFactory);
+        factory.setConcurrency(invoicingConcurrency);
+        return factory;
+    }
+
+    public ConcurrentKafkaListenerContainerFactory<String, MachineEvent> createDefaultListenerContainerFactory(
+            ConsumerFactory<String, MachineEvent> consumerFactory
     ) {
         ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -99,7 +120,6 @@ public class KafkaConfig {
         factory.getContainerProperties().setAckOnError(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setBatchErrorHandler(kafkaErrorHandler());
-        factory.setConcurrency(concurrency);
         return factory;
     }
 

@@ -4,6 +4,7 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.config.AbstractHandlerConfig;
+import com.rbkmoney.reporter.handler.EventHandler;
 import com.rbkmoney.reporter.service.TaskService;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Test;
@@ -23,14 +24,13 @@ import static org.mockito.Mockito.verify;
         classes = {
                 ContractReportPreferencesHandler.class,
                 ContractCreatedChangesHandler.class,
-                ContractEffectHander.class,
-                PartyManagementEventHandler.class},
+                PartyManagementEventHandlerImpl.class},
         initializers = AbstractHandlerConfig.Initializer.class
 )
 public class PartyManagementHandlersTest extends AbstractHandlerConfig {
 
     @Autowired
-    private EventHandler<PartyEventData> partyManagementEventHandler;
+    private EventHandler<PartyChange> partyManagementEventHandler;
 
     @MockBean
     private TaskService taskService;
@@ -40,10 +40,12 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
     private final static String CONTRACT_EFFECT_REPORT_PREFERENCES = "report_preferences";
 
     @Test
-    public void partyManagementEventHandlerTest() {
+    public void partyManagementEventHandlerTest() throws Exception {
         MachineEvent machineEvent = createTestMachineEvent();
         PartyEventData partyEventData = createTestPartyEventData();
-        partyManagementEventHandler.handle(machineEvent, partyEventData);
+        for (PartyChange change : partyEventData.getChanges()) {
+            partyManagementEventHandler.handle(machineEvent, change, 0);
+        }
         verify(taskService, times(2))
                 .registerProvisionOfServiceJob(
                         anyString(), // party id

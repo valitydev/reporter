@@ -10,6 +10,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
 import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
+import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.damsel.payment_processing.PartyEventData;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.damsel.signer.SignerSrv;
@@ -75,6 +76,18 @@ public class ApplicationConfig {
     }
 
     @Bean
+    public InvoicingSrv.Iface invoicingThriftClient(
+            @Value("${hellgate.invoicing.url}") Resource resource,
+            @Value("${hellgate.invoicing.timeout}") int timeout
+    )
+            throws IOException {
+        return new THSpawnClientBuilder()
+                .withAddress(resource.getURI())
+                .withNetworkTimeout(timeout)
+                .build(InvoicingSrv.Iface.class);
+    }
+
+    @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
@@ -92,16 +105,6 @@ public class ApplicationConfig {
                 .setDaemon(true)
                 .build();
         return Executors.newFixedThreadPool(threadPoolSize, threadFactory);
-    }
-
-    @Bean
-    public MachineEventParser<PartyEventData> partyEventDataMachineEventParser(BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer) {
-        return new PartyEventDataMachineEventParser(partyEventDataBinaryDeserializer);
-    }
-
-    @Bean
-    public BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer() {
-        return new PartyEventDataDeserializer();
     }
 
 }

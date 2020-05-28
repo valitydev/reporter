@@ -1,0 +1,66 @@
+package com.rbkmoney.reporter.handler.invoicing;
+
+import com.rbkmoney.damsel.domain.InvoicePaymentRefundStatus;
+import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import com.rbkmoney.reporter.dao.RefundDao;
+import com.rbkmoney.reporter.domain.tables.pojos.Refund;
+import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
+import com.rbkmoney.reporter.util.BusinessErrorUtils;
+import com.rbkmoney.reporter.util.InvoicingServiceUtils;
+import com.rbkmoney.reporter.util.MapperUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TException;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class RefundStatusChangeHandler implements InvoicingEventHandler {
+
+    private final InvoicingSrv.Iface hgInvoicingService;
+
+    private final RefundDao refundDao;
+
+    @Override
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws TException {
+        InvoicePaymentRefundChange invoicePaymentRefundChange = invoiceChange.getInvoicePaymentChange().getPayload()
+                .getInvoicePaymentRefundChange();
+        InvoicePaymentRefundStatus status = invoicePaymentRefundChange.getPayload()
+                .getInvoicePaymentRefundStatusChanged().getStatus();
+        if (!status.isSetSucceeded() && !status.isSetFailed()) {
+            return;
+        }
+        String invoiceId = event.getSourceId();
+        long sequenceId = event.getEventId();
+
+        log.info("Processing refund with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
+                "changeId = '{}')", status, invoiceId, sequenceId, changeId);
+        String paymentId = invoiceChange.getInvoicePaymentChange().getId();
+        String refundId = invoicePaymentRefundChange.getId();
+
+        Invoice invoice = hgInvoicingService.get(USER_INFO, invoiceId, getEventRange((int) sequenceId));
+        BusinessErrorUtils.checkInvoiceCorrectness(invoice, invoiceId, sequenceId, changeId);
+        InvoicePayment invoicePayment = InvoicingServiceUtils.getInvoicePaymentById(
+                invoice, paymentId, invoiceId, sequenceId, changeId
+        );
+        InvoicePaymentRefund refund = InvoicingServiceUtils.getInvoicePaymentRefundById(
+                invoicePayment, refundId, invoiceId, sequenceId, changeId
+        );
+        Refund refundRecord = MapperUtils.createRefundRecord(refund, event, invoicePayment);
+        Long extRefundId = refundDao.saveRefund(refundRecord);
+        RefundAdditionalInfo additionalInfoRecord =
+                MapperUtils.createRefundAdditionalInfoRecord(refund, status, extRefundId);
+        refundDao.saveAdditionalRefundInfo(additionalInfoRecord);
+        log.info("Refund with status '{}' was saved (invoiceId = '{}', sequenceId = '{}', " +
+                "changeId = '{}')", status, invoiceId, sequenceId, changeId);
+    }
+
+    @Override
+    public boolean isAccept(InvoiceChange change) {
+        return change.isSetInvoicePaymentChange()
+                && change.getInvoicePaymentChange().getPayload().isSetInvoicePaymentRefundChange()
+                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentRefundChange().getPayload().isSetInvoicePaymentRefundStatusChanged();
+    }
+}
