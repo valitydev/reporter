@@ -1,10 +1,10 @@
 package com.rbkmoney.reporter.config;
 
-import com.rbkmoney.damsel.event_stock.StockEvent;
+import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.eventstock.client.EventHandler;
 import com.rbkmoney.eventstock.client.EventPublisher;
 import com.rbkmoney.eventstock.client.poll.PollingEventPublisherBuilder;
-import com.rbkmoney.reporter.config.properties.BustermazePayoutProperties;
+import com.rbkmoney.reporter.config.properties.PayoutProperties;
 import com.rbkmoney.reporter.listener.stockevent.PayoutOnStart;
 import com.rbkmoney.reporter.service.PayoutEventService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,12 +19,13 @@ import java.io.IOException;
 public class EventPublisherConfig {
 
     @Bean
-    public EventPublisher<StockEvent> payoutEventPublisher(EventHandler<StockEvent> payoutStockEventHandler,
-                                                           BustermazePayoutProperties properties) throws IOException {
+    public EventPublisher payoutEventPublisher(EventHandler<Event> payoutEventStockHandler,
+                                               PayoutProperties properties) throws IOException {
         return new PollingEventPublisherBuilder()
                 .withURI(properties.getUrl().getURI())
+                .withPayoutServiceAdapter()
                 .withHousekeeperTimeout(properties.getHousekeeperTimeout())
-                .withEventHandler(payoutStockEventHandler)
+                .withEventHandler(payoutEventStockHandler)
                 .withMaxPoolSize(properties.getMaxPoolSize())
                 .withMaxQuerySize(properties.getMaxQuerySize())
                 .withPollDelay(properties.getDelay())
@@ -33,7 +34,7 @@ public class EventPublisherConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(value = "bustermaze.payout.polling.enabled", havingValue = "true")
+    @ConditionalOnProperty(value = "payouter.polling.enabled", havingValue = "true")
     public ApplicationListener<ApplicationReadyEvent> payoutOnStart(EventPublisher payoutEventPublisher,
                                                                     PayoutEventService eventService) {
         return new PayoutOnStart(payoutEventPublisher, eventService);

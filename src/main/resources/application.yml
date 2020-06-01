@@ -75,16 +75,15 @@ kafka:
       enabled: false
       concurrency: 1
 
-bustermaze:
-  payout:
-    polling:
-      url: http://localhost:8026/repo/payout
-      housekeeperTimeout: 15000
-      maxPoolSize: 1
-      maxQuerySize: 1000
-      delay: 10000
-      retryDelay: 1000
-      enabled: false
+payouter:
+  polling:
+    url: http://payouter:8022/repo
+    housekeeperTimeout: 15000
+    maxQuerySize: 1000
+    delay: 10000
+    retryDelay: 1000
+    maxPoolSize: 1
+    enabled: false
 
 hellgate:
   invoicing:

@@ -1,8 +1,9 @@
 package com.rbkmoney.reporter.service.impl;
 
+import com.rbkmoney.damsel.payout_processing.Event;
+import com.rbkmoney.damsel.payout_processing.EventPayload;
 import com.rbkmoney.reporter.dao.PayoutDao;
-import com.rbkmoney.reporter.exception.DaoException;
-import com.rbkmoney.reporter.exception.StorageException;
+import com.rbkmoney.reporter.handler.payout.AbstractPayoutHandler;
 import com.rbkmoney.reporter.service.PayoutEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,25 +11,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class PayoutEventServiceImpl implements PayoutEventService {
 
     private final PayoutDao payoutDao;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    private final List<AbstractPayoutHandler> payoutHandlers;
+
     @Override
-    public Optional<Long> getPayoutLastEventId() {
-        try {
-            log.info("Trying to get last payout event id");
-            Optional<Long> eventId = payoutDao.getLastEventId();
-            log.info("Last payout event id, eventId='{}'", eventId.orElse(null));
-            return eventId;
-        } catch (Exception e) {
-            throw new StorageException("Failed to get last payout event id", e);
-        }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void handleEvents(Event payoutEvent, EventPayload payload) {
+        payload.getPayoutChanges().forEach(c -> payoutHandlers.forEach(ph -> {
+            if (ph.accept(c)) {
+                ph.handle(c, payoutEvent);
+            }
+        }));
+    }
+
+    @Override
+    public Optional<Long> getLastEventId() {
+        Optional<Long> lastEventId = payoutDao.getLastEventId();
+        log.info("Last payout eventId={}", lastEventId);
+        return lastEventId;
     }
 }

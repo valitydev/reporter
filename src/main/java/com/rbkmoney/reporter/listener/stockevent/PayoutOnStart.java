@@ -21,7 +21,7 @@ public class PayoutOnStart implements ApplicationListener<ApplicationReadyEvent>
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        payoutEventPublisher.subscribe(buildSubscriberConfig(eventService.getPayoutLastEventId()));
+        payoutEventPublisher.subscribe(buildSubscriberConfig(eventService.getLastEventId()));
     }
 
     private SubscriberConfig buildSubscriberConfig(Optional<Long> lastEventIdOptional) {

@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
 @Configuration
-@ConfigurationProperties(prefix = "bustermaze.payout.polling")
+@ConfigurationProperties(prefix = "payouter.polling")
 @Data
-public class BustermazePayoutProperties {
+public class PayoutProperties {
 
     private Resource url;
     private int housekeeperTimeout;

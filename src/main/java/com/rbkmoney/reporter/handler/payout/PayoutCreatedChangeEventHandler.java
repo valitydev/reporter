@@ -1,7 +1,7 @@
 package com.rbkmoney.reporter.handler.payout;
 
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.event_stock.StockEvent;
+import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.*;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -13,7 +13,6 @@ import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
 import com.rbkmoney.reporter.util.DamselUtil;
-import com.rbkmoney.sink.common.handle.stockevent.event.change.PayoutChangeEventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,14 +23,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PayoutCreatedChangeEventHandler implements PayoutChangeEventHandler {
+public class PayoutCreatedChangeEventHandler extends AbstractPayoutHandler {
 
     private final PayoutDao payoutDao;
 
     @Override
-    public void handle(PayoutChange payload, StockEvent baseEvent, Integer changeId) {
-        Event event = baseEvent.getSourceEvent().getPayoutEvent();
-
+    public void handle(PayoutChange payload, Event event) {
         var damselPayout = payload.getPayoutCreated().getPayout();
         var damselPayoutType = damselPayout.getType();
         String payoutId = event.getSource().getPayoutId();
