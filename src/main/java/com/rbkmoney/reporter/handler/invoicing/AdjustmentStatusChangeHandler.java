@@ -2,16 +2,19 @@ package com.rbkmoney.reporter.handler.invoicing;
 
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustment;
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentStatus;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.Invoice;
+import com.rbkmoney.damsel.payment_processing.InvoiceChange;
+import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentAdjustmentChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.AdjustmentDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Adjustment;
+import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.InvoicingServiceUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.thrift.TException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -19,12 +22,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
 
-    private final InvoicingSrv.Iface hgInvoicingService;
+    private final HellgateInvoicingService hgInvoicingService;
 
     private final AdjustmentDao adjustmentDao;
 
     @Override
-    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws TException {
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
         InvoicePaymentAdjustmentChange adjustmentChange = invoiceChange.getInvoicePaymentChange().getPayload()
                 .getInvoicePaymentAdjustmentChange();
         InvoicePaymentAdjustmentStatus status = adjustmentChange.getPayload()
@@ -41,7 +44,7 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
         String paymentId = invoiceChange.getInvoicePaymentChange().getId();
         String adjustmentId = adjustmentChange.getId();
 
-        Invoice invoice = hgInvoicingService.get(USER_INFO, invoiceId, getEventRange((int) sequenceId));
+        Invoice invoice = hgInvoicingService.getInvoice(invoiceId, sequenceId);
         BusinessErrorUtils.checkInvoiceCorrectness(invoice, invoiceId, sequenceId, changeId);
 
         InvoicePayment invoicePayment = InvoicingServiceUtils.getInvoicePaymentById(

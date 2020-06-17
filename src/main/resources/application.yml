@@ -74,6 +74,8 @@ kafka:
       id: mg-invoice-100-2
       enabled: false
       concurrency: 1
+      throttling-timeout-ms: 50
+      error-throttling-timeout-ms: 1000
 
 payouter:
   polling:

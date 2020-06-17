@@ -6,6 +6,7 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.RefundDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
+import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.InvoicingServiceUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
@@ -19,12 +20,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RefundStatusChangeHandler implements InvoicingEventHandler {
 
-    private final InvoicingSrv.Iface hgInvoicingService;
+    private final HellgateInvoicingService hgInvoicingService;
 
     private final RefundDao refundDao;
 
     @Override
-    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws TException {
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
         InvoicePaymentRefundChange invoicePaymentRefundChange = invoiceChange.getInvoicePaymentChange().getPayload()
                 .getInvoicePaymentRefundChange();
         InvoicePaymentRefundStatus status = invoicePaymentRefundChange.getPayload()
@@ -40,7 +41,7 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
         String paymentId = invoiceChange.getInvoicePaymentChange().getId();
         String refundId = invoicePaymentRefundChange.getId();
 
-        Invoice invoice = hgInvoicingService.get(USER_INFO, invoiceId, getEventRange((int) sequenceId));
+        Invoice invoice = hgInvoicingService.getInvoice(invoiceId, sequenceId);
         BusinessErrorUtils.checkInvoiceCorrectness(invoice, invoiceId, sequenceId, changeId);
         InvoicePayment invoicePayment = InvoicingServiceUtils.getInvoicePaymentById(
                 invoice, paymentId, invoiceId, sequenceId, changeId

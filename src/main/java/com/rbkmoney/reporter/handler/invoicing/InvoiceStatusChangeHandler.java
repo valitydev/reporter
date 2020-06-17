@@ -1,16 +1,15 @@
 package com.rbkmoney.reporter.handler.invoicing;
 
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
-import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.InvoiceDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.InvoiceAdditionalInfo;
+import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.thrift.TException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
 
-    private final InvoicingSrv.Iface hgInvoicingService;
+    private final HellgateInvoicingService hgInvoicingService;
 
     private final InvoiceDao invoiceDao;
 
     @Override
     @Transactional
-    public void handle(MachineEvent event, InvoiceChange change, int changeId) throws TException {
+    public void handle(MachineEvent event, InvoiceChange change, int changeId) throws Exception {
         var invoiceStatus = change.getInvoiceStatusChanged().getStatus();
         if (!invoiceStatus.isSetPaid() && !invoiceStatus.isSetCancelled()) {
             return;
@@ -36,7 +35,7 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
         log.info("Start irocessing invoice with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", invoiceStatus, invoiceId, sequenceId, changeId);
 
-        var hgInvoice = hgInvoicingService.get(USER_INFO, invoiceId, getEventRange((int) sequenceId));
+        var hgInvoice = hgInvoicingService.getInvoice(invoiceId, sequenceId);
         BusinessErrorUtils.checkInvoiceCorrectness(hgInvoice, invoiceId, sequenceId, changeId);
 
         Invoice invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);

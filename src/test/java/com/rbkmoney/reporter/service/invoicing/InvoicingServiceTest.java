@@ -2,9 +2,6 @@ package com.rbkmoney.reporter.service.invoicing;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.EventPayload;
-import com.rbkmoney.damsel.payment_processing.EventRange;
-import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
-import com.rbkmoney.damsel.payment_processing.UserInfo;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.config.AbstractInvoicingServiceConfig;
 import com.rbkmoney.reporter.dao.AdjustmentDao;
@@ -20,9 +17,9 @@ import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.handler.invoicing.InvoiceStatusChangeHandler;
+import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.service.impl.InvoicingService;
 import com.rbkmoney.sink.common.parser.Parser;
-import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +60,7 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
     private Parser<MachineEvent, EventPayload> paymentMachineEventParser;
 
     @MockBean
-    private InvoicingSrv.Iface hgInvoicingService;
+    private HellgateInvoicingService hgInvoicingService;
 
     private static final String INVOICE_ID = "inv-1";
     private static final String INVOICE_ID_2 = "inv-2";
@@ -75,12 +72,10 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
     private MachineEvent machineEventTwo = createMachineEvent(INVOICE_ID_2);
 
     @Before
-    public void init() throws TException {
-        UserInfo userInfo = InvoiceStatusChangeHandler.USER_INFO;
-        EventRange eventRange = invoiceStatusChangeHandler.getEventRange(1);
-        when(hgInvoicingService.get(userInfo, INVOICE_ID, eventRange))
+    public void init() throws Exception {
+        when(hgInvoicingService.getInvoice(INVOICE_ID, 1L))
                 .thenReturn(createHgInvoice(INVOICE_ID, PAYMENT_ID, REFUND_ID, ADJUSTMENT_ID));
-        when(hgInvoicingService.get(userInfo, INVOICE_ID_2, eventRange))
+        when(hgInvoicingService.getInvoice(INVOICE_ID_2, 1L))
                 .thenReturn(createHgInvoice(INVOICE_ID_2, PAYMENT_ID, REFUND_ID, ADJUSTMENT_ID));
     }
 
