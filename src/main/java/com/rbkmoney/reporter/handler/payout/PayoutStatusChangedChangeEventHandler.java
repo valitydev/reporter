@@ -6,7 +6,9 @@ import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.dao.PayoutDao;
 import com.rbkmoney.reporter.domain.enums.PayoutStatus;
+import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
+import com.rbkmoney.reporter.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,8 +27,14 @@ public class PayoutStatusChangedChangeEventHandler extends AbstractPayoutHandler
 
         log.info("Start payout status changed handling, payoutId={}", payoutId);
 
+        Payout payout = payoutDao.getPayout(payoutId);
+        if (payout == null) {
+            throw new NotFoundException(String.format("Source payout with id %s not found!", payoutId));
+        }
+
         PayoutState payoutState = new PayoutState();
         payoutState.setEventId(event.getId());
+        payoutState.setExtPayoutId(payout.getId());
         payoutState.setEventCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         payoutState.setPayoutId(payoutId);
         payoutState.setStatus(TBaseUtil.unionFieldToEnum(damselPayoutStatus, PayoutStatus.class));

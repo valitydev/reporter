@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.dao.impl;
 
 import com.rbkmoney.dao.impl.AbstractGenericDao;
+import com.rbkmoney.mapper.RecordRowMapper;
 import com.rbkmoney.reporter.dao.PayoutDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
@@ -10,6 +11,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.Query;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -22,9 +24,12 @@ import static com.rbkmoney.reporter.domain.tables.PayoutState.PAYOUT_STATE;
 @Component
 public class PayoutDaoImpl extends AbstractGenericDao implements PayoutDao {
 
+    private final RowMapper<Payout> payoutRowMapper;
+
     @Autowired
     public PayoutDaoImpl(HikariDataSource dataSource) {
         super(dataSource);
+        payoutRowMapper = new RecordRowMapper<>(PAYOUT, Payout.class);
     }
 
     @Override
@@ -36,6 +41,14 @@ public class PayoutDaoImpl extends AbstractGenericDao implements PayoutDao {
                 .set(getDslContext().newRecord(PAYOUT, payout))
                 .returning(PAYOUT.ID);
         return fetchOne(query, Long.class);
+    }
+
+    @Override
+    public Payout getPayout(String payoutId) {
+        Query query = getDslContext()
+                .selectFrom(PAYOUT)
+                .where(PAYOUT.PAYOUT_ID.eq(payoutId));
+        return fetchOne(query, payoutRowMapper);
     }
 
     @Override

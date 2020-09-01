@@ -11,6 +11,8 @@ public interface PayoutDao {
 
     Long savePayout(Payout payout);
 
+    Payout getPayout(String payoutId);
+
     void savePayoutAccountInfo(PayoutAccount payoutAccount);
 
     void savePayoutInternationalAccountInfo(PayoutInternationalAccount internationalAccount);

@@ -26,7 +26,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     private final ObjectMapper objectMapper;
 
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 
     @Override
     public ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant toTime) {

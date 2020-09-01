@@ -5,6 +5,7 @@ import com.rbkmoney.easyway.TestContainers;
 import com.rbkmoney.easyway.TestContainersBuilder;
 import com.rbkmoney.easyway.TestContainersParameters;
 import com.rbkmoney.reporter.dao.impl.ContractMetaDaoImpl;
+import com.rbkmoney.reporter.dao.impl.PayoutDaoImpl;
 import com.rbkmoney.reporter.dao.impl.ReportDaoImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
@@ -35,6 +36,7 @@ import java.util.function.Supplier;
                 DataSourceTransactionManagerAutoConfiguration.class,
                 FlywayAutoConfiguration.class,
                 ReportDaoImpl.class,
+                PayoutDaoImpl.class,
                 ContractMetaDaoImpl.class,
         },
         initializers = AbstractDaoConfig.Initializer.class

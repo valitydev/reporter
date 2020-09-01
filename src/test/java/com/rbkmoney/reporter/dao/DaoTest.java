@@ -5,6 +5,7 @@ import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
+import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.awaitility.Awaitility;
@@ -32,6 +33,9 @@ public class DaoTest extends AbstractDaoConfig {
 
     @Autowired
     private ReportDao reportDao;
+
+    @Autowired
+    private PayoutDao payoutDao;
 
     @Autowired
     private ContractMetaDao contractMetaDao;
@@ -178,6 +182,14 @@ public class DaoTest extends AbstractDaoConfig {
         assertEquals(file.getFilename(), currentFile.getFilename());
         assertEquals(file.getMd5(), currentFile.getMd5());
         assertEquals(file.getSha256(), currentFile.getSha256());
+    }
+
+    @Test
+    public void payoutGetTest() {
+        Payout payout = random(Payout.class);
+        payoutDao.savePayout(payout);
+        Payout resultPayout = payoutDao.getPayout(payout.getPayoutId());
+        assertEquals(payout, resultPayout);
     }
 
     @Test
