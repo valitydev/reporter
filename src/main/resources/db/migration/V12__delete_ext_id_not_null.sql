@@ -1,0 +1,3 @@
+ALTER TABLE rpt.invoice ALTER COLUMN external_id DROP NOT NULL;
+ALTER TABLE rpt.payment ALTER COLUMN external_id DROP NOT NULL;
+ALTER TABLE rpt.refund  ALTER COLUMN external_id DROP NOT NULL;
