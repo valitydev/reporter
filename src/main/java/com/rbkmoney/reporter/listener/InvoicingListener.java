@@ -22,7 +22,7 @@ public class InvoicingListener {
     @Value("${kafka.topics.invoicing.error-throttling-timeout-ms}")
     private int errorThrottlingTimeout;
 
-    @KafkaListener(topics = "${kafka.topics.invoice.id}", containerFactory = "kafkaInvoicingListenerContainerFactory")
+    @KafkaListener(topics = "${kafka.topics.invoicing.id}", containerFactory = "kafkaInvoicingListenerContainerFactory")
     public void listen(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
         log.info("Got invoicing machineEvent batch with size: {}", messages.size());
         try {
