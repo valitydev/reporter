@@ -17,9 +17,9 @@ import com.rbkmoney.reporter.domain.enums.InvoiceStatus;
 import com.rbkmoney.reporter.domain.enums.OnHoldExpiration;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
 import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
-import com.rbkmoney.reporter.exception.NotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import static com.rbkmoney.reporter.util.DamselUtil.getFees;
 import static com.rbkmoney.reporter.util.FeeTypeMapUtil.isContainsAmount;
 import static com.rbkmoney.reporter.util.FeeTypeMapUtil.isContainsAnyFee;
 
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MapperUtils {
 
@@ -209,9 +210,13 @@ public final class MapperUtils {
                 .filter(session -> session.getTargetStatus().isSetCaptured()
                         || session.getTargetStatus().isSetCancelled())
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Session for transaction with " +
-                                "invoice id '%s', sequence id '%d' and change id '%d' not found!",
-                        event.getSourceId(), event.getEventId(), changeId)));
+                .orElse(null);
+        if (paymentSession == null) {
+            log.warn("Session for transaction with invoice id '{}', sequence id '{}' and change id '{}' not found!",
+                    event.getSourceId(), event.getEventId(), changeId);
+            return;
+        }
+
         if (paymentSession.isSetTransactionInfo()
                 && paymentSession.getTransactionInfo().isSetAdditionalInfo()) {
             AdditionalTransactionInfo additionalTrxInfo =

@@ -76,7 +76,8 @@ public class PayoutDaoImpl extends AbstractGenericDao implements PayoutDao {
         Query query = getDslContext()
                 .insertInto(PAYOUT_STATE)
                 .set(getDslContext().newRecord(PAYOUT_STATE, payoutState))
-                .onDuplicateKeyUpdate()
+                .onConflict(PAYOUT_STATE.EXT_PAYOUT_ID, PAYOUT_STATE.EVENT_CREATED_AT, PAYOUT_STATE.STATUS)
+                .doUpdate()
                 .set(getDslContext().newRecord(PAYOUT_STATE, payoutState))
                 .returning(PAYOUT_STATE.ID);
         return fetchOne(query, Long.class);
