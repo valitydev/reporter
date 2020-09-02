@@ -9,13 +9,13 @@ import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -197,7 +197,7 @@ public class DaoTest extends AbstractDaoConfig {
     public void severalInstancesReportServiceTest() throws ExecutionException, InterruptedException {
         Awaitility.setDefaultPollInterval(10, TimeUnit.MILLISECONDS);
         Awaitility.setDefaultPollDelay(Duration.ZERO);
-        Awaitility.setDefaultTimeout(Duration.ONE_MINUTE);
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(1L));
         int count = 3000;
         createReports(count, LocalDateTime.now());
 

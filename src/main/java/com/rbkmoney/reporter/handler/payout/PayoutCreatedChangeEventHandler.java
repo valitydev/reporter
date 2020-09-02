@@ -36,8 +36,8 @@ public class PayoutCreatedChangeEventHandler extends AbstractPayoutHandler {
         log.info("Start payout created handling, payoutId={}", payoutId);
 
         Payout payout = getPayout(damselPayout, damselPayoutType, payoutId);
-        PayoutState payoutState = getPayoutState(event, damselPayout, payoutId);
         Long extPayoutId = payoutDao.savePayout(payout);
+        PayoutState payoutState = getPayoutState(event, damselPayout, payoutId, extPayoutId);
         payoutDao.savePayoutState(payoutState);
 
         if (damselPayoutType.isSetBankAccount()) {
@@ -174,11 +174,13 @@ public class PayoutCreatedChangeEventHandler extends AbstractPayoutHandler {
 
     private PayoutState getPayoutState(Event event,
                                        com.rbkmoney.damsel.payout_processing.Payout damselPayout,
-                                       String payoutId) {
+                                       String payoutId,
+                                       Long extPayoutId) {
         PayoutState payoutState = new PayoutState();
         payoutState.setEventId(event.getId());
         payoutState.setEventCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         payoutState.setPayoutId(payoutId);
+        payoutState.setExtPayoutId(extPayoutId);
         payoutState.setStatus(TBaseUtil.unionFieldToEnum(damselPayout.getStatus(), PayoutStatus.class));
         return payoutState;
     }

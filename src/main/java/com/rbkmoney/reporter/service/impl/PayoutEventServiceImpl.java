@@ -26,9 +26,9 @@ public class PayoutEventServiceImpl implements PayoutEventService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void handleEvents(Event payoutEvent, EventPayload payload) {
-        payload.getPayoutChanges().forEach(c -> payoutHandlers.forEach(ph -> {
-            if (ph.accept(c)) {
-                ph.handle(c, payoutEvent);
+        payload.getPayoutChanges().forEach(change -> payoutHandlers.forEach(payoutHandler -> {
+            if (payoutHandler.accept(change)) {
+                payoutHandler.handle(change, payoutEvent);
             }
         }));
     }
