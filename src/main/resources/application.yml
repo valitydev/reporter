@@ -18,6 +18,7 @@ spring:
       maximum-pool-size: 3
   flyway:
     schemas: @db.schema@
+    table: schema_version
   quartz:
     job-store-type: JDBC
     properties:

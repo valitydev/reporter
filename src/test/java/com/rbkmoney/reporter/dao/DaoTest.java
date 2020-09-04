@@ -3,10 +3,7 @@ package com.rbkmoney.reporter.dao;
 import com.rbkmoney.reporter.config.AbstractDaoConfig;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
-import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
-import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
-import com.rbkmoney.reporter.domain.tables.pojos.Payout;
-import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.domain.tables.pojos.*;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.awaitility.Awaitility;
 import org.junit.Before;
@@ -190,6 +187,25 @@ public class DaoTest extends AbstractDaoConfig {
         payoutDao.savePayout(payout);
         Payout resultPayout = payoutDao.getPayout(payout.getPayoutId());
         assertEquals(payout, resultPayout);
+
+        Long extPayoutId = resultPayout.getId();
+        PayoutAccount payoutAccount = random(PayoutAccount.class);
+        payoutAccount.setExtPayoutId(extPayoutId);
+        payoutDao.savePayoutAccountInfo(payoutAccount);
+        PayoutAccount resultPayoutAccount = payoutDao.getPayoutAccount(extPayoutId);
+        assertEquals(payoutAccount, resultPayoutAccount);
+
+        PayoutInternationalAccount payoutInternationalAccount = random(PayoutInternationalAccount.class);
+        payoutInternationalAccount.setExtPayoutId(extPayoutId);
+        payoutDao.savePayoutInternationalAccountInfo(payoutInternationalAccount);
+        PayoutInternationalAccount internationalAccount = payoutDao.getPayoutInternationalAccount(extPayoutId);
+        assertEquals(payoutInternationalAccount, internationalAccount);
+
+        PayoutState payoutState = random(PayoutState.class);
+        payoutState.setExtPayoutId(extPayoutId);
+        payoutDao.savePayoutState(payoutState);
+        PayoutState resultPayoutState = payoutDao.getPayoutState(extPayoutId);
+        assertEquals(payoutState, resultPayoutState);
     }
 
     @Test

@@ -15,9 +15,15 @@ public interface PayoutDao {
 
     void savePayoutAccountInfo(PayoutAccount payoutAccount);
 
+    PayoutAccount getPayoutAccount(Long extPayoutId);
+
     void savePayoutInternationalAccountInfo(PayoutInternationalAccount internationalAccount);
 
+    PayoutInternationalAccount getPayoutInternationalAccount(Long extPayoutId);
+
     Long savePayoutState(PayoutState payoutState);
+
+    PayoutState getPayoutState(Long extPayoutId);
 
     Optional<Long> getLastEventId();
 
