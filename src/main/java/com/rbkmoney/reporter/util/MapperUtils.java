@@ -212,7 +212,7 @@ public final class MapperUtils {
                 .findFirst()
                 .orElse(null);
         if (paymentSession == null) {
-            log.warn("Session for transaction with invoice id '{}', sequence id '{}' and change id '{}' not found!",
+            log.info("Session for transaction with invoice id '{}', sequence id '{}' and change id '{}' not found!",
                     event.getSourceId(), event.getEventId(), changeId);
             return;
         }
