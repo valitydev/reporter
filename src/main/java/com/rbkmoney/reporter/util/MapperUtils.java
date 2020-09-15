@@ -232,7 +232,8 @@ public final class MapperUtils {
             additionalInfo.setCavv(additionalTrxInfo.getCavv());
             additionalInfo.setCavvAlgorithm(additionalTrxInfo.getCavvAlgorithm());
             additionalInfo.setXid(additionalTrxInfo.getXid());
-            additionalInfo.setThreeDsVerification(additionalTrxInfo.getThreeDsVerification().name());
+            additionalInfo.setThreeDsVerification(additionalTrxInfo.getThreeDsVerification() == null ?
+                    null : additionalTrxInfo.getThreeDsVerification().name());
         }
     }
 
