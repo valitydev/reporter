@@ -272,7 +272,7 @@ public class TemplateTest extends AbstractTemplateConfig {
                     sheet.getRow(40).getCell(4).getStringCellValue()
             );
             assertEquals(
-                    contractMeta.getRepresentativeFullName(),
+                    contractMeta.getRepresentativeFullName() + ",",
                     sheet.getRow(41).getCell(4).getStringCellValue()
             );
 
