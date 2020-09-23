@@ -12,7 +12,7 @@ public class HellgateInvoicingServiceImpl implements HellgateInvoicingService {
     private final InvoicingSrv.Iface hgInvoicingService;
 
     private static final UserInfo USER_INFO = new UserInfo()
-            .setId("admin")
+            .setId("reporter")
             .setType(UserType.service_user(new ServiceUser()));
 
     @Override

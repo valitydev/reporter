@@ -34,7 +34,9 @@ public final class MapperUtils {
 
     public static Refund createRefundRecord(com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund hgRefund,
                                             MachineEvent event,
+                                            com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
                                             InvoicePayment invoicePayment) {
+        var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
         InvoicePaymentRefund hgInnerRefund = hgRefund.getRefund();
         Map<FeeType, Long> fees = DamselUtil.getFees(hgRefund.getCashFlow());
@@ -42,8 +44,8 @@ public final class MapperUtils {
 
         Refund refund = new Refund();
         refund.setExternalId(hgInnerRefund.getExternalId());
-        refund.setPartyId(hgInnerPayment.getOwnerId());
-        refund.setShopId(hgInnerPayment.getShopId());
+        refund.setPartyId(hgInnerInvoice.getOwnerId());
+        refund.setShopId(hgInnerInvoice.getShopId());
         refund.setInvoiceId(event.getSourceId());
         refund.setPaymentId(hgInnerPayment.getId());
         refund.setRefundId(hgInnerRefund.getId());
@@ -70,11 +72,14 @@ public final class MapperUtils {
     public static RefundAdditionalInfo createRefundAdditionalInfoRecord(
             com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund hgRefund,
             InvoicePaymentRefundStatus status,
-            Long extRefundId
+            InvoicePayment invoicePayment,
+            MachineEvent event
     ) {
         InvoicePaymentRefund hgInnerRefund = hgRefund.getRefund();
         RefundAdditionalInfo additionalInfo = new RefundAdditionalInfo();
-        additionalInfo.setExtRefundId(extRefundId);
+        additionalInfo.setInvoiceId(event.getSourceId());
+        additionalInfo.setPaymentId(invoicePayment.getPayment().getId());
+        additionalInfo.setRefundId(hgInnerRefund.getId());
         additionalInfo.setDomainRevision(hgInnerRefund.getDomainRevision());
         additionalInfo.setPartyRevision(hgInnerRefund.getPartyRevision());
 
@@ -92,13 +97,14 @@ public final class MapperUtils {
 
     public static Adjustment createAdjustmentRecord(InvoicePaymentAdjustment paymentAdjustment,
                                                     InvoicePayment invoicePayment,
-                                                    String invoiceId,
+                                                    com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
                                                     MachineEvent event) {
+        var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
         Adjustment adjustment = new Adjustment();
-        adjustment.setPartyId(hgInnerPayment.getOwnerId());
-        adjustment.setShopId(hgInnerPayment.getShopId());
-        adjustment.setInvoiceId(invoiceId);
+        adjustment.setPartyId(hgInnerInvoice.getOwnerId());
+        adjustment.setShopId(hgInnerInvoice.getShopId());
+        adjustment.setInvoiceId(event.getSourceId());
         adjustment.setPaymentId(hgInnerPayment.getId());
         adjustment.setAdjustmentId(paymentAdjustment.getId());
         adjustment.setCreatedAt(TypeUtil.stringToLocalDateTime(paymentAdjustment.getCreatedAt()));
@@ -115,7 +121,9 @@ public final class MapperUtils {
     }
 
     public static Payment createPaymentRecord(MachineEvent event,
+                                              com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
                                               InvoicePayment invoicePayment) {
+        var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
 
         Payment payment = new Payment();
@@ -125,8 +133,9 @@ public final class MapperUtils {
         payment.setCreatedAt(TypeUtil.stringToLocalDateTime(hgInnerPayment.getCreatedAt()));
         payment.setStatus(TBaseUtil.unionFieldToEnum(hgInnerPayment.getStatus(), InvoicePaymentStatus.class));
         payment.setStatusCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
-        payment.setPartyId(hgInnerPayment.getOwnerId());
-        payment.setShopId(hgInnerPayment.getShopId());
+
+        payment.setPartyId(hgInnerInvoice.getOwnerId());
+        payment.setShopId(hgInnerInvoice.getShopId());
         payment.setFlow(TBaseUtil.unionFieldToEnum(hgInnerPayment.getFlow(), PaymentFlow.class));
 
         fillPayerInfo(hgInnerPayment.getPayer(), payment);
@@ -153,13 +162,13 @@ public final class MapperUtils {
             MachineEvent event,
             InvoicePayment invoicePayment,
             InvoicePaymentStatusChanged paymentStatusChanged,
-            Long extPaymentId,
             int changeId
     ) {
         var hgInnerPayment = invoicePayment.getPayment();
 
         PaymentAdditionalInfo additionalInfo = new PaymentAdditionalInfo();
-        additionalInfo.setExtPaymentId(extPaymentId);
+        additionalInfo.setInvoiceId(event.getSourceId());
+        additionalInfo.setPaymentId(hgInnerPayment.getId());
         additionalInfo.setDomainRevision(hgInnerPayment.getDomainRevision());
         if (hgInnerPayment.isSetPartyRevision()) {
             additionalInfo.setPartyRevision(hgInnerPayment.getPartyRevision());
@@ -326,11 +335,11 @@ public final class MapperUtils {
 
     public static InvoiceAdditionalInfo createInvoiceAdditionalInfoRecord(
             com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
-            Long extInvoiceId
+            MachineEvent event
     ) {
         var hgInnerInvoice = hgInvoice.getInvoice();
         InvoiceAdditionalInfo additionalInfo = new InvoiceAdditionalInfo();
-        additionalInfo.setExtInvoiceId(extInvoiceId);
+        additionalInfo.setInvoiceId(event.getSourceId());
         additionalInfo.setTemplateId(hgInnerInvoice.getTemplateId());
         additionalInfo.setStatusDetails(DamselUtil.getInvoiceStatusDetails(hgInnerInvoice.getStatus()));
         additionalInfo.setPartyRevision(hgInnerInvoice.getPartyRevision());

@@ -22,6 +22,11 @@ public final class InvoicingData {
     private static final String PARTY_ID = "patry-id-1";
     private static final String SHOP_ID = "shop-id-1";
     private static final String EXTERNAL_ID = "external-1";
+    private static final String INVOICE_ID = "inv-1";
+    private static final String INVOICE_ID_2 = "inv-2";
+    private static final String PAYMENT_ID = "pay-1";
+    private static final String REFUND_ID = "ref-1";
+    private static final String ADJUSTMENT_ID = "adj-1";
 
     public static EventPayload createTestInvoiceEventPayload(List<InvoiceChangeStatusInfo> statusInfoList) {
         EventPayload eventPayload = new EventPayload();
@@ -95,7 +100,7 @@ public final class InvoicingData {
         return invoiceChanges;
     }
 
-    private static InvoiceChange createInvoiceStatusChange(com.rbkmoney.reporter.domain.enums.InvoiceStatus status) {
+    public static InvoiceChange createInvoiceStatusChange(com.rbkmoney.reporter.domain.enums.InvoiceStatus status) {
         InvoiceChange invoiceChange = new InvoiceChange();
         InvoiceStatusChanged statusChanged = new InvoiceStatusChanged();
         InvoiceStatus invoiceStatus = new InvoiceStatus();
@@ -116,6 +121,43 @@ public final class InvoicingData {
         }
         statusChanged.setStatus(invoiceStatus);
         invoiceChange.setInvoiceStatusChanged(statusChanged);
+        return invoiceChange;
+    }
+
+    public static InvoiceChange createCapturePaymentStatusChange() {
+        InvoiceChange invoiceChange = new InvoiceChange();
+        InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
+        invoicePaymentChange.setId(PAYMENT_ID);
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
+        InvoicePaymentStatusChanged changed = new InvoicePaymentStatusChanged();
+        InvoicePaymentStatus paymentStatus = new InvoicePaymentStatus();
+        paymentStatus.setCaptured(new InvoicePaymentCaptured());
+        changed.setStatus(paymentStatus);
+        payload.setInvoicePaymentStatusChanged(changed);
+        invoicePaymentChange.setPayload(payload);
+        invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
+        return invoiceChange;
+    }
+
+    public static InvoiceChange createSucceededRefundStatusChange() {
+        InvoiceChange invoiceChange = new InvoiceChange();
+        InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
+        invoicePaymentChange.setId(PAYMENT_ID);
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
+        InvoicePaymentRefundChange refundChange = new InvoicePaymentRefundChange();
+        refundChange.setId(REFUND_ID);
+        InvoicePaymentRefundChangePayload refundChangePayload = new InvoicePaymentRefundChangePayload();
+        InvoicePaymentRefundStatusChanged refundStatusChanged = new InvoicePaymentRefundStatusChanged();
+        refundStatusChanged.setStatus(
+                com.rbkmoney.damsel.domain.InvoicePaymentRefundStatus.succeeded(
+                        new InvoicePaymentRefundSucceeded()
+                )
+        );
+        refundChangePayload.setInvoicePaymentRefundStatusChanged(refundStatusChanged);
+        refundChange.setPayload(refundChangePayload);
+        payload.setInvoicePaymentRefundChange(refundChange);
+        invoicePaymentChange.setPayload(payload);
+        invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
         return invoiceChange;
     }
 

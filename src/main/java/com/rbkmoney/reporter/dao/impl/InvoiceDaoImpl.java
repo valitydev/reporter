@@ -33,14 +33,16 @@ public class InvoiceDaoImpl extends AbstractGenericDao implements InvoiceDao {
 
     @Override
     public Long saveInvoice(Invoice invoice) {
-        Query query = getDslContext()
+        return fetchOne(getSaveInvoiceQuery(invoice), Long.class);
+    }
+
+    @Override
+    public Query getSaveInvoiceQuery(Invoice invoice) {
+        return getDslContext()
                 .insertInto(INVOICE)
                 .set(getDslContext().newRecord(INVOICE, invoice))
                 .onConflict(INVOICE.INVOICE_ID)
-                .doUpdate()
-                .set(getDslContext().newRecord(INVOICE, invoice))
-                .returning(INVOICE.ID);
-        return fetchOne(query, Long.class);
+                .doNothing();
     }
 
     @Override
@@ -63,19 +65,25 @@ public class InvoiceDaoImpl extends AbstractGenericDao implements InvoiceDao {
 
     @Override
     public void saveAdditionalInvoiceInfo(InvoiceAdditionalInfo invoiceAdditionalInfo) {
-        Query query = getDslContext()
-                .insertInto(INVOICE_ADDITIONAL_INFO)
-                .set(getDslContext().newRecord(INVOICE_ADDITIONAL_INFO, invoiceAdditionalInfo))
-                .onDuplicateKeyUpdate()
-                .set(getDslContext().newRecord(INVOICE_ADDITIONAL_INFO, invoiceAdditionalInfo));
-        executeOne(query);
+        executeOne(
+                getSaveAdditionalInvoiceInfoQuery(invoiceAdditionalInfo)
+        );
     }
 
     @Override
-    public InvoiceAdditionalInfo getInvoiceAdditionalInfo(Long extInvoiceId) {
+    public Query getSaveAdditionalInvoiceInfoQuery(InvoiceAdditionalInfo invoiceAdditionalInfo) {
+        return getDslContext()
+                .insertInto(INVOICE_ADDITIONAL_INFO)
+                .set(getDslContext().newRecord(INVOICE_ADDITIONAL_INFO, invoiceAdditionalInfo))
+                .onConflict(INVOICE_ADDITIONAL_INFO.INVOICE_ID)
+                .doNothing();
+    }
+
+    @Override
+    public InvoiceAdditionalInfo getInvoiceAdditionalInfo(String invoiceId) {
         Query query = getDslContext()
                 .selectFrom(INVOICE_ADDITIONAL_INFO)
-                .where(INVOICE_ADDITIONAL_INFO.EXT_INVOICE_ID.eq(extInvoiceId));
+                .where(INVOICE_ADDITIONAL_INFO.INVOICE_ID.eq(invoiceId));
         return fetchOne(query, invoiceAdditionalInfoRowMapper);
     }
 }
