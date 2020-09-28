@@ -51,6 +51,15 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
                 hgInvoice, paymentId, invoiceId, sequenceId, changeId
         );
 
+        InvoicePaymentStatus hgPaymentStatus = payment.getPayment().getStatus();
+        if (!hgPaymentStatus.isSetCaptured() && !hgPaymentStatus.isSetCancelled()
+                && !hgPaymentStatus.isSetFailed()) {
+            log.warn("Payment with status '{}' have incorrect status in HG '{}' (invoiceId = '{}', " +
+                    "sequenceId = '{}', changeId = '{}')", status, hgPaymentStatus, invoiceId,
+                    sequenceId, changeId);
+            return paymentQueries;
+        }
+
         Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);
         paymentQueries.add(paymentDao.getSavePaymentQuery(paymentRecord));
         PaymentAdditionalInfo paymentAdditionalInfoRecord = MapperUtils.createPaymentAdditionalInfoRecord(

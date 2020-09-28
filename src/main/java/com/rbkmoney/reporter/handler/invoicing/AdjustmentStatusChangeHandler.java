@@ -60,6 +60,14 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
         InvoicePaymentAdjustment paymentAdjustment = InvoicingServiceUtils.getInvoicePaymentAdjustmentById(
                 invoicePayment, adjustmentId, invoiceId, sequenceId, changeId
         );
+        InvoicePaymentAdjustmentStatus hgAdjustmentStatus = paymentAdjustment.getStatus();
+        if (hgAdjustmentStatus.isSetPending() || hgAdjustmentStatus.isSetProcessed()) {
+            log.warn("Adjustment with status '{}' have incorrect status'{}' in HG (invoiceId = '{}', " +
+                    "sequenceId = '{}', changeId = '{}')", status, hgAdjustmentStatus, invoiceId,
+                    sequenceId, changeId);
+            return adjQueries;
+        }
+
         Adjustment adjustmentRecord = MapperUtils.createAdjustmentRecord(
                 paymentAdjustment, invoicePayment, invoice, event
         );

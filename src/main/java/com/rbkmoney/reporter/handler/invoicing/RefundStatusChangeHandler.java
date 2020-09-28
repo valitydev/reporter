@@ -53,6 +53,13 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
         InvoicePaymentRefund refund = InvoicingServiceUtils.getInvoicePaymentRefundById(
                 invoicePayment, refundId, invoiceId, sequenceId, changeId
         );
+        InvoicePaymentRefundStatus hgRefundStatus = refund.getRefund().getStatus();
+        if (!hgRefundStatus.isSetSucceeded() && !hgRefundStatus.isSetFailed()) {
+            log.warn("Refund with status '{}' have incorrect status in HG (invoiceId = '{}', " +
+                    "sequenceId = '{}', changeId = '{}')", status, hgRefundStatus, invoiceId,
+                    sequenceId, changeId);
+            return refundQueries;
+        }
         Refund refundRecord = MapperUtils.createRefundRecord(refund, event, invoice, invoicePayment);
         refundQueries.add(refundDao.getSaveRefundQuery(refundRecord));
         RefundAdditionalInfo additionalInfoRecord =

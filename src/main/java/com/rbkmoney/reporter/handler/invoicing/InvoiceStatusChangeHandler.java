@@ -1,5 +1,6 @@
 package com.rbkmoney.reporter.handler.invoicing;
 
+import com.rbkmoney.damsel.domain.InvoiceStatus;
 import com.rbkmoney.damsel.payment_processing.InvoiceChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.InvoiceDao;
@@ -39,11 +40,18 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
 
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
-        log.info("Start irocessing invoice with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
+        log.info("Start processing invoice with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", invoiceStatus, invoiceId, sequenceId, changeId);
 
         var hgInvoice = hgInvoicingService.getInvoice(invoiceId, sequenceId);
         BusinessErrorUtils.checkInvoiceCorrectness(hgInvoice, invoiceId, sequenceId, changeId);
+        InvoiceStatus hgInvoiceStatus = hgInvoice.getInvoice().getStatus();
+        if (!hgInvoiceStatus.isSetPaid() && !hgInvoiceStatus.isSetCancelled()) {
+            log.warn("Invoice with a status '{}' have incorrect status '{}' in HG (invoiceId = '{}', " +
+                    "sequenceId = '{}', changeId = '{}')", invoiceStatus, hgInvoiceStatus, invoiceId,
+                    sequenceId, changeId);
+            return invoiceQueries;
+        }
         Invoice invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);
         invoiceQueries.add(invoiceDao.getSaveInvoiceQuery(invoiceRecord));
 
