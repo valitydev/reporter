@@ -65,7 +65,6 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
             log.warn("Adjustment with status '{}' have incorrect status'{}' in HG (invoiceId = '{}', " +
                     "sequenceId = '{}', changeId = '{}')", status, hgAdjustmentStatus, invoiceId,
                     sequenceId, changeId);
-            return adjQueries;
         }
 
         Adjustment adjustmentRecord = MapperUtils.createAdjustmentRecord(

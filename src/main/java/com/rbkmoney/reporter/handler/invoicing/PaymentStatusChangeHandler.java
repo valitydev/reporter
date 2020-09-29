@@ -57,7 +57,6 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
             log.warn("Payment with status '{}' have incorrect status in HG '{}' (invoiceId = '{}', " +
                     "sequenceId = '{}', changeId = '{}')", status, hgPaymentStatus, invoiceId,
                     sequenceId, changeId);
-            return paymentQueries;
         }
 
         Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);

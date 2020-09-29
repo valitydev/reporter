@@ -50,7 +50,6 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
             log.warn("Invoice with a status '{}' have incorrect status '{}' in HG (invoiceId = '{}', " +
                     "sequenceId = '{}', changeId = '{}')", invoiceStatus, hgInvoiceStatus, invoiceId,
                     sequenceId, changeId);
-            return invoiceQueries;
         }
         Invoice invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);
         invoiceQueries.add(invoiceDao.getSaveInvoiceQuery(invoiceRecord));
