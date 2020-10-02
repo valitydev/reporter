@@ -12,11 +12,7 @@ import com.rbkmoney.reporter.util.InvoicingServiceUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.Query;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -28,14 +24,13 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
     private final RefundDao refundDao;
 
     @Override
-    public List<Query> handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
         InvoicePaymentRefundChange invoicePaymentRefundChange = invoiceChange.getInvoicePaymentChange().getPayload()
                 .getInvoicePaymentRefundChange();
         InvoicePaymentRefundStatus status = invoicePaymentRefundChange.getPayload()
                 .getInvoicePaymentRefundStatusChanged().getStatus();
-        List<Query> refundQueries = new ArrayList<>();
         if (!status.isSetSucceeded() && !status.isSetFailed()) {
-            return refundQueries;
+            return;
         }
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
@@ -60,13 +55,12 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
                     sequenceId, changeId);
         }
         Refund refundRecord = MapperUtils.createRefundRecord(refund, event, invoice, invoicePayment);
-        refundQueries.add(refundDao.getSaveRefundQuery(refundRecord));
+        Long extRefundId = refundDao.saveRefund(refundRecord);
         RefundAdditionalInfo additionalInfoRecord =
-                MapperUtils.createRefundAdditionalInfoRecord(refund, status, invoicePayment, event);
-        refundQueries.add(refundDao.getSaveAdditionalRefundInfoQuery(additionalInfoRecord));
-        log.info("Refund queries with status '{}' was created (invoiceId = '{}', sequenceId = '{}', " +
+                MapperUtils.createRefundAdditionalInfoRecord(refund, status, extRefundId);
+        refundDao.saveAdditionalRefundInfo(additionalInfoRecord);
+        log.info("Refund with status '{}' was saved (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", status, invoiceId, sequenceId, changeId);
-        return refundQueries;
     }
 
     @Override

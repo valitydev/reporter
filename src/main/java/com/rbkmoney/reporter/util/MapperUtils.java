@@ -72,14 +72,11 @@ public final class MapperUtils {
     public static RefundAdditionalInfo createRefundAdditionalInfoRecord(
             com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund hgRefund,
             InvoicePaymentRefundStatus status,
-            InvoicePayment invoicePayment,
-            MachineEvent event
+            Long extRefundId
     ) {
         InvoicePaymentRefund hgInnerRefund = hgRefund.getRefund();
         RefundAdditionalInfo additionalInfo = new RefundAdditionalInfo();
-        additionalInfo.setInvoiceId(event.getSourceId());
-        additionalInfo.setPaymentId(invoicePayment.getPayment().getId());
-        additionalInfo.setRefundId(hgInnerRefund.getId());
+        additionalInfo.setExtRefundId(extRefundId);
         additionalInfo.setDomainRevision(hgInnerRefund.getDomainRevision());
         additionalInfo.setPartyRevision(hgInnerRefund.getPartyRevision());
 
@@ -162,13 +159,13 @@ public final class MapperUtils {
             MachineEvent event,
             InvoicePayment invoicePayment,
             InvoicePaymentStatusChanged paymentStatusChanged,
+            Long extPaymentId,
             int changeId
     ) {
         var hgInnerPayment = invoicePayment.getPayment();
 
         PaymentAdditionalInfo additionalInfo = new PaymentAdditionalInfo();
-        additionalInfo.setInvoiceId(event.getSourceId());
-        additionalInfo.setPaymentId(hgInnerPayment.getId());
+        additionalInfo.setExtPaymentId(extPaymentId);
         additionalInfo.setDomainRevision(hgInnerPayment.getDomainRevision());
         if (hgInnerPayment.isSetPartyRevision()) {
             additionalInfo.setPartyRevision(hgInnerPayment.getPartyRevision());
@@ -289,7 +286,7 @@ public final class MapperUtils {
     }
 
     private static void fillPaymentToolUnion(PaymentAdditionalInfo additionalInfo,
-                                      PaymentTool paymentTool) {
+                                             PaymentTool paymentTool) {
         if (paymentTool.isSetBankCard()) {
             BankCard bankCard = paymentTool.getBankCard();
 
@@ -335,11 +332,11 @@ public final class MapperUtils {
 
     public static InvoiceAdditionalInfo createInvoiceAdditionalInfoRecord(
             com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
-            MachineEvent event
+            Long extInvoiceId
     ) {
         var hgInnerInvoice = hgInvoice.getInvoice();
         InvoiceAdditionalInfo additionalInfo = new InvoiceAdditionalInfo();
-        additionalInfo.setInvoiceId(event.getSourceId());
+        additionalInfo.setExtInvoiceId(extInvoiceId);
         additionalInfo.setTemplateId(hgInnerInvoice.getTemplateId());
         additionalInfo.setStatusDetails(DamselUtil.getInvoiceStatusDetails(hgInnerInvoice.getStatus()));
         additionalInfo.setPartyRevision(hgInnerInvoice.getPartyRevision());

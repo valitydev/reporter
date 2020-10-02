@@ -15,11 +15,7 @@ import com.rbkmoney.reporter.util.InvoicingServiceUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.Query;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -31,16 +27,13 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
     private final AdjustmentDao adjustmentDao;
 
     @Override
-    public List<Query> handle(MachineEvent event,
-                              InvoiceChange invoiceChange,
-                              int changeId) throws Exception {
-        InvoicePaymentAdjustmentChange adjustmentChange = invoiceChange.getInvoicePaymentChange()
-                .getPayload().getInvoicePaymentAdjustmentChange();
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
+        InvoicePaymentAdjustmentChange adjustmentChange = invoiceChange.getInvoicePaymentChange().getPayload()
+                .getInvoicePaymentAdjustmentChange();
         InvoicePaymentAdjustmentStatus status = adjustmentChange.getPayload()
                 .getInvoicePaymentAdjustmentStatusChanged().getStatus();
-        List<Query> adjQueries = new ArrayList<>();
         if (!status.isSetCaptured() && !status.isSetCancelled()) {
-            return adjQueries;
+            return;
         }
 
         String invoiceId = event.getSourceId();
@@ -70,10 +63,9 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
         Adjustment adjustmentRecord = MapperUtils.createAdjustmentRecord(
                 paymentAdjustment, invoicePayment, invoice, event
         );
-        adjQueries.add(adjustmentDao.getSaveAdjustmentQuery(adjustmentRecord));
-        log.info("Adjustment queries with status '{}' was processed (invoiceId = '{}', sequenceId = '{}', " +
+        adjustmentDao.saveAdjustment(adjustmentRecord);
+        log.info("Adjustment with status '{}' was processed (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", status, invoiceId, sequenceId, changeId);
-        return adjQueries;
     }
 
     @Override

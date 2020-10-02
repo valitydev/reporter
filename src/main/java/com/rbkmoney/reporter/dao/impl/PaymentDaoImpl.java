@@ -31,16 +31,14 @@ public class PaymentDaoImpl extends AbstractGenericDao implements PaymentDao {
 
     @Override
     public Long savePayment(Payment payment) {
-        return fetchOne(getSavePaymentQuery(payment), Long.class);
-    }
-
-    @Override
-    public Query getSavePaymentQuery(Payment payment) {
-        return  getDslContext()
+        Query query = getDslContext()
                 .insertInto(PAYMENT)
                 .set(getDslContext().newRecord(PAYMENT, payment))
                 .onConflict(PAYMENT.INVOICE_ID, PAYMENT.PAYMENT_ID)
-                .doNothing();
+                .doUpdate()
+                .set(getDslContext().newRecord(PAYMENT, payment))
+                .returning(PAYMENT.ID);
+        return fetchOne(query, Long.class);
     }
 
     @Override
@@ -57,17 +55,11 @@ public class PaymentDaoImpl extends AbstractGenericDao implements PaymentDao {
 
     @Override
     public void saveAdditionalPaymentInfo(PaymentAdditionalInfo paymentAdditionalInfo) {
-        executeOne(
-                getSaveAdditionalPaymentInfoQuery(paymentAdditionalInfo)
-        );
-    }
-
-    @Override
-    public Query getSaveAdditionalPaymentInfoQuery(PaymentAdditionalInfo paymentAdditionalInfo) {
-        return getDslContext()
+        Query query = getDslContext()
                 .insertInto(PAYMENT_ADDITIONAL_INFO)
                 .set(getDslContext().newRecord(PAYMENT_ADDITIONAL_INFO, paymentAdditionalInfo))
-                .onConflict(PAYMENT_ADDITIONAL_INFO.INVOICE_ID, PAYMENT_ADDITIONAL_INFO.PAYMENT_ID)
-                .doNothing();
+                .onDuplicateKeyUpdate()
+                .set(getDslContext().newRecord(PAYMENT_ADDITIONAL_INFO, paymentAdditionalInfo));
+        executeOne(query);
     }
 }

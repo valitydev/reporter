@@ -13,11 +13,7 @@ import com.rbkmoney.reporter.util.InvoicingServiceUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.Query;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -29,15 +25,12 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
     private final PaymentDao paymentDao;
 
     @Override
-    public List<Query> handle(MachineEvent event,
-                              InvoiceChange invoiceChange,
-                              int changeId) throws Exception{
+    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception{
         InvoicePaymentStatusChanged invoicePaymentStatusChanged =
                 invoiceChange.getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged();
         InvoicePaymentStatus status = invoicePaymentStatusChanged.getStatus();
-        List<Query> paymentQueries = new ArrayList<>();
         if (!status.isSetCaptured() && !status.isSetCancelled() && !status.isSetFailed()) {
-            return paymentQueries;
+            return;
         }
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
@@ -60,14 +53,13 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
         }
 
         Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);
-        paymentQueries.add(paymentDao.getSavePaymentQuery(paymentRecord));
+        Long extPaymentId = paymentDao.savePayment(paymentRecord);
         PaymentAdditionalInfo paymentAdditionalInfoRecord = MapperUtils.createPaymentAdditionalInfoRecord(
-                event, payment, invoicePaymentStatusChanged, changeId
+                event, payment, invoicePaymentStatusChanged, extPaymentId, changeId
         );
-        paymentQueries.add(paymentDao.getSaveAdditionalPaymentInfoQuery(paymentAdditionalInfoRecord));
-        log.info("Payment queries with status '{}' was created (invoiceId = '{}', sequenceId = '{}', " +
+        paymentDao.saveAdditionalPaymentInfo(paymentAdditionalInfoRecord);
+        log.info("Payment with status '{}' was saved (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", status, invoiceId, sequenceId, changeId);
-        return paymentQueries;
     }
 
     @Override

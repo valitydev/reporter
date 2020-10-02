@@ -32,8 +32,7 @@ public class AdjustmentDaoImpl extends AbstractGenericDao implements AdjustmentD
         return fetchOne(getSaveAdjustmentQuery(adjustment), Long.class);
     }
 
-    @Override
-    public Query getSaveAdjustmentQuery(Adjustment adjustment) {
+    private Query getSaveAdjustmentQuery(Adjustment adjustment) {
         return getDslContext()
                 .insertInto(ADJUSTMENT)
                 .set(getDslContext().newRecord(ADJUSTMENT, adjustment))

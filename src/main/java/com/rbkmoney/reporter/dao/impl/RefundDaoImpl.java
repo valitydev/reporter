@@ -31,16 +31,14 @@ public class RefundDaoImpl extends AbstractGenericDao implements RefundDao {
 
     @Override
     public Long saveRefund(Refund refund) {
-        return fetchOne(getSaveRefundQuery(refund), Long.class);
-    }
-
-    @Override
-    public Query getSaveRefundQuery(Refund refund) {
-        return getDslContext()
+        Query query = getDslContext()
                 .insertInto(REFUND)
                 .set(getDslContext().newRecord(REFUND, refund))
                 .onConflict(REFUND.INVOICE_ID, REFUND.PAYMENT_ID, REFUND.REFUND_ID)
-                .doNothing();
+                .doUpdate()
+                .set(getDslContext().newRecord(REFUND, refund))
+                .returning(REFUND.ID);
+        return fetchOne(query, Long.class);
     }
 
     @Override
@@ -57,20 +55,11 @@ public class RefundDaoImpl extends AbstractGenericDao implements RefundDao {
 
     @Override
     public void saveAdditionalRefundInfo(RefundAdditionalInfo refundAdditionalInfo) {
-        executeOne(
-                getSaveAdditionalRefundInfoQuery(refundAdditionalInfo)
-        );
-    }
-
-    @Override
-    public Query getSaveAdditionalRefundInfoQuery(RefundAdditionalInfo refundAdditionalInfo) {
-        return getDslContext()
+        Query query = getDslContext()
                 .insertInto(REFUND_ADDITIONAL_INFO)
                 .set(getDslContext().newRecord(REFUND_ADDITIONAL_INFO, refundAdditionalInfo))
-                .onConflict(
-                        REFUND_ADDITIONAL_INFO.INVOICE_ID,
-                        REFUND_ADDITIONAL_INFO.PAYMENT_ID,
-                        REFUND_ADDITIONAL_INFO.REFUND_ID)
-                .doNothing();
+                .onDuplicateKeyUpdate()
+                .set(getDslContext().newRecord(REFUND_ADDITIONAL_INFO, refundAdditionalInfo));
+        executeOne(query);
     }
 }

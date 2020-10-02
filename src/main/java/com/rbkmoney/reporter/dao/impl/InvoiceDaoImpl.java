@@ -33,16 +33,14 @@ public class InvoiceDaoImpl extends AbstractGenericDao implements InvoiceDao {
 
     @Override
     public Long saveInvoice(Invoice invoice) {
-        return fetchOne(getSaveInvoiceQuery(invoice), Long.class);
-    }
-
-    @Override
-    public Query getSaveInvoiceQuery(Invoice invoice) {
-        return getDslContext()
+        Query query = getDslContext()
                 .insertInto(INVOICE)
                 .set(getDslContext().newRecord(INVOICE, invoice))
                 .onConflict(INVOICE.INVOICE_ID)
-                .doNothing();
+                .doUpdate()
+                .set(getDslContext().newRecord(INVOICE, invoice))
+                .returning(INVOICE.ID);
+        return fetchOne(query, Long.class);
     }
 
     @Override
@@ -65,25 +63,19 @@ public class InvoiceDaoImpl extends AbstractGenericDao implements InvoiceDao {
 
     @Override
     public void saveAdditionalInvoiceInfo(InvoiceAdditionalInfo invoiceAdditionalInfo) {
-        executeOne(
-                getSaveAdditionalInvoiceInfoQuery(invoiceAdditionalInfo)
-        );
-    }
-
-    @Override
-    public Query getSaveAdditionalInvoiceInfoQuery(InvoiceAdditionalInfo invoiceAdditionalInfo) {
-        return getDslContext()
+        Query query = getDslContext()
                 .insertInto(INVOICE_ADDITIONAL_INFO)
                 .set(getDslContext().newRecord(INVOICE_ADDITIONAL_INFO, invoiceAdditionalInfo))
-                .onConflict(INVOICE_ADDITIONAL_INFO.INVOICE_ID)
-                .doNothing();
+                .onDuplicateKeyUpdate()
+                .set(getDslContext().newRecord(INVOICE_ADDITIONAL_INFO, invoiceAdditionalInfo));
+        executeOne(query);
     }
 
     @Override
-    public InvoiceAdditionalInfo getInvoiceAdditionalInfo(String invoiceId) {
+    public InvoiceAdditionalInfo getInvoiceAdditionalInfo(Long extInvoiceId) {
         Query query = getDslContext()
                 .selectFrom(INVOICE_ADDITIONAL_INFO)
-                .where(INVOICE_ADDITIONAL_INFO.INVOICE_ID.eq(invoiceId));
+                .where(INVOICE_ADDITIONAL_INFO.EXT_INVOICE_ID.eq(extInvoiceId));
         return fetchOne(query, invoiceAdditionalInfoRowMapper);
     }
 }
