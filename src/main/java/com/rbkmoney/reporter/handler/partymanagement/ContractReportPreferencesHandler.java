@@ -5,7 +5,7 @@ import com.rbkmoney.damsel.domain.ServiceAcceptanceActPreferences;
 import com.rbkmoney.damsel.payment_processing.ContractEffect;
 import com.rbkmoney.damsel.payment_processing.ContractEffectUnit;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.reporter.handler.EventHandler;
+import com.rbkmoney.reporter.model.KafkaEvent;
 import com.rbkmoney.reporter.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,8 @@ public class ContractReportPreferencesHandler implements JobRegistratorEventHand
     private final TaskService taskService;
 
     @Override
-    public void handle(MachineEvent event, ContractEffectUnit contractEffectUnit, int changeId) {
+    public void handle(KafkaEvent kafkaEvent, ContractEffectUnit contractEffectUnit, int changeId) {
+        MachineEvent event = kafkaEvent.getEvent();
         String partyId = event.getSourceId();
         String contractId = contractEffectUnit.getContractId();
         long eventId = event.getEventId();

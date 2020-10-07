@@ -7,6 +7,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.PaymentDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
+import com.rbkmoney.reporter.model.KafkaEvent;
+import com.rbkmoney.reporter.service.FaultyEventsService;
 import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.InvoicingServiceUtils;
@@ -24,8 +26,11 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
 
     private final PaymentDao paymentDao;
 
+    private final FaultyEventsService faultyEventsService;
+
     @Override
-    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception{
+    public void handle(KafkaEvent kafkaEvent, InvoiceChange invoiceChange, int changeId) throws Exception {
+        MachineEvent event = kafkaEvent.getEvent();
         InvoicePaymentStatusChanged invoicePaymentStatusChanged =
                 invoiceChange.getInvoicePaymentChange().getPayload().getInvoicePaymentStatusChanged();
         InvoicePaymentStatus status = invoicePaymentStatusChanged.getStatus();
@@ -47,9 +52,14 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
         InvoicePaymentStatus hgPaymentStatus = payment.getPayment().getStatus();
         if (!hgPaymentStatus.isSetCaptured() && !hgPaymentStatus.isSetCancelled()
                 && !hgPaymentStatus.isSetFailed()) {
-            log.warn("Payment with status '{}' have incorrect status in HG '{}' (invoiceId = '{}', " +
-                    "sequenceId = '{}', changeId = '{}')", status, hgPaymentStatus, invoiceId,
+            log.warn("Payment received from kafka (topic: '{}', partition: '{}', offset: {}) " +
+                            "with status '{}' have incorrect status in HG '{}' (invoiceId = '{}', " +
+                            "sequenceId = '{}', changeId = '{}')", kafkaEvent.getTopic(),
+                    kafkaEvent.getPartition(), kafkaEvent.getOffset(), status, hgPaymentStatus, invoiceId,
                     sequenceId, changeId);
+            if (faultyEventsService.isFaultyEvent(kafkaEvent)) {
+                return;
+            }
         }
 
         Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);

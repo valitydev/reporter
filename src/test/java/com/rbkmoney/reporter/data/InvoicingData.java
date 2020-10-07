@@ -6,6 +6,7 @@ import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import com.rbkmoney.reporter.model.KafkaEvent;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -221,6 +222,14 @@ public final class InvoicingData {
         invoicePaymentChange.setPayload(payload);
         invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
         return invoiceChange;
+    }
+
+    public static KafkaEvent createKafkaEvent(MachineEvent machineEvent) {
+        return new KafkaEvent("test", 1, 1, machineEvent);
+    }
+
+    public static KafkaEvent createKafkaEvent(String invoiceId) {
+        return new KafkaEvent("test", 1, 1, createMachineEvent(invoiceId));
     }
 
     public static MachineEvent createMachineEvent(String invoiceId) {

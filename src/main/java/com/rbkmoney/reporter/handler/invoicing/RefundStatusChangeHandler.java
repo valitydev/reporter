@@ -6,6 +6,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.RefundDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
+import com.rbkmoney.reporter.model.KafkaEvent;
+import com.rbkmoney.reporter.service.FaultyEventsService;
 import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.InvoicingServiceUtils;
@@ -23,8 +25,11 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
 
     private final RefundDao refundDao;
 
+    private final FaultyEventsService faultyEventsService;
+
     @Override
-    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
+    public void handle(KafkaEvent kafkaEvent, InvoiceChange invoiceChange, int changeId) throws Exception {
+        MachineEvent event = kafkaEvent.getEvent();
         InvoicePaymentRefundChange invoicePaymentRefundChange = invoiceChange.getInvoicePaymentChange().getPayload()
                 .getInvoicePaymentRefundChange();
         InvoicePaymentRefundStatus status = invoicePaymentRefundChange.getPayload()
@@ -50,9 +55,14 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
         );
         InvoicePaymentRefundStatus hgRefundStatus = refund.getRefund().getStatus();
         if (!hgRefundStatus.isSetSucceeded() && !hgRefundStatus.isSetFailed()) {
-            log.warn("Refund with status '{}' have incorrect status in HG (invoiceId = '{}', " +
-                    "sequenceId = '{}', changeId = '{}')", status, hgRefundStatus, invoiceId,
+            log.warn("Refund received from kafka (topic: '{}', partition: '{}', offset: {}) " +
+                            "with status '{}' have incorrect status in HG (invoiceId = '{}', " +
+                            "sequenceId = '{}', changeId = '{}')", kafkaEvent.getTopic(),
+                    kafkaEvent.getPartition(), kafkaEvent.getOffset(),  status, hgRefundStatus, invoiceId,
                     sequenceId, changeId);
+            if (faultyEventsService.isFaultyEvent(kafkaEvent)) {
+                return;
+            }
         }
         Refund refundRecord = MapperUtils.createRefundRecord(refund, event, invoice, invoicePayment);
         Long extRefundId = refundDao.saveRefund(refundRecord);

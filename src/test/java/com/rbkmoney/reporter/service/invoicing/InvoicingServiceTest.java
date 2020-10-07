@@ -96,8 +96,8 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         when(paymentMachineEventParser.parse(machineEventTwo))
                 .thenReturn(createTestInvoiceEventPayload(secondStatusInfoList));
 
-        invoicingService.handleEvents(Arrays.asList(machineEventOne));
-        invoicingService.handleEvents(Arrays.asList(machineEventTwo));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventOne)));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventTwo)));
         List<Invoice> invoices = invoiceDao.getInvoicesByState(
                 LocalDateTime.now().minus(10L, ChronoUnit.MINUTES),
                 LocalDateTime.now(),
@@ -132,8 +132,8 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         when(paymentMachineEventParser.parse(machineEventTwo))
                 .thenReturn(createTestPaymentEventPayload(secondStatusInfoList));
 
-        invoicingService.handleEvents(Arrays.asList(machineEventOne));
-        invoicingService.handleEvents(Arrays.asList(machineEventTwo));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventOne)));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventTwo)));
         List<Payment> payments = paymentDao.getPaymentsByState(
                 LocalDateTime.now().minus(10L, ChronoUnit.MINUTES),
                 LocalDateTime.now(),
@@ -171,8 +171,8 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         when(paymentMachineEventParser.parse(machineEventTwo))
                 .thenReturn(createTestRefundEventPayload(secondStatusInfoList));
 
-        invoicingService.handleEvents(Arrays.asList(machineEventOne));
-        invoicingService.handleEvents(Arrays.asList(machineEventTwo));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventOne)));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventTwo)));
 
         List<Refund> refunds = refundDao.getRefundsByState(
                 LocalDateTime.now().minus(10L, ChronoUnit.MINUTES),
@@ -211,8 +211,8 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         when(paymentMachineEventParser.parse(machineEventTwo))
                 .thenReturn(createTestAdjustmentEventPayload(secondStatusInfoList));
 
-        invoicingService.handleEvents(Arrays.asList(machineEventOne));
-        invoicingService.handleEvents(Arrays.asList(machineEventTwo));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventOne)));
+        invoicingService.handleEvents(Arrays.asList(createKafkaEvent(machineEventTwo)));
 
         List<Adjustment> adjustments = adjustmentDao.getAdjustmentsByState(
                 LocalDateTime.now().minus(10L, ChronoUnit.MINUTES),

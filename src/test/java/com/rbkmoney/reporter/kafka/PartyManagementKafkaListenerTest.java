@@ -5,8 +5,6 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
 import com.rbkmoney.reporter.config.AbstractKafkaConfig;
 import com.rbkmoney.reporter.service.EventService;
-import com.rbkmoney.reporter.service.impl.InvoicingService;
-import com.rbkmoney.reporter.service.impl.PartyManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;

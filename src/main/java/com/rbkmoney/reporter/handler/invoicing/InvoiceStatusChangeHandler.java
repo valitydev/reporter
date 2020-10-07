@@ -6,6 +6,8 @@ import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.InvoiceDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.InvoiceAdditionalInfo;
+import com.rbkmoney.reporter.model.KafkaEvent;
+import com.rbkmoney.reporter.service.FaultyEventsService;
 import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.MapperUtils;
@@ -23,9 +25,12 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
 
     private final InvoiceDao invoiceDao;
 
+    private final FaultyEventsService faultyEventsService;
+
     @Override
     @Transactional
-    public void handle(MachineEvent event, InvoiceChange change, int changeId) throws Exception {
+    public void handle(KafkaEvent kafkaEvent, InvoiceChange change, int changeId) throws Exception {
+        MachineEvent event = kafkaEvent.getEvent();
         var invoiceStatus = change.getInvoiceStatusChanged().getStatus();
         if (!invoiceStatus.isSetPaid() && !invoiceStatus.isSetCancelled()) {
             return;
@@ -40,9 +45,14 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
         BusinessErrorUtils.checkInvoiceCorrectness(hgInvoice, invoiceId, sequenceId, changeId);
         InvoiceStatus hgInvoiceStatus = hgInvoice.getInvoice().getStatus();
         if (!hgInvoiceStatus.isSetPaid() && !hgInvoiceStatus.isSetCancelled()) {
-            log.warn("Invoice with a status '{}' have incorrect status '{}' in HG (invoiceId = '{}', " +
-                    "sequenceId = '{}', changeId = '{}')", invoiceStatus, hgInvoiceStatus, invoiceId,
-                    sequenceId, changeId);
+            log.warn("Invoice received from kafka (topic: '{}', partition: '{}', offset: {}) " +
+                            "with a status '{}' have incorrect status '{}' in HG (invoiceId = '{}', " +
+                            "sequenceId = '{}', changeId = '{}')", kafkaEvent.getTopic(),
+                    kafkaEvent.getPartition(), kafkaEvent.getOffset(), invoiceStatus, hgInvoiceStatus,
+                    invoiceId, sequenceId, changeId);
+            if (faultyEventsService.isFaultyEvent(kafkaEvent)) {
+                return;
+            }
         }
         Invoice invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);
         Long extInvoiceId = invoiceDao.saveInvoice(invoiceRecord);

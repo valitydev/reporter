@@ -5,6 +5,7 @@ import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.config.AbstractHandlerConfig;
 import com.rbkmoney.reporter.handler.EventHandler;
+import com.rbkmoney.reporter.model.KafkaEvent;
 import com.rbkmoney.reporter.service.TaskService;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Test;
@@ -41,10 +42,9 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
 
     @Test
     public void partyManagementEventHandlerTest() throws Exception {
-        MachineEvent machineEvent = createTestMachineEvent();
         PartyEventData partyEventData = createTestPartyEventData();
         for (PartyChange change : partyEventData.getChanges()) {
-            partyManagementEventHandler.handle(machineEvent, change, 0);
+            partyManagementEventHandler.handle(createTestKafkaEvent(), change, 0);
         }
         verify(taskService, times(2))
                 .registerProvisionOfServiceJob(
@@ -54,6 +54,10 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
                         any(BusinessScheduleRef.class),
                         any(Representative.class)
                 );
+    }
+
+    private static KafkaEvent createTestKafkaEvent() {
+        return new KafkaEvent("test", 1, 1, createTestMachineEvent());
     }
 
     private static MachineEvent createTestMachineEvent() {

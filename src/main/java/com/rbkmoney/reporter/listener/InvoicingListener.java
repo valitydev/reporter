@@ -2,6 +2,7 @@ package com.rbkmoney.reporter.listener;
 
 import com.rbkmoney.kafka.common.util.LogUtil;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
+import com.rbkmoney.reporter.model.KafkaEvent;
 import com.rbkmoney.reporter.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,17 +23,22 @@ public class InvoicingListener {
     @Value("${kafka.topics.invoicing.error-throttling-timeout-ms}")
     private int errorThrottlingTimeout;
 
-    @KafkaListener(topics = "${kafka.topics.invoicing.id}", containerFactory = "kafkaInvoicingListenerContainerFactory")
+    @KafkaListener(topics = "${kafka.topics.invoicing.id}",
+            containerFactory = "kafkaInvoicingListenerContainerFactory")
     public void listen(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
         log.info("Got invoicing machineEvent batch with size: {}", messages.size());
         try {
             invoicingService.handleEvents(
                     messages.stream()
-                            .map(m -> m.value().getEvent())
+                            .map(message -> new KafkaEvent(
+                                    message.topic(),
+                                    message.partition(),
+                                    message.offset(),
+                                    message.value().getEvent())
+                            )
                             .collect(Collectors.toList())
             );
         } catch (Exception e) {
-            log.error("Received error during processing invoice batch: ", e);
             Thread.sleep(errorThrottlingTimeout);
             throw e;
         }

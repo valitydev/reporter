@@ -9,6 +9,8 @@ import com.rbkmoney.damsel.payment_processing.InvoicePaymentAdjustmentChange;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.dao.AdjustmentDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Adjustment;
+import com.rbkmoney.reporter.model.KafkaEvent;
+import com.rbkmoney.reporter.service.FaultyEventsService;
 import com.rbkmoney.reporter.service.HellgateInvoicingService;
 import com.rbkmoney.reporter.util.BusinessErrorUtils;
 import com.rbkmoney.reporter.util.InvoicingServiceUtils;
@@ -26,8 +28,11 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
 
     private final AdjustmentDao adjustmentDao;
 
+    private final FaultyEventsService faultyEventsService;
+
     @Override
-    public void handle(MachineEvent event, InvoiceChange invoiceChange, int changeId) throws Exception {
+    public void handle(KafkaEvent kafkaEvent, InvoiceChange invoiceChange, int changeId) throws Exception {
+        MachineEvent event = kafkaEvent.getEvent();
         InvoicePaymentAdjustmentChange adjustmentChange = invoiceChange.getInvoicePaymentChange().getPayload()
                 .getInvoicePaymentAdjustmentChange();
         InvoicePaymentAdjustmentStatus status = adjustmentChange.getPayload()
@@ -55,9 +60,13 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
         );
         InvoicePaymentAdjustmentStatus hgAdjustmentStatus = paymentAdjustment.getStatus();
         if (hgAdjustmentStatus.isSetPending() || hgAdjustmentStatus.isSetProcessed()) {
-            log.warn("Adjustment with status '{}' have incorrect status'{}' in HG (invoiceId = '{}', " +
-                    "sequenceId = '{}', changeId = '{}')", status, hgAdjustmentStatus, invoiceId,
-                    sequenceId, changeId);
+            log.warn("Adjustment received from kafka (topic: '{}', partition: '{}', offset: {}) " +
+                            "with status '{}' have incorrect status'{}' in HG (invoiceId = '{}' " +
+                            "sequenceId = '{}', changeId = '{}')", kafkaEvent.getTopic(), kafkaEvent.getPartition(),
+                    kafkaEvent.getOffset(), status, hgAdjustmentStatus, invoiceId, sequenceId, changeId);
+            if (faultyEventsService.isFaultyEvent(kafkaEvent)) {
+                return;
+            }
         }
 
         Adjustment adjustmentRecord = MapperUtils.createAdjustmentRecord(
