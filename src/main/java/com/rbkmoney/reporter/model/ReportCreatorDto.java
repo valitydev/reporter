@@ -19,6 +19,7 @@ public class ReportCreatorDto {
     private String toTime;
     private Iterator<StatPayment> paymentsIterator;
     private Iterator<StatRefund> refundsIterator;
+    private Iterator<StatAdjustment> adjustmentsIterator;
     private Report report;
     private OutputStream outputStream;
     private Map<String, String> shopUrls;

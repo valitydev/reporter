@@ -3,6 +3,7 @@ package com.rbkmoney.reporter.service.impl;
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.service.ReportCreatorService;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
@@ -35,39 +36,71 @@ public class ReportCreatorServiceImpl implements ReportCreatorService {
             Sheet sh = createSheet(wb);
             AtomicInteger rownum = new AtomicInteger(0);
 
-            createPaymentsHeadRow(reportCreatorDto, wb, sh, rownum);
-            createPaymentsColumnsDesciptionRow(wb, sh, rownum);
+            sh = createPaymentTable(reportCreatorDto, wb, sh, rownum);
+            sh = addIndent(wb, sh,rownum);
+            sh = createRefundTable(reportCreatorDto, wb, sh, rownum);
+            sh = addIndent(wb, sh,rownum);
+            createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
 
-            AtomicLong totalAmnt = new AtomicLong();
-            AtomicLong totalPayoutAmnt = new AtomicLong();
-            AtomicLong totalRefundAmnt = new AtomicLong();
-
-            while (reportCreatorDto.getPaymentsIterator().hasNext()) {
-                createPaymentRow(reportCreatorDto, sh, totalAmnt, totalPayoutAmnt, rownum, reportCreatorDto.getPaymentsIterator().next());
-                sh = checkAndReset(wb, sh, rownum);
-            }
-            sh = checkAndReset(wb, sh, rownum);
-            createTotalAmountRow(wb, sh, totalAmnt, totalPayoutAmnt, rownum);
-            sh = checkAndReset(wb, sh, rownum);
-            sh.createRow(rownum.getAndIncrement());
-            sh = checkAndReset(wb, sh, rownum);
-            sh.createRow(rownum.getAndIncrement());
-            sh = checkAndReset(wb, sh, rownum);
-            createRefundsHeadRow(reportCreatorDto, wb, sh, rownum);
-            sh = checkAndReset(wb, sh, rownum);
-            createRefundsColumnsDescriptionRow(wb, sh, rownum);
-            sh = checkAndReset(wb, sh, rownum);
-
-            while (reportCreatorDto.getRefundsIterator().hasNext()) {
-                createRefundRow(reportCreatorDto, sh, totalRefundAmnt, rownum, reportCreatorDto.getRefundsIterator().next());
-                sh = checkAndReset(wb, sh, rownum);
-            }
-            sh = checkAndReset(wb, sh, rownum);
-            createTotalRefundAmountRow(wb, sh, totalRefundAmnt, rownum);
             wb.write(reportCreatorDto.getOutputStream());
             reportCreatorDto.getOutputStream().close();
             wb.dispose();
         }
+    }
+
+    private Sheet createPaymentTable(ReportCreatorDto reportCreatorDto, SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
+        createPaymentsHeadRow(reportCreatorDto, wb, sh, rownum);
+        createPaymentsColumnsDesciptionRow(wb, sh, rownum);
+
+        AtomicLong totalAmnt = new AtomicLong();
+        AtomicLong totalPayoutAmnt = new AtomicLong();
+
+        while (reportCreatorDto.getPaymentsIterator().hasNext()) {
+            createPaymentRow(reportCreatorDto, sh, totalAmnt, totalPayoutAmnt, rownum, reportCreatorDto.getPaymentsIterator().next());
+            sh = checkAndReset(wb, sh, rownum);
+        }
+        sh = checkAndReset(wb, sh, rownum);
+        createTotalAmountRow(wb, sh, totalAmnt, totalPayoutAmnt, rownum);
+        return checkAndReset(wb, sh, rownum);
+    }
+
+    private Sheet createRefundTable(ReportCreatorDto reportCreatorDto, SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
+        createRefundsHeadRow(reportCreatorDto, wb, sh, rownum);
+        sh = checkAndReset(wb, sh, rownum);
+        createRefundsColumnsDescriptionRow(wb, sh, rownum);
+        sh = checkAndReset(wb, sh, rownum);
+
+        AtomicLong totalRefundAmnt = new AtomicLong();
+        while (reportCreatorDto.getRefundsIterator().hasNext()) {
+            createRefundRow(reportCreatorDto, sh, totalRefundAmnt, rownum, reportCreatorDto.getRefundsIterator().next());
+            sh = checkAndReset(wb, sh, rownum);
+        }
+        sh = checkAndReset(wb, sh, rownum);
+        createTotalRefundAmountRow(wb, sh, totalRefundAmnt, rownum);
+        return checkAndReset(wb, sh, rownum);
+    }
+
+    private Sheet createAdjustmentTable(ReportCreatorDto reportCreatorDto, SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
+        createAdjustmentsHeadRow(reportCreatorDto, wb, sh, rownum);
+        sh = checkAndReset(wb, sh, rownum);
+        createAdjustmentColumnsDescriptionRow(wb, sh, rownum);
+        sh = checkAndReset(wb, sh, rownum);
+
+        AtomicLong totalAdjustmentAmnt = new AtomicLong();
+        while (reportCreatorDto.getAdjustmentsIterator().hasNext()) {
+            createAdjustmentRow(reportCreatorDto, sh, totalAdjustmentAmnt, rownum, reportCreatorDto.getAdjustmentsIterator().next());
+            sh = checkAndReset(wb, sh, rownum);
+        }
+        sh = checkAndReset(wb, sh, rownum);
+        createTotalAdjustmentAmountRow(wb, sh, totalAdjustmentAmnt, rownum);
+        return checkAndReset(wb, sh, rownum);
+    }
+
+    private Sheet addIndent(SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
+        sh.createRow(rownum.getAndIncrement());
+        sh = checkAndReset(wb, sh, rownum);
+        sh.createRow(rownum.getAndIncrement());
+        return checkAndReset(wb, sh, rownum);
     }
 
     private Sheet checkAndReset(SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
@@ -164,6 +197,61 @@ public class ReportCreatorServiceImpl implements ReportCreatorService {
         cellFirstRefunds.setCellValue(String.format("Возвраты за период с %s по %s", reportCreatorDto.getFromTime(), reportCreatorDto.getToTime()));
         CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
         CellUtil.setFont(cellFirstRefunds, createBoldFont(wb));
+    }
+
+    private void createAdjustmentColumnsDescriptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
+        Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
+        for (int i = 0; i < 6; ++i) {
+            Cell cell = rowSecondRefunds.createCell(i);
+            CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
+            cell.setCellStyle(createGreyCellStyle(wb));
+            CellUtil.setFont(cell, createBoldFont(wb));
+        }
+        rowSecondRefunds.getCell(0).setCellValue("Id корректировки");
+        rowSecondRefunds.getCell(1).setCellValue("Id платежа");
+        rowSecondRefunds.getCell(2).setCellValue("Дата корректировки");
+        rowSecondRefunds.getCell(3).setCellValue("Сумма");
+        rowSecondRefunds.getCell(4).setCellValue("Валюта");
+        rowSecondRefunds.getCell(5).setCellValue("Причина корректировки");
+    }
+
+    private void createAdjustmentsHeadRow(ReportCreatorDto reportCreatorDto, SXSSFWorkbook wb, Sheet sh, AtomicInteger rownum) {
+        Row rowFirstAdjustments = sh.createRow(rownum.getAndIncrement());
+        for (int i = 0; i < 6; ++i) {
+            rowFirstAdjustments.createCell(i);
+        }
+        sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
+        Cell cellFirstRefunds = rowFirstAdjustments.getCell(0);
+        cellFirstRefunds.setCellValue(String.format("Корректировки за период с %s по %s", reportCreatorDto.getFromTime(), reportCreatorDto.getToTime()));
+        CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
+        CellUtil.setFont(cellFirstRefunds, createBoldFont(wb));
+    }
+
+    private void createAdjustmentRow(ReportCreatorDto reportCreatorDto, Sheet sh, AtomicLong totalAdjustmentAmnt, AtomicInteger rownum, StatAdjustment a) {
+        ZoneId reportZoneId = ZoneId.of(reportCreatorDto.getReport().getTimezone());
+
+        Row row = sh.createRow(rownum.getAndIncrement());
+        row.createCell(0).setCellValue(a.getAdjustmentId());
+        row.createCell(1).setCellValue(a.getInvoiceId() + "." + a.getPaymentId());
+        row.createCell(2).setCellValue(TimeUtil.toLocalizedDateTime(a.getAdjustmentStatusCreatedAt(), reportZoneId));
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(a.getAdjustmentAmount()));
+        totalAdjustmentAmnt.addAndGet(a.getAdjustmentAmount());
+        row.createCell(4).setCellValue(a.getAdjustmentCurrencyCode());
+        row.createCell(5).setCellValue(a.getAdjustmentReason());
+    }
+
+    private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb, Sheet sh, AtomicLong totalAdjustmentAmnt, AtomicInteger rownum) {
+        Row rowTotalPaymentAmount = sh.createRow(rownum.getAndIncrement());
+        for (int i = 0; i < 6; ++i) {
+            Cell cell = rowTotalPaymentAmount.createCell(i);
+            cell.setCellStyle(createGreyCellStyle(wb));
+            CellUtil.setFont(cell, createBoldFont(wb));
+        }
+        sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 2));
+        Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
+        cellTotalPaymentAmount.setCellValue("Сумма");
+        CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
+        rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAdjustmentAmnt.longValue()));
     }
 
     private void createTotalAmountRow(Workbook wb, Sheet sh, AtomicLong totalAmnt, AtomicLong totalPayoutAmnt, AtomicInteger rownum) {

@@ -1,8 +1,7 @@
-package com.rbkmoney.reporter.utils;
+package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.reporter.data.InvoicingData;
-import com.rbkmoney.reporter.util.DamselUtil;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -16,11 +16,12 @@ import com.rbkmoney.reporter.domain.tables.pojos.ContractMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
-import com.rbkmoney.reporter.utils.BuildUtils;
+import com.rbkmoney.reporter.util.BuildUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -78,11 +79,19 @@ public class TemplateTest extends AbstractTemplateConfig {
                 refundList.add(BuildUtils.buildStatRefund(i));
             }
 
+            List<StatAdjustment> adjustmentList = new ArrayList<>();
+            for (int i = 0; i < 3; ++i) {
+                adjustmentList.add(BuildUtils.buildStatAdjustment(i));
+            }
+
             given(statisticService.getCapturedPaymentsIterator(any(), any(), any(), any()))
                     .willReturn(paymentList.iterator());
 
             given(statisticService.getRefundsIterator(any(), any(), any(), any()))
                     .willReturn(refundList.iterator());
+
+            given(statisticService.getAdjustmentsIterator(any(), any(), any(), any()))
+                    .willReturn(adjustmentList.iterator());
 
             StatPayment payment = new StatPayment();
             InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();

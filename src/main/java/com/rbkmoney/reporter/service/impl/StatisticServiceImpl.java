@@ -6,6 +6,7 @@ import com.rbkmoney.reporter.dsl.DslUtil;
 import com.rbkmoney.reporter.exception.InvoiceNotFoundException;
 import com.rbkmoney.reporter.exception.PaymentNotFoundException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.service.StatisticService;
 import lombok.RequiredArgsConstructor;
 import org.apache.thrift.TException;
@@ -17,6 +18,7 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public Map<String, String> getPurposes(String partyId, String shopId, Instant fromTime, Instant toTime) {
         try {
-            Optional<String> continuationToken = Optional.empty();
+            String continuationToken = null;
             int size = 1000;
             Map<String, String> purposes = new HashMap<>();
             List<StatInvoice> nextInvoices;
@@ -49,8 +51,8 @@ public class StatisticServiceImpl implements StatisticService {
                 StatResponse statResponse = merchantStatisticsClient.getInvoices(DslUtil.createInvoicesRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
                 nextInvoices = statResponse.getData().getInvoices();
                 nextInvoices.forEach(i -> purposes.put(i.getId(), i.getProduct()));
-                continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
-            } while (continuationToken.isPresent());
+                continuationToken = statResponse.getContinuationToken();
+            } while (continuationToken != null);
             return purposes;
         } catch (TException ex) {
             throw new RuntimeException(ex);
@@ -91,17 +93,17 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
         return new Iterator<>() {
-            private Optional<String> continuationToken = Optional.empty();
+            private String continuationToken = null;
             private final int size = 1000;
             private Iterator<StatPayment> iterator = null;
 
             @Override
             public boolean hasNext() {
-                if (iterator == null || ((!iterator.hasNext()) && continuationToken.isPresent())) {
+                if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
                     try {
                         StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createPaymentsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
                         iterator = statResponse.getData().getPayments().iterator();
-                        continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
+                        continuationToken = statResponse.getContinuationToken();
                     } catch (TException e) {
                         throw new RuntimeException(e);
                     }
@@ -133,17 +135,17 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
         return new Iterator<>() {
-            private Optional<String> continuationToken = Optional.empty();
+            private String continuationToken = null;
             private final int size = 1000;
             private Iterator<StatRefund> iterator = null;
 
             @Override
             public boolean hasNext() {
-                if (iterator == null || ((!iterator.hasNext()) && continuationToken.isPresent())) {
+                if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
                     try {
                         StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
                         iterator = statResponse.getData().getRefunds().iterator();
-                        continuationToken = Optional.ofNullable(statResponse.getContinuationToken());
+                        continuationToken = statResponse.getContinuationToken();
                     } catch (TException e) {
                         throw new RuntimeException(e);
                     }
@@ -154,6 +156,35 @@ public class StatisticServiceImpl implements StatisticService {
             @Override
             public StatRefund next() {
                 return iterator.next();
+            }
+        };
+    }
+
+    @Override
+    public Iterator<StatAdjustment> getAdjustmentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
+        return new Iterator<>() {
+
+            private String continuationToken = null;
+            private final int size = 1000;
+            private Iterator<Map<String, String>> iterator = null;
+
+            @Override
+            public boolean hasNext() {
+                if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
+                    try {
+                        StatResponse statResponse = merchantStatisticsClient.getStatistics(DslUtil.createAdjustmentsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
+                        iterator = statResponse.getData().getRecords().iterator();
+                        continuationToken = statResponse.getContinuationToken();
+                    } catch (TException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return iterator.hasNext();
+            }
+
+            @Override
+            public StatAdjustment next() {
+                return objectMapper.convertValue(iterator.next(), StatAdjustment.class);
             }
         };
     }

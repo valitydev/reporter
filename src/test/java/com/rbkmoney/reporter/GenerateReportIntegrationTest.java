@@ -14,6 +14,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.service.ReportService;
 import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.service.impl.TaskServiceImpl;
@@ -37,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.rbkmoney.reporter.utils.TestDataUtil.*;
+import static com.rbkmoney.reporter.util.TestDataUtil.*;
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -76,6 +77,8 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
         given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any())).willReturn(getStatPayment());
 
         given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any())).willReturn(getStatRefund());
+
+        given(statisticService.getAdjustmentsIterator(anyString(), anyString(), any(), any())).willReturn(getStatAdjustment());
 
         given(partyManagementClient.checkout(any(), any(), any()))
                 .willReturn(getTestParty(partyId, shopId, contractId));
@@ -157,6 +160,20 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
             @Override
             public StatRefund next() {
                 return new StatRefund();
+            }
+        };
+    }
+
+    private Iterator<StatAdjustment> getStatAdjustment() {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public StatAdjustment next() {
+                return new StatAdjustment();
             }
         };
     }

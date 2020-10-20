@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.utils;
+package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;

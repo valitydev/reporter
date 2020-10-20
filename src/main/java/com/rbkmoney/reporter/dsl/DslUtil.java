@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public class DslUtil {
 
-    public static StatRequest createPaymentsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, Optional<String> continuationToken, int size, ObjectMapper objectMapper) {
+    public static StatRequest createPaymentsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, String continuationToken, int size, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         PaymentsForReportQuery paymentsQuery = new PaymentsForReportQuery();
@@ -25,7 +25,7 @@ public class DslUtil {
         return createStatRequest(statisticDsl, continuationToken, objectMapper);
     }
 
-    public static StatRequest createRefundsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, Optional<String> continuationToken, int size, ObjectMapper objectMapper) {
+    public static StatRequest createRefundsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, String continuationToken, int size, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         RefundsForReportQuery refundsForReportQuery = new RefundsForReportQuery();
@@ -40,7 +40,22 @@ public class DslUtil {
         return createStatRequest(statisticDsl, continuationToken, objectMapper);
     }
 
-    public static StatRequest createInvoicesRequest(String partyId, String shopId, Instant fromTime, Instant toTime, Optional<String> continuationToken, int size, ObjectMapper objectMapper) {
+    public static StatRequest createAdjustmentsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, String continuationToken, int size, ObjectMapper objectMapper) {
+        StatisticDsl statisticDsl = new StatisticDsl();
+        Query query = new Query();
+        AdjustmentsForReportQuery adjustmentsForReportQuery = new AdjustmentsForReportQuery();
+        adjustmentsForReportQuery.setMerchantId(partyId);
+        adjustmentsForReportQuery.setShopId(shopId);
+        adjustmentsForReportQuery.setFromTime(fromTime);
+        adjustmentsForReportQuery.setToTime(toTime);
+        query.setAdjustmentsForReportQuery(adjustmentsForReportQuery);
+        query.setSize(size);
+        statisticDsl.setQuery(query);
+
+        return createStatRequest(statisticDsl, continuationToken, objectMapper);
+    }
+
+    public static StatRequest createInvoicesRequest(String partyId, String shopId, Instant fromTime, Instant toTime, String continuationToken, int size, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         InvoicesQuery invoicesQuery = new InvoicesQuery();
@@ -63,7 +78,7 @@ public class DslUtil {
         query.setInvoicesQuery(invoicesQuery);
         statisticDsl.setQuery(query);
 
-        return createStatRequest(statisticDsl, Optional.empty(), objectMapper);
+        return createStatRequest(statisticDsl, null, objectMapper);
     }
 
     public static StatRequest createPaymentRequest(String partyId, String shopId, String invoiceId, String paymentId, ObjectMapper objectMapper) {
@@ -77,10 +92,10 @@ public class DslUtil {
         query.setPaymentsForReportQuery(paymentsQuery);
         statisticDsl.setQuery(query);
 
-        return createStatRequest(statisticDsl, Optional.empty(), objectMapper);
+        return createStatRequest(statisticDsl, null, objectMapper);
     }
 
-    public static StatRequest createRefundsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status, long from, int size, ObjectMapper objectMapper) {
+    public static StatRequest createRefundsRequest(String partyId, String shopId, Instant fromTime, Instant toTime, InvoicePaymentRefundStatus status, int size, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
         RefundsQuery refundsQuery = new RefundsQuery();
@@ -90,19 +105,17 @@ public class DslUtil {
         refundsQuery.setToTime(toTime);
         refundsQuery.setRefundStatus(status.getSetField().getFieldName());
         query.setRefundsQuery(refundsQuery);
-        query.setFrom(from);
         query.setSize(size);
         statisticDsl.setQuery(query);
 
-        return createStatRequest(statisticDsl, Optional.empty(), objectMapper);
+        return createStatRequest(statisticDsl, null, objectMapper);
     }
 
-    public static StatRequest createStatRequest(StatisticDsl statisticDsl, Optional<String> continuationToken, ObjectMapper objectMapper) {
+    public static StatRequest createStatRequest(StatisticDsl statisticDsl, String continuationToken, ObjectMapper objectMapper) {
         try {
             StatRequest statRequest = new StatRequest(objectMapper.writeValueAsString(statisticDsl));
-            continuationToken.ifPresent(
-                    token -> statRequest.setContinuationToken(token)
-            );
+            Optional.ofNullable(continuationToken)
+                    .ifPresent(statRequest::setContinuationToken);
             return statRequest;
         } catch (JsonProcessingException ex) {
             throw new RuntimeException(ex);
@@ -121,7 +134,7 @@ public class DslUtil {
         query.setShopAccountingQuery(shopAccountingQuery);
         statisticDsl.setQuery(query);
 
-        return createStatRequest(statisticDsl, Optional.empty(), objectMapper);
+        return createStatRequest(statisticDsl, null, objectMapper);
     }
 
 }

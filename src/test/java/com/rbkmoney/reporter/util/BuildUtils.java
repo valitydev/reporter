@@ -1,11 +1,26 @@
-package com.rbkmoney.reporter.utils;
+package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
+import com.rbkmoney.reporter.model.StatAdjustment;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class BuildUtils {
+
+    public static StatAdjustment buildStatAdjustment(int i) {
+        StatAdjustment statAdjustment = new StatAdjustment();
+        statAdjustment.setAdjustmentId("id" + i);
+        statAdjustment.setPaymentId("paymentId" + i);
+        statAdjustment.setInvoiceId("invoiceId" + i);
+        statAdjustment.setAdjustmentAmount(123L + i);
+        statAdjustment.setPartyShopId("shopId" + i);
+        statAdjustment.setAdjustmentCurrencyCode("RUB");
+        statAdjustment.setAdjustmentStatusCreatedAt(Instant.now());
+        statAdjustment.setAdjustmentReason("You are the reason of my life");
+        return statAdjustment;
+    }
 
     public static StatRefund buildStatRefund(int i) {
         StatRefund refund = new StatRefund();

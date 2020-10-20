@@ -4,6 +4,7 @@ import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportCreatorService;
 import com.rbkmoney.reporter.service.StatisticService;
@@ -56,6 +57,13 @@ public class PaymentRegistryTemplateImpl implements ReportTemplate {
                 report.getToTime().toInstant(ZoneOffset.UTC)
         );
 
+        Iterator<StatAdjustment> adjustmentsIterator = statisticService.getAdjustmentsIterator(
+                report.getPartyId(),
+                report.getPartyShopId(),
+                report.getFromTime().toInstant(ZoneOffset.UTC),
+                report.getToTime().toInstant(ZoneOffset.UTC)
+        );
+
         Map<String, String> shopUrls = partyService.getShopUrls(report.getPartyId());
         Map<String, String> purposes = statisticService.getPurposes(report.getPartyId(), report.getPartyShopId(),
                 report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC));
@@ -65,6 +73,7 @@ public class PaymentRegistryTemplateImpl implements ReportTemplate {
                 .toTime(toTime)
                 .paymentsIterator(paymentsIterator)
                 .refundsIterator(refundsIterator)
+                .adjustmentsIterator(adjustmentsIterator)
                 .report(report)
                 .outputStream(outputStream)
                 .shopUrls(shopUrls)

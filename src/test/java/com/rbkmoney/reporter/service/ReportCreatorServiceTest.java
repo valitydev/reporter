@@ -4,9 +4,10 @@ import com.rbkmoney.damsel.merch_stat.StatPayment;
 import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
+import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
 import com.rbkmoney.reporter.service.impl.StatisticServiceImpl;
-import com.rbkmoney.reporter.utils.BuildUtils;
+import com.rbkmoney.reporter.util.BuildUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
@@ -38,6 +39,9 @@ public class ReportCreatorServiceTest {
         Iterator<StatRefund> refundsIterator = IntStream.range(1, 10)
                 .mapToObj(BuildUtils::buildStatRefund).iterator();
 
+        Iterator<StatAdjustment> adjustmentsIterator = IntStream.range(1, 10)
+                .mapToObj(BuildUtils::buildStatAdjustment).iterator();
+
         Report report = new Report();
         report.setTimezone("UTC");
         report.setPartyId("partyId");
@@ -57,6 +61,7 @@ public class ReportCreatorServiceTest {
                     "2019-04-22T06:12:27Z",
                     paymentsIterator,
                     refundsIterator,
+                    adjustmentsIterator,
                     report,
                     Files.newOutputStream(tempFile),
                     shopUrls,
