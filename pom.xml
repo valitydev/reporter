@@ -38,6 +38,7 @@
         <shared.resources.version>0.3.8</shared.resources.version>
         <damsel.version>1.449-e2de943</damsel.version>
         <sink-common-lib.version>0.0.7</sink-common-lib.version>
+        <otj-pg-embedded>0.12.5</otj-pg-embedded>
         <!---->
         <db.name>reporter</db.name>
         <db.schema>rpt</db.schema>
@@ -263,6 +264,12 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-proxy</artifactId>
             <version>${awaitility.proxy.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.opentable.components</groupId>
+            <artifactId>otj-pg-embedded</artifactId>
+            <version>${otj-pg-embedded}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

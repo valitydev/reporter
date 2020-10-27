@@ -62,7 +62,8 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
         public StatInvoice getInvoice(String invoiceId) {
         try {
-            return merchantStatisticsClient.getPayments(DslUtil.createInvoiceRequest(invoiceId, objectMapper))
+            return merchantStatisticsClient.getPayments(
+                    DslUtil.createInvoiceRequest(invoiceId, objectMapper))
                     .getData()
                     .getInvoices()
                     .stream()
@@ -73,8 +74,18 @@ public class StatisticServiceImpl implements StatisticService {
         }
     }
 
-    private ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Optional<Instant> fromTime, Instant toTime) {
+    private ShopAccountingModel getShopAccounting(String partyId,
+                                                  String shopId,
+                                                  String currencyCode,
+                                                  Optional<Instant> fromTime,
+                                                  Instant toTime) {
         try {
+            StatResponse statistics = merchantStatisticsClient.getStatistics(
+                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime, objectMapper)
+            );
+            StatResponseData data = statistics.getData();
+            List<Map<String, String>> records = data.getRecords();
+
             ShopAccountingModel shopAccounting = merchantStatisticsClient.getStatistics(
                     DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime, objectMapper)
             ).getData()
@@ -91,7 +102,10 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
+    public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId,
+                                                             String shopId,
+                                                             Instant fromTime,
+                                                             Instant toTime) {
         return new Iterator<>() {
             private String continuationToken = null;
             private final int size = 1000;
@@ -101,7 +115,9 @@ public class StatisticServiceImpl implements StatisticService {
             public boolean hasNext() {
                 if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
                     try {
-                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createPaymentsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
+                        StatResponse statResponse = merchantStatisticsClient.getPayments(
+                                DslUtil.createPaymentsRequest(
+                                        partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
                         iterator = statResponse.getData().getPayments().iterator();
                         continuationToken = statResponse.getContinuationToken();
                     } catch (TException e) {
@@ -133,7 +149,10 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public Iterator<StatRefund> getRefundsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
+    public Iterator<StatRefund> getRefundsIterator(String partyId,
+                                                   String shopId,
+                                                   Instant fromTime,
+                                                   Instant toTime) {
         return new Iterator<>() {
             private String continuationToken = null;
             private final int size = 1000;
@@ -143,7 +162,17 @@ public class StatisticServiceImpl implements StatisticService {
             public boolean hasNext() {
                 if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
                     try {
-                        StatResponse statResponse = merchantStatisticsClient.getPayments(DslUtil.createRefundsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
+                        StatResponse statResponse = merchantStatisticsClient.getPayments(
+                                DslUtil.createRefundsRequest(
+                                        partyId,
+                                        shopId,
+                                        fromTime,
+                                        toTime,
+                                        continuationToken,
+                                        size,
+                                        objectMapper
+                                )
+                        );
                         iterator = statResponse.getData().getRefunds().iterator();
                         continuationToken = statResponse.getContinuationToken();
                     } catch (TException e) {

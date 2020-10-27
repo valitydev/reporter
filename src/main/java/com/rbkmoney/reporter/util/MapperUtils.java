@@ -182,9 +182,8 @@ public final class MapperUtils {
         if (hgInnerPayment.isSetMakeRecurrent()) {
             additionalInfo.setMakeRecurrentFlag(hgInnerPayment.isMakeRecurrent());
         }
-
-        //TODO: it isnt't in payment from HG
-        //additionalInfo.setPaymentShortId();
+        // TODO: add after HG fix
+        // additionalInfo.setPaymentShortId(hgInnerPayment);
 
         fillPaymentFailedStatusInfo(paymentStatusChanged, additionalInfo);
 

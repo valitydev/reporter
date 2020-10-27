@@ -3,6 +3,8 @@ package com.rbkmoney.reporter.dao;
 import com.rbkmoney.reporter.domain.enums.RefundStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
+import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
+import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,4 +19,8 @@ public interface RefundDao {
 
     void saveAdditionalRefundInfo(RefundAdditionalInfo refundAdditionalInfo);
 
+    Cursor<RefundRecord> getRefundsCursor(String partyId,
+                                          String shopId,
+                                          LocalDateTime fromTime,
+                                          LocalDateTime toTime);
 }

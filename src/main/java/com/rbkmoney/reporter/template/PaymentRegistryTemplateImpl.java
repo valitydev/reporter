@@ -27,7 +27,7 @@ public class PaymentRegistryTemplateImpl implements ReportTemplate {
 
     private final PartyService partyService;
 
-    private final ReportCreatorService reportCreatorService;
+    private final ReportCreatorService<ReportCreatorDto> reportCreatorService;
 
     @Override
     public boolean isAccept(ReportType reportType) {

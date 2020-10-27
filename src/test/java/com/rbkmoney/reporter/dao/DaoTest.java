@@ -1,11 +1,15 @@
 package com.rbkmoney.reporter.dao;
 
 import com.rbkmoney.reporter.config.AbstractDaoConfig;
-import com.rbkmoney.reporter.domain.enums.ReportStatus;
-import com.rbkmoney.reporter.domain.enums.ReportType;
+import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
+import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
+import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
+import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.awaitility.Awaitility;
+import org.jooq.Cursor;
+import org.jooq.Result;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -33,6 +38,15 @@ public class DaoTest extends AbstractDaoConfig {
 
     @Autowired
     private PayoutDao payoutDao;
+
+    @Autowired
+    private InvoiceDao invoiceDao;
+
+    @Autowired
+    private PaymentDao paymentDao;
+
+    @Autowired
+    private RefundDao refundDao;
 
     @Autowired
     private ContractMetaDao contractMetaDao;
@@ -206,6 +220,87 @@ public class DaoTest extends AbstractDaoConfig {
         payoutDao.savePayoutState(payoutState);
         PayoutState resultPayoutState = payoutDao.getPayoutState(extPayoutId);
         assertEquals(payoutState, resultPayoutState);
+    }
+
+    @Test
+    public void saveAndGetInvoiceTest() {
+        String partyId = random(String.class);
+        String shopId = random(String.class);
+        Invoice invoice = random(Invoice.class);
+        invoice.setPartyId(partyId);
+        invoice.setShopId(shopId);
+        invoice.setStatus(InvoiceStatus.paid);
+        invoiceDao.saveInvoice(invoice);
+
+        InvoiceRecord invoiceRecordOne = invoiceDao.getInvoice(invoice.getInvoiceId());
+        assertEquals(invoice, invoiceRecordOne.into(Invoice.class));
+    }
+
+    @Test
+    public void saveAndGetPaymentTest() {
+        String partyId = random(String.class);
+        String shopId = random(String.class);
+
+        int paymentsCount = 100;
+        List<Payment> sourcePayments = new ArrayList<>();
+        for (int i = 0; i < paymentsCount; i++) {
+            Payment payment = random(Payment.class);
+            payment.setShopId(shopId);
+            payment.setPartyId(partyId);
+            payment.setCreatedAt(LocalDateTime.now());
+            payment.setStatusCreatedAt(LocalDateTime.now());
+            payment.setStatus(InvoicePaymentStatus.captured);
+            sourcePayments.add(payment);
+            paymentDao.savePayment(payment);
+        }
+        Payment firstPayment = sourcePayments.get(0);
+        PaymentRecord payment =
+                paymentDao.getPayment(partyId, shopId, firstPayment.getInvoiceId(), firstPayment.getPaymentId());
+        assertEquals(firstPayment, payment.into(Payment.class));
+
+        Cursor<PaymentRecord> paymentsCursor =
+                paymentDao.getPaymentsCursor(partyId, shopId, Optional.empty(), LocalDateTime.now());
+        List<Payment> resultPayments = new ArrayList<>();
+        while (paymentsCursor.hasNext()) {
+            Result<PaymentRecord> paymentRecords = paymentsCursor.fetchNext(10);
+            resultPayments.addAll(paymentRecords.into(Payment.class));
+        }
+        assertEquals(paymentsCount, resultPayments.size());
+    }
+
+    @Test
+    public void saveAndGetRefundTest() {
+        String partyId = random(String.class);
+        String shopId = random(String.class);
+
+        int refundsCount = 100;
+        List<Refund> sourceRefunds = new ArrayList<>();
+        for (int i = 0; i < refundsCount; i++) {
+            Refund refund = random(Refund.class);
+            refund.setShopId(shopId);
+            refund.setPartyId(partyId);
+            refund.setCreatedAt(LocalDateTime.now());
+            refund.setStatusCreatedAt(LocalDateTime.now());
+            refund.setStatus(RefundStatus.succeeded);
+            sourceRefunds.add(refund);
+            refundDao.saveRefund(refund);
+        }
+
+        Cursor<RefundRecord> refundsCursor = refundDao.getRefundsCursor(
+                partyId,
+                shopId,
+                LocalDateTime.now().minus(10L, ChronoUnit.HOURS),
+                LocalDateTime.now()
+        );
+        List<Refund> resultRefunds = new ArrayList<>();
+        int iterationsCount = 0;
+        while (refundsCursor.hasNext()) {
+            Result<RefundRecord> refundRecords = refundsCursor.fetchNext(10);
+            resultRefunds.addAll(refundRecords.into(Refund.class));
+            iterationsCount++;
+        }
+        assertEquals(10, iterationsCount);
+        assertEquals(refundsCount, resultRefunds.size());
     }
 
     @Test
