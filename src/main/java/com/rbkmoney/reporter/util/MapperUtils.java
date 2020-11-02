@@ -2,6 +2,7 @@ package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.base.Content;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.InvoicePaymentChargeback;
 import com.rbkmoney.damsel.domain.InvoicePaymentRefund;
 import com.rbkmoney.damsel.domain.PaymentTool;
 import com.rbkmoney.damsel.payment_processing.*;
@@ -90,6 +91,39 @@ public final class MapperUtils {
             }
         }
         return additionalInfo;
+    }
+
+    public static Chargeback createChargebackRecord(InvoicePaymentChargeback paymentChargeback,
+                                                    InvoicePayment invoicePayment,
+                                                    com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
+                                                    MachineEvent event) {
+        var hgInnerInvoice = hgInvoice.getInvoice();
+        var hgInnerPayment = invoicePayment.getPayment();
+        Chargeback chargeback = new Chargeback();
+        chargeback.setDomainRevision(paymentChargeback.getDomainRevision());
+        chargeback.setPartyRevision(paymentChargeback.getPartyRevision());
+        chargeback.setInvoiceId(event.getSourceId());
+        chargeback.setPaymentId(hgInnerPayment.getId());
+        chargeback.setChargebackId(paymentChargeback.getId());
+        chargeback.setShopId(hgInnerInvoice.getShopId());
+        chargeback.setPartyId(hgInnerInvoice.getOwnerId());
+        chargeback.setExternalId(paymentChargeback.getExternalId());
+        chargeback.setEventCreatedAt(TypeUtil.stringToLocalDateTime(paymentChargeback.getCreatedAt()));
+        chargeback.setCreatedAt(TypeUtil.stringToLocalDateTime(paymentChargeback.getCreatedAt()));
+        chargeback.setStatus(
+                TBaseUtil.unionFieldToEnum(paymentChargeback.getStatus(), ChargebackStatus.class));
+        chargeback.setLevyAmount(paymentChargeback.getLevy().getAmount());
+        chargeback.setLevyCurrencyCode(paymentChargeback.getLevy().getCurrency().getSymbolicCode());
+        chargeback.setAmount(paymentChargeback.getBody().getAmount());
+        chargeback.setCurrencyCode(paymentChargeback.getBody().getCurrency().getSymbolicCode());
+        chargeback.setReasonCode(paymentChargeback.getReason().getCode());
+        chargeback.setReasonCategory(TBaseUtil.unionFieldToEnum(
+                paymentChargeback.getReason().getCategory(),
+                ChargebackCategory.class)
+        );
+        chargeback.setStage(TBaseUtil.unionFieldToEnum(paymentChargeback.getStage(), ChargebackStage.class));
+        chargeback.setContext(paymentChargeback.getContext().getData());
+        return chargeback;
     }
 
     public static Adjustment createAdjustmentRecord(InvoicePaymentAdjustment paymentAdjustment,

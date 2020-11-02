@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustment;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChargeback;
 import com.rbkmoney.damsel.payment_processing.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund;
@@ -39,6 +40,22 @@ public final class InvoicingServiceUtils {
                 .orElseThrow(() -> new NotFoundException(String.format("InvoicePaymentAdjustment for payment " +
                         "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId, changeId)));
     }
+
+    public static InvoicePaymentChargeback getInvoicePaymentChargebackById(InvoicePayment invoicePayment,
+                                                                           String chargeback,
+                                                                           String invoiceId,
+                                                                           Long sequenceId,
+                                                                           int changeId) {
+        if (!invoicePayment.isSetChargebacks()) {
+            throw new NotFoundException(String.format("Chargebacks for invoice not found! (invoice id '%s', " +
+                    "sequenceId = '%d' and changeId = '%d')", invoiceId, sequenceId, changeId));
+        }
+        return invoicePayment.getChargebacks().stream()
+                .filter(hgChbk -> chargeback.equals(hgChbk.getChargeback().getId()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format("InvoicePaymentChargeback for payment " +
+                        "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId, changeId)));
+}
 
     public static InvoicePaymentRefund getInvoicePaymentRefundById(InvoicePayment invoicePayment,
                                                                    String refundId,
