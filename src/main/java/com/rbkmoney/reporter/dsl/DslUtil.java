@@ -84,12 +84,12 @@ public class DslUtil {
     public static StatRequest createPaymentRequest(String partyId, String shopId, String invoiceId, String paymentId, ObjectMapper objectMapper) {
         StatisticDsl statisticDsl = new StatisticDsl();
         Query query = new Query();
-        PaymentsForReportQuery paymentsQuery = new PaymentsForReportQuery();
+        PaymentsQuery paymentsQuery = new PaymentsQuery();
         paymentsQuery.setMerchantId(partyId);
         paymentsQuery.setShopId(shopId);
         paymentsQuery.setInvoiceId(invoiceId);
         paymentsQuery.setPaymentId(paymentId);
-        query.setPaymentsForReportQuery(paymentsQuery);
+        query.setPaymentsQuery(paymentsQuery);
         statisticDsl.setQuery(query);
 
         return createStatRequest(statisticDsl, null, objectMapper);
