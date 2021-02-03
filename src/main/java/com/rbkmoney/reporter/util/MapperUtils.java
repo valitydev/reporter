@@ -1,29 +1,29 @@
 package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.base.Content;
-import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.domain.InvoicePaymentChargeback;
-import com.rbkmoney.damsel.domain.InvoicePaymentRefund;
 import com.rbkmoney.damsel.domain.PaymentTool;
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentSession;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentStatusChanged;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.enums.BankCardTokenProvider;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
 import com.rbkmoney.reporter.domain.enums.InvoiceStatus;
 import com.rbkmoney.reporter.domain.enums.OnHoldExpiration;
-import com.rbkmoney.reporter.domain.tables.pojos.*;
+import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
+import com.rbkmoney.reporter.domain.tables.pojos.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.rbkmoney.reporter.util.DamselUtil.getFees;
 import static com.rbkmoney.reporter.util.FeeTypeMapUtil.isContainsAmount;
@@ -122,7 +122,7 @@ public final class MapperUtils {
                 ChargebackCategory.class)
         );
         chargeback.setStage(TBaseUtil.unionFieldToEnum(paymentChargeback.getStage(), ChargebackStage.class));
-        chargeback.setContext(paymentChargeback.getContext().getData());
+        chargeback.setContext(Optional.ofNullable(paymentChargeback.getContext()).map(Content::getData).orElse(null));
         return chargeback;
     }
 

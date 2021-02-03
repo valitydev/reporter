@@ -1,30 +1,30 @@
 version: '2.3'
 services:
-  reporter:
-    image: dr2.rbkmoney.com/rbkmoney/reporter:32fbf98125de1782c88333f344b0a97cbaeb6710
-    networks:
-      - reporternet
-    ports:
-      - "8022:8022"
-    depends_on:
-      - postgresql
-      - ceph
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/reporter
-      - STORAGE_ENDPOINT=ceph:80
-      - STORAGE_SIGNINGREGION=RU
-      - STORAGE_ACCESSKEY=TEST
-      - STORAGE_SECRETKEY=TEST
-      - STORAGE_CLIENTPROTOCOL=HTTP
-      - STORAGE_CLIENT.MAXERRORRETRY=10
-      - STORAGE_BUCKETNAME=TEST
+  #  reporter:
+  #    image: dr2.rbkmoney.com/rbkmoney/reporter:32fbf98125de1782c88333f344b0a97cbaeb6710
+  #    networks:
+  #      - reporternet
+  #    ports:
+  #      - "8022:8022"
+  #    depends_on:
+  #      - postgresql
+  #      - ceph
+  #    environment:
+  #      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/reporter
+  #      - STORAGE_ENDPOINT=ceph:80
+  #      - STORAGE_SIGNINGREGION=RU
+  #      - STORAGE_ACCESSKEY=TEST
+  #      - STORAGE_SECRETKEY=TEST
+  #      - STORAGE_CLIENTPROTOCOL=HTTP
+  #      - STORAGE_CLIENT.MAXERRORRETRY=10
+  #      - STORAGE_BUCKETNAME=TEST
 
   postgresql:
     image: postgres:9.6
-    networks:
-      - reporternet
+    #    networks:
+    #      - reporternet
     ports:
-      - 5432:5432
+      - 15432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -32,23 +32,23 @@ services:
   #    volumes:
   #      - /tmp/docker/postgresql/data:/var/lib/postgresql
 
-  ceph:
-    image: dr.rbkmoney.com/ceph-demo:latest
-    networks:
-      - reporternet
-    ports:
-      - 42827:80
-    environment:
-      SERVICE_NAME: ceph
-      RGW_NAME: localhost
-      NETWORK_AUTO_DETECT: 4
-      CEPH_DEMO_UID: ceph-test
-      CEPH_DEMO_ACCESS_KEY: test
-      CEPH_DEMO_SECRET_KEY: test
-      CEPH_DEMO_BUCKET: test
-
-networks:
-  reporternet:
+#  ceph:
+#    image: dr.rbkmoney.com/ceph-demo:latest
+#    networks:
+#      - reporternet
+#    ports:
+#      - 42827:80
+#    environment:
+#      SERVICE_NAME: ceph
+#      RGW_NAME: localhost
+#      NETWORK_AUTO_DETECT: 4
+#      CEPH_DEMO_UID: ceph-test
+#      CEPH_DEMO_ACCESS_KEY: test
+#      CEPH_DEMO_SECRET_KEY: test
+#      CEPH_DEMO_BUCKET: test
+#
+#networks:
+#  reporternet:
 
 #  file-storage:
 #    image: dr.rbkmoney.com/rbkmoney/file-storage:replace_me_on_last_tag
