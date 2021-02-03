@@ -39,6 +39,7 @@ public class InvoicingListener {
                             .collect(Collectors.toList())
             );
         } catch (Exception e) {
+            log.error("Received error during processing invoice batch: ", e);
             Thread.sleep(errorThrottlingTimeout);
             throw e;
         }
