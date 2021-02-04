@@ -168,7 +168,7 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
         }
         Query query = getDslContext().selectFrom(REPORT)
                 .where(condition)
-                .orderBy(REPORT.CREATED_AT.asc())
+                .orderBy(REPORT.CREATED_AT.desc())
                 .limit(limit);
 
         return fetch(query, reportRowMapper);

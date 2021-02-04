@@ -75,6 +75,7 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
             String continuationToken = statReportRequest.getContinuationToken();
             Instant fromTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getFromTime());
             Instant toTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getToTime());
+            int limit = statReportRequest.isSetLimit() ? statReportRequest.getLimit() : REPORTS_LIMIT;
 
             if (fromTime.compareTo(toTime) > 0) {
                 throw buildInvalidRequest("fromTime must be less that toTime");
@@ -93,7 +94,7 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
                     fromTime,
                     toTime,
                     statReportRequest.isSetContinuationToken() ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
-                    REPORTS_LIMIT
+                    limit
             );
             List<Report> reportsFiltered = reports.stream()
                     .filter(report -> report.getStatus() != ReportStatus.cancelled)
@@ -101,7 +102,7 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
                     .collect(Collectors.toList());
 
             StatReportResponse statReportResponse = new StatReportResponse(reportsFiltered);
-            if (reports.size() >= REPORTS_LIMIT) {
+            if (reports.size() >= limit) {
                 String nextCreatedAfter = TypeUtil.temporalToString(reports.get(reports.size() - 1).getCreatedAt());
                 statReportResponse.setContinuationToken(TokenUtil.buildToken(reportRequest, reportTypes, nextCreatedAfter));
             }
