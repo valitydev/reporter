@@ -3,7 +3,31 @@ info:
   stage: dev
   single-instance-mode: false
 server:
-  port: @server.port@
+  port: '@server.port@'
+management:
+  security:
+    flag: false
+  server:
+    port: @management.port@
+  metrics:
+    export:
+      statsd:
+        flavor: etsy
+        enabled: false
+      prometheus:
+        enabled: false
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
 spring:
   application:
     name: '@project.name@'
@@ -125,25 +149,3 @@ storage:
 
 retry-policy:
   maxAttempts: 5
-
-#faulty-events:
-#  topics:
-#    - topicName: mg-invoice-100-2
-#      partitions:
-#        - partitionNumber: 1
-#          events:
-#            - offset: 1
-#            - offset: 2
-#            - offset: 3
-
-management:
-  endpoint:
-    health:
-      show-details: ALWAYS
-  metrics:
-    export:
-      statsd:
-        flavor: ETSY
-        enabled: false
-  security:
-    flag: false

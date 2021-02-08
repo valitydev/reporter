@@ -127,27 +127,29 @@ public class DaoTest extends AbstractDaoConfig {
 
     @Test
     public void testGetReportsWithToken() throws DaoException {
+        int count = 15;
         LocalDateTime currMoment = LocalDateTime.now();
-        createReports(15, currMoment);
+        createReports(count, currMoment);
 
         List<Report> reports = reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
                 currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
         assertEquals(10, reports.size());
         List<Report> reportsWithTime = reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
-                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(10), 10);
+                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
         assertEquals(5, reportsWithTime.size());
     }
 
     @Test
     public void testGetReportsWithTokenByShopIds() throws DaoException {
+        int count = 15;
         LocalDateTime currMoment = LocalDateTime.now();
-        createReports(15, currMoment);
+        createReports(count, currMoment);
 
         List<Report> reports = reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
                 currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
         assertEquals(10, reports.size());
         List<Report> reportsWithTime = reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
-                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(10), 10);
+                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
         assertEquals(5, reportsWithTime.size());
     }
 
