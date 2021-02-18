@@ -36,7 +36,7 @@
 <!--        <dockerfile.registry>dr2.rbkmoney.com</dockerfile.registry>-->
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <shared.resources.version>0.3.8</shared.resources.version>
-        <damsel.version>1.475-bde841f</damsel.version>
+        <damsel.version>1.477-957a713</damsel.version>
         <sink-common-lib.version>0.0.7</sink-common-lib.version>
         <otj-pg-embedded>0.12.5</otj-pg-embedded>
         <!---->

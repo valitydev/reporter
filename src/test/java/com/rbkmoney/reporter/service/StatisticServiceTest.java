@@ -38,7 +38,7 @@ public class StatisticServiceTest extends AbstractStatisticServiceConfig {
     @Test
     public void testCreatePaymentRequest() {
         assertEquals(
-                new StatRequest("{\"query\":{\"payments\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
+                new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
                 DslUtil.createPaymentRequest("partyId", "shopId", "invoiceId", "paymentId", objectMapper)
         );
         assertEquals(

@@ -138,8 +138,7 @@ public class ReportCreatorServiceImpl implements ReportCreatorService<ReportCrea
         Row row = sh.createRow(rownum.getAndIncrement());
         StatPayment statPayment = reportCreatorDto.getStatisticService().getCapturedPayment(reportCreatorDto.getReport().getPartyId(), reportCreatorDto.getReport().getPartyShopId(), r.getInvoiceId(), r.getPaymentId());
         row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(r.getStatus().getSucceeded().getAt(), reportZoneId));
-        String capturedAt = statPayment.getStatus().isSetCaptured() ? TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId) : "";
-        row.createCell(1).setCellValue(capturedAt);
+        row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(statPayment.getStatus().getCaptured().getAt(), reportZoneId));
         row.createCell(2).setCellValue(r.getInvoiceId() + "." + r.getPaymentId());
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(r.getAmount()));
         String paymentTool = null;
