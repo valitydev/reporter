@@ -71,25 +71,8 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
 
     @Override
     public Optional<LocalDateTime> getLastAggregationDate() {
-        return getLastAdjustmentAggsByHourLocalDateTime().or(() -> getFirstAdjustmentLocalDateTime());
-    }
-
-    private Optional<LocalDateTime> getLastAdjustmentAggsByHourLocalDateTime() {
-        return Optional.ofNullable(getDslContext()
-                .selectFrom(ADJUSTMENT_AGGS_BY_HOUR)
-                .orderBy(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.desc())
-                .limit(1)
-                .fetchOne())
-                .map(AdjustmentAggsByHourRecord::getCreatedAt);
-    }
-
-    private Optional<LocalDateTime> getFirstAdjustmentLocalDateTime() {
-        return Optional.ofNullable(getDslContext()
-                .selectFrom(ADJUSTMENT)
-                .orderBy(ADJUSTMENT.CREATED_AT.asc())
-                .limit(1)
-                .fetchOne())
-                .map(AdjustmentRecord::getCreatedAt);
+        return getLastAdjustmentAggsByHourLocalDateTime()
+                .or(this::getFirstAdjustmentLocalDateTime);
     }
 
     @Override
@@ -113,5 +96,25 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .where(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
                         .and(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))
                 .fetch();
+    }
+
+    private Optional<LocalDateTime> getLastAdjustmentAggsByHourLocalDateTime() {
+        return Optional.ofNullable(
+                getDslContext()
+                        .selectFrom(ADJUSTMENT_AGGS_BY_HOUR)
+                        .orderBy(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.desc())
+                        .limit(1)
+                        .fetchOne())
+                .map(AdjustmentAggsByHourRecord::getCreatedAt);
+    }
+
+    private Optional<LocalDateTime> getFirstAdjustmentLocalDateTime() {
+        return Optional.ofNullable(
+                getDslContext()
+                        .selectFrom(ADJUSTMENT)
+                        .orderBy(ADJUSTMENT.CREATED_AT.asc())
+                        .limit(1)
+                        .fetchOne())
+                .map(AdjustmentRecord::getCreatedAt);
     }
 }

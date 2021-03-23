@@ -63,8 +63,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .set(getDslContext().newRecord(REFUND_ADDITIONAL_INFO, refundAdditionalInfo))
                 .onDuplicateKeyUpdate()
                 .set(getDslContext().newRecord(REFUND_ADDITIONAL_INFO, refundAdditionalInfo))
-        .execute();
-
+                .execute();
     }
 
     @Override
@@ -84,24 +83,8 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
 
     @Override
     public Optional<LocalDateTime> getLastAggregationDate() {
-        return getLastRefundAggsByHourDateTime().or(() -> getFirstRefundDateTime());
-    }
-
-    private Optional<LocalDateTime> getLastRefundAggsByHourDateTime() {
-        return Optional.ofNullable(getDslContext()
-                .selectFrom(REFUND_AGGS_BY_HOUR)
-                .orderBy(REFUND_AGGS_BY_HOUR.CREATED_AT.desc())
-                .limit(1)
-                .fetchOne())
-                .map(RefundAggsByHourRecord::getCreatedAt);
-    }
-
-    private Optional<LocalDateTime> getFirstRefundDateTime() {
-        return Optional.ofNullable(getDslContext().selectFrom(REFUND)
-                .orderBy(REFUND.CREATED_AT.asc())
-                .limit(1)
-                .fetchOne())
-                .map(RefundRecord::getCreatedAt);
+        return getLastRefundAggsByHourDateTime()
+                .or(this::getFirstRefundDateTime);
     }
 
     @Override
@@ -128,5 +111,24 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .where(REFUND_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
                         .and(REFUND_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))
                 .fetch();
+    }
+
+    private Optional<LocalDateTime> getLastRefundAggsByHourDateTime() {
+        return Optional.ofNullable(
+                getDslContext()
+                        .selectFrom(REFUND_AGGS_BY_HOUR)
+                        .orderBy(REFUND_AGGS_BY_HOUR.CREATED_AT.desc())
+                        .limit(1)
+                        .fetchOne())
+                .map(RefundAggsByHourRecord::getCreatedAt);
+    }
+
+    private Optional<LocalDateTime> getFirstRefundDateTime() {
+        return Optional.ofNullable(
+                getDslContext().selectFrom(REFUND)
+                        .orderBy(REFUND.CREATED_AT.asc())
+                        .limit(1)
+                        .fetchOne())
+                .map(RefundRecord::getCreatedAt);
     }
 }
