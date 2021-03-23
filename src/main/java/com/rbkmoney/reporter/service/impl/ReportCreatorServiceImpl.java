@@ -8,11 +8,13 @@ import com.rbkmoney.reporter.service.ReportCreatorService;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -21,14 +23,14 @@ import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Setter
 @Service
 public class ReportCreatorServiceImpl implements ReportCreatorService<ReportCreatorDto> {
 
-    private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
+    @Value("${report.includeAdjustments}")
+    private boolean includeAdjustments;
 
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
+    private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
 
     @Override
     public void createReport(ReportCreatorDto reportCreatorDto) throws IOException {
@@ -39,8 +41,12 @@ public class ReportCreatorServiceImpl implements ReportCreatorService<ReportCrea
             sh = createPaymentTable(reportCreatorDto, wb, sh, rownum);
             sh = addIndent(wb, sh,rownum);
             sh = createRefundTable(reportCreatorDto, wb, sh, rownum);
-            sh = addIndent(wb, sh,rownum);
-            createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
+
+            if (includeAdjustments) {
+                sh = addIndent(wb, sh,rownum);
+                createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
+
+            }
 
             wb.write(reportCreatorDto.getOutputStream());
             reportCreatorDto.getOutputStream().close();

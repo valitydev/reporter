@@ -102,6 +102,13 @@ kafka:
       throttling-timeout-ms: 50
       error-throttling-timeout-ms: 1000
 
+aggregation:
+  enabled: false
+  invoicing:
+    timeout: 900000
+  balancees:
+    timeout: 900000
+
 payouter:
   polling:
     url: http://payouter:8022/repo
@@ -136,6 +143,7 @@ domainConfig:
 report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
+  includeAdjustments: false
 
 storage:
   endpoint: localhost:42827

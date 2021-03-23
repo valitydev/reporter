@@ -3,13 +3,14 @@ package com.rbkmoney.reporter.dao;
 import com.rbkmoney.reporter.domain.enums.RefundStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
+import com.rbkmoney.reporter.domain.tables.records.RefundAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface RefundDao {
+public interface RefundDao extends AggregatesDao {
 
     Long saveRefund(Refund refund);
 
@@ -23,4 +24,11 @@ public interface RefundDao {
                                           String shopId,
                                           LocalDateTime fromTime,
                                           LocalDateTime toTime);
+
+    LocalDateTime getLastAggregationDate();
+
+    void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
+
+    List<RefundAggsByHourRecord> getRefundAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo);
+
 }

@@ -7,11 +7,13 @@ import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.InvoiceAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
 import com.zaxxer.hikari.HikariDataSource;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,27 +54,27 @@ public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
                                      String shopId,
                                      Optional<LocalDateTime> fromTime,
                                      LocalDateTime toTime) {
-        return getDslContext()
+        Result<InvoiceRecord> records = getDslContext()
                 .selectFrom(INVOICE)
                 .where(fromTime.map(INVOICE.STATUS_CREATED_AT::ge).orElse(DSL.trueCondition()))
                 .and(INVOICE.STATUS_CREATED_AT.lt(toTime))
                 .and(INVOICE.PARTY_ID.eq(partyId))
                 .and(INVOICE.SHOP_ID.eq(shopId))
-                .fetch()
-                .into(Invoice.class);
+                .fetch();
+        return records == null || records.isEmpty() ? new ArrayList<>() : records.into(Invoice.class);
     }
 
     @Override
     public List<Invoice> getInvoicesByState(LocalDateTime dateFrom,
                                             LocalDateTime dateTo,
                                             List<InvoiceStatus> statuses) {
-        return getDslContext()
+        Result<InvoiceRecord> records = getDslContext()
                 .selectFrom(INVOICE)
                 .where(INVOICE.STATUS_CREATED_AT.greaterThan(dateFrom)
                         .and(INVOICE.STATUS_CREATED_AT.lessThan(dateTo))
                         .and(INVOICE.STATUS.in(statuses)))
-                .fetch()
-                .into(Invoice.class);
+                .fetch();
+        return records == null || records.isEmpty() ? new ArrayList<>() : records.into(Invoice.class);
     }
 
     @Override

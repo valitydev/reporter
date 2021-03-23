@@ -3,6 +3,7 @@ package com.rbkmoney.reporter.dao;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
+import com.rbkmoney.reporter.domain.tables.records.PaymentAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.jooq.Cursor;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface PaymentDao {
+public interface PaymentDao extends AggregatesDao {
 
     Long savePayment(Payment payment);
 
@@ -34,5 +35,11 @@ public interface PaymentDao {
                                             String shopId,
                                             Optional<LocalDateTime> fromTime,
                                             LocalDateTime toTime);
+
+    LocalDateTime getLastAggregationDate();
+
+    void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
+
+    List<PaymentAggsByHourRecord> getPaymentsAggregatesByHour(LocalDateTime dateFrom, LocalDateTime dateTo);
 
 }

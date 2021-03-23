@@ -19,6 +19,7 @@ import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.jooq.Cursor;
 import org.jooq.Result;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,6 +34,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private final LocalStatisticService localStatisticService;
 
+    @Value("${report.includeAdjustments}")
+    private boolean includeAdjustments;
+
     private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
 
     private static final int PACKAGE_SIZE = 100;
@@ -46,8 +50,11 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             sh = createPaymentTable(reportCreatorDto, wb, sh, rownum);
             sh = addIndent(wb, sh,rownum);
             sh = createRefundTable(reportCreatorDto, wb, sh, rownum);
-            sh = addIndent(wb, sh,rownum);
-            createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
+
+            if (includeAdjustments) {
+                sh = addIndent(wb, sh,rownum);
+                createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
+            }
 
             wb.write(reportCreatorDto.getOutputStream());
             reportCreatorDto.getOutputStream().close();

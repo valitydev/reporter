@@ -134,7 +134,7 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
 
             String contractId = random(String.class);
             Report report = random(Report.class);
-            report.setFromTime(LocalDateTime.now().minus(11L, ChronoUnit.YEARS));
+            report.setFromTime(LocalDateTime.now().minus(110L, ChronoUnit.YEARS));
             report.setToTime(LocalDateTime.now());
             report.setTimezone("Europe/Moscow");
             report.setPartyId(partyId);
