@@ -30,7 +30,7 @@ public interface PayoutDao extends AggregatesDao {
 
     Optional<Long> getLastEventId();
 
-    LocalDateTime getLastAggregationDate();
+    Optional<LocalDateTime> getLastAggregationDate();
 
     void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
 

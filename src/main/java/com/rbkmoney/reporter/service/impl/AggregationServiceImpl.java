@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -22,7 +23,6 @@ public class AggregationServiceImpl implements AggregationService {
     private final RefundDao refundDao;
     private final AdjustmentDao adjustmentDao;
     private final PayoutDao payoutDao;
-
 
     @Override
     @Transactional
@@ -54,17 +54,24 @@ public class AggregationServiceImpl implements AggregationService {
 
     private void aggregateData(AggregatesDao aggregatesDao, String methodName) {
         log.info("Start '{}' aggregation", methodName);
-        LocalDateTime lastAggregationDate = aggregatesDao.getLastAggregationDate();
-        if (lastAggregationDate == null) {
+        Optional<LocalDateTime> lastAggregationDateOptional = aggregatesDao.getLastAggregationDate();
+        if (lastAggregationDateOptional.isEmpty()) {
+            log.info("Last '{}' aggregation time is empty", methodName);
             return;
         }
+        LocalDateTime lastAggregationDate = lastAggregationDateOptional.get();
+
         log.info("For '{}' aggregation last aggregation date is '{}'", methodName, lastAggregationDate);
         LocalDateTime now = LocalDateTime.now();
         long untilNow = lastAggregationDate.until(now, ChronoUnit.HOURS);
         if (untilNow == 0) {
+            log.info("Current time delta for '{}' aggregation less than one hour", methodName);
             return;
         }
-        aggregatesDao.aggregateForDate(lastAggregationDate.plusHours(1L), now.truncatedTo(ChronoUnit.HOURS));
+        aggregatesDao.aggregateForDate(
+                lastAggregationDate.minusHours(3L),
+                lastAggregationDate.plusHours(2L).truncatedTo(ChronoUnit.HOURS)
+        );
         log.info("'{}' aggregation was finished", methodName);
     }
 

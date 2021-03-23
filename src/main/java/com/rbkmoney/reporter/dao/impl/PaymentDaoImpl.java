@@ -7,7 +7,6 @@ import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.PaymentAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
-import com.rbkmoney.reporter.exception.DaoException;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import java.util.*;
 import static com.rbkmoney.reporter.domain.tables.Payment.PAYMENT;
 import static com.rbkmoney.reporter.domain.tables.PaymentAdditionalInfo.PAYMENT_ADDITIONAL_INFO;
 import static com.rbkmoney.reporter.domain.tables.PaymentAggsByHour.PAYMENT_AGGS_BY_HOUR;
+
 import org.jooq.impl.*;
 
 @Component
@@ -71,7 +71,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                                                          String partyShopId,
                                                          String currencyCode,
                                                          Optional<LocalDateTime> fromTime,
-                                                         LocalDateTime toTime) throws DaoException {
+                                                         LocalDateTime toTime) {
         String amountKey = "funds_acquired";
         String feeKey = "fee_charged";
 
@@ -126,13 +126,26 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
     }
 
     @Override
-    public LocalDateTime getLastAggregationDate() {
-        return getDslContext()
+    public Optional<LocalDateTime> getLastAggregationDate() {
+        return getLastPaymentAggsByHourDateTime().or(() -> getFirstPaymentDateTime());
+    }
+
+    private Optional<LocalDateTime> getLastPaymentAggsByHourDateTime() {
+        return Optional.ofNullable(getDslContext()
                 .selectFrom(PAYMENT_AGGS_BY_HOUR)
                 .orderBy(PAYMENT_AGGS_BY_HOUR.CREATED_AT.desc())
                 .limit(1)
-                .fetchOne()
-                .getCreatedAt();
+                .fetchOne())
+                .map(PaymentAggsByHourRecord::getCreatedAt);
+    }
+
+    private Optional<LocalDateTime> getFirstPaymentDateTime() {
+        return Optional.ofNullable(getDslContext()
+                .selectFrom(PAYMENT)
+                .orderBy(PAYMENT.CREATED_AT.asc())
+                .limit(1)
+                .fetchOne())
+                .map(PaymentRecord::getCreatedAt);
     }
 
     @Override

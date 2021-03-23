@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Adjustment.ADJUSTMENT;
 import static com.rbkmoney.reporter.domain.tables.AdjustmentAggsByHour.ADJUSTMENT_AGGS_BY_HOUR;
@@ -69,13 +70,26 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
     }
 
     @Override
-    public LocalDateTime getLastAggregationDate() {
-        return getDslContext()
+    public Optional<LocalDateTime> getLastAggregationDate() {
+        return getLastAdjustmentAggsByHourLocalDateTime().or(() -> getFirstAdjustmentLocalDateTime());
+    }
+
+    private Optional<LocalDateTime> getLastAdjustmentAggsByHourLocalDateTime() {
+        return Optional.ofNullable(getDslContext()
                 .selectFrom(ADJUSTMENT_AGGS_BY_HOUR)
                 .orderBy(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.desc())
                 .limit(1)
-                .fetchOne()
-                .getCreatedAt();
+                .fetchOne())
+                .map(AdjustmentAggsByHourRecord::getCreatedAt);
+    }
+
+    private Optional<LocalDateTime> getFirstAdjustmentLocalDateTime() {
+        return Optional.ofNullable(getDslContext()
+                .selectFrom(ADJUSTMENT)
+                .orderBy(ADJUSTMENT.CREATED_AT.asc())
+                .limit(1)
+                .fetchOne())
+                .map(AdjustmentRecord::getCreatedAt);
     }
 
     @Override
@@ -94,7 +108,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
 
     @Override
     public List<AdjustmentAggsByHourRecord> getAdjustmentsAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        return  getDslContext()
+        return getDslContext()
                 .selectFrom(ADJUSTMENT_AGGS_BY_HOUR)
                 .where(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
                         .and(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))

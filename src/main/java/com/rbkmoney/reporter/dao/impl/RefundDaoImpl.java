@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Refund.REFUND;
 import static com.rbkmoney.reporter.domain.tables.RefundAdditionalInfo.REFUND_ADDITIONAL_INFO;
@@ -82,13 +83,25 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
     }
 
     @Override
-    public LocalDateTime getLastAggregationDate() {
-        return getDslContext()
+    public Optional<LocalDateTime> getLastAggregationDate() {
+        return getLastRefundAggsByHourDateTime().or(() -> getFirstRefundDateTime());
+    }
+
+    private Optional<LocalDateTime> getLastRefundAggsByHourDateTime() {
+        return Optional.ofNullable(getDslContext()
                 .selectFrom(REFUND_AGGS_BY_HOUR)
                 .orderBy(REFUND_AGGS_BY_HOUR.CREATED_AT.desc())
                 .limit(1)
-                .fetchOne()
-                .getCreatedAt();
+                .fetchOne())
+                .map(RefundAggsByHourRecord::getCreatedAt);
+    }
+
+    private Optional<LocalDateTime> getFirstRefundDateTime() {
+        return Optional.ofNullable(getDslContext().selectFrom(REFUND)
+                .orderBy(REFUND.CREATED_AT.asc())
+                .limit(1)
+                .fetchOne())
+                .map(RefundRecord::getCreatedAt);
     }
 
     @Override
@@ -110,7 +123,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
 
     @Override
     public List<RefundAggsByHourRecord> getRefundAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        return  getDslContext()
+        return getDslContext()
                 .selectFrom(REFUND_AGGS_BY_HOUR)
                 .where(REFUND_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
                         .and(REFUND_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))

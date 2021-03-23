@@ -36,7 +36,7 @@ public interface PaymentDao extends AggregatesDao {
                                             Optional<LocalDateTime> fromTime,
                                             LocalDateTime toTime);
 
-    LocalDateTime getLastAggregationDate();
+    Optional<LocalDateTime> getLastAggregationDate();
 
     void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
 

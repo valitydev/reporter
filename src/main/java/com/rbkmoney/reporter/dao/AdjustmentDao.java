@@ -8,6 +8,7 @@ import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AdjustmentDao extends AggregatesDao {
 
@@ -22,7 +23,7 @@ public interface AdjustmentDao extends AggregatesDao {
                                                  LocalDateTime fromTime,
                                                  LocalDateTime toTime);
 
-    LocalDateTime getLastAggregationDate();
+    Optional<LocalDateTime> getLastAggregationDate();
 
     void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
 
