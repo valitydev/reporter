@@ -1,10 +1,7 @@
 package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.reporter.config.AbstractDaoConfig;
-import com.rbkmoney.reporter.dao.AdjustmentDao;
-import com.rbkmoney.reporter.dao.PaymentDao;
-import com.rbkmoney.reporter.dao.PayoutDao;
-import com.rbkmoney.reporter.dao.RefundDao;
+import com.rbkmoney.reporter.dao.*;
 import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
 import com.rbkmoney.reporter.domain.tables.records.AdjustmentAggsByHourRecord;
@@ -51,6 +48,9 @@ public class AggregationServiceTest extends AbstractDaoConfig {
     private AdjustmentDao adjustmentDao;
 
     @Autowired
+    private AggregatesDao aggregatesDao;
+
+    @Autowired
     private HikariDataSource dataSource;
 
     private AggregationService aggregationService;
@@ -59,7 +59,7 @@ public class AggregationServiceTest extends AbstractDaoConfig {
 
     @Before
     public void setup() {
-        aggregationService = new AggregationServiceImpl(paymentDao, refundDao, adjustmentDao, payoutDao);
+        aggregationService = new AggregationServiceImpl(aggregatesDao);
         invoicingTestDao = new InvoicingTestDao(dataSource);
     }
 
@@ -78,13 +78,13 @@ public class AggregationServiceTest extends AbstractDaoConfig {
         invoicingTestDao.savePaymentsAggregate(createTestPaymentAggsByHour(prevAggregateTime, partyId + 1, shopId + 1, 10000L, 2000L));
 
         List<PaymentAggsByHourRecord> prevPaymentsAggregatesByHour =
-                paymentDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, prevPaymentsAggregatesByHour.size());
 
         aggregationService.aggregatePayments();
 
         List<PaymentAggsByHourRecord> paymentsAggregatesByHour =
-                paymentDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(4, paymentsAggregatesByHour.size());
     }
 
@@ -103,13 +103,13 @@ public class AggregationServiceTest extends AbstractDaoConfig {
         invoicingTestDao.saveRefundsAggregate(createTestRefundAggsByHour(prevAggregateTime, partyId + 1, shopId + 1, 10000L, 2000L));
 
         List<RefundAggsByHourRecord> refundAggsByHour =
-                refundDao.getRefundAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getRefundsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, refundAggsByHour.size());
 
         aggregationService.aggregateRefunds();
 
         List<RefundAggsByHourRecord> refundAggsByHourLast =
-                refundDao.getRefundAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getRefundsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(4, refundAggsByHourLast.size());
     }
 
@@ -128,13 +128,13 @@ public class AggregationServiceTest extends AbstractDaoConfig {
         invoicingTestDao.saveAdjustmentsAggregate(createTestAdjAggsByHour(prevAggregateTime, partyId + 1, shopId + 1, 10000L));
 
         List<AdjustmentAggsByHourRecord> adjustmentsAggsByHour =
-                adjustmentDao.getAdjustmentsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getAdjustmentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, adjustmentsAggsByHour.size());
 
         aggregationService.aggregateAdjustments();
 
         List<AdjustmentAggsByHourRecord> adjustmentsAggsByHourLast =
-                adjustmentDao.getAdjustmentsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getAdjustmentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(4, adjustmentsAggsByHourLast.size());
     }
 
@@ -156,13 +156,13 @@ public class AggregationServiceTest extends AbstractDaoConfig {
         invoicingTestDao.savePayoutsAggregate(createTestPayoutAggsByHour(prevAggregateTime, partyId + 1, shopId + 1, 10000L, 2000L));
 
         List<PayoutAggsByHourRecord> payoutsAggsByHour =
-                payoutDao.getPayoutsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPayoutsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, payoutsAggsByHour.size());
 
         aggregationService.aggregatePayouts();
 
         List<PayoutAggsByHourRecord> lastPayoutsAggsByHour =
-                payoutDao.getPayoutsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPayoutsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(4, lastPayoutsAggsByHour.size());
     }
 

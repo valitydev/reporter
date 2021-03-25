@@ -68,6 +68,10 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  task:
+    scheduling:
+      pool:
+        size: 10
 
 kafka:
   bootstrap-servers: localhost:9092

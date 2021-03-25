@@ -31,6 +31,9 @@ public class AggregationDaoTest extends AbstractDaoConfig {
     @Autowired
     private AdjustmentDao adjustmentDao;
 
+    @Autowired
+    private AggregatesDao aggregatesDao;
+
     @Test
     public void paymentsAggragateDaoTest() {
         String partyId = random(String.class);
@@ -40,9 +43,13 @@ public class AggregationDaoTest extends AbstractDaoConfig {
         for (int i = 0; i < paymentsCount; i++) {
             paymentDao.savePayment(createTestPayment(partyId, shopId, LocalDateTime.now(), i));
         }
-        paymentDao.aggregateForDate(LocalDateTime.now().minusHours(2L), LocalDateTime.now());
+        aggregatesDao.aggregateByHour(
+                AggregationType.PAYMENT,
+                LocalDateTime.now().minusHours(2L),
+                LocalDateTime.now()
+        );
         List<PaymentAggsByHourRecord> paymentsAggregatesByHour =
-                paymentDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, paymentsAggregatesByHour.size());
         PaymentAggsByHourRecord paymentAggsByHourRecord = paymentsAggregatesByHour.get(0);
         assertEquals(Long.valueOf(50000L), paymentAggsByHourRecord.getAmount());
@@ -58,9 +65,13 @@ public class AggregationDaoTest extends AbstractDaoConfig {
         for (int i = 0; i < refundsCount; i++) {
             refundDao.saveRefund(createTestRefund(partyId, shopId, LocalDateTime.now(), i));
         }
-        refundDao.aggregateForDate(LocalDateTime.now().minusHours(2L), LocalDateTime.now());
+        aggregatesDao.aggregateByHour(
+                AggregationType.REFUND,
+                LocalDateTime.now().minusHours(2L),
+                LocalDateTime.now()
+        );
         List<RefundAggsByHourRecord> refundAggsByHour =
-                refundDao.getRefundAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getRefundsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, refundAggsByHour.size());
         RefundAggsByHourRecord refundAggsByHourRecord = refundAggsByHour.get(0);
         assertEquals(Long.valueOf(50000L), refundAggsByHourRecord.getAmount());
@@ -76,9 +87,13 @@ public class AggregationDaoTest extends AbstractDaoConfig {
         for (int i = 0; i < сount; i++) {
             adjustmentDao.saveAdjustment(createTestAdjustment(partyId, shopId, LocalDateTime.now(), i));
         }
-        adjustmentDao.aggregateForDate(LocalDateTime.now().minusHours(2L), LocalDateTime.now());
+        aggregatesDao.aggregateByHour(
+                AggregationType.ADJUSTMENT,
+                LocalDateTime.now().minusHours(2L),
+                LocalDateTime.now()
+        );
         List<AdjustmentAggsByHourRecord> adjustmentsAggsByHour =
-                adjustmentDao.getAdjustmentsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getAdjustmentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, adjustmentsAggsByHour.size());
         AdjustmentAggsByHourRecord adjustmentAggsByHourRecord = adjustmentsAggsByHour.get(0);
         assertEquals(Long.valueOf(50000L), adjustmentAggsByHourRecord.getAmount());
@@ -98,9 +113,13 @@ public class AggregationDaoTest extends AbstractDaoConfig {
             payoutDao.savePayoutState(payoutState);
         }
 
-        payoutDao.aggregateForDate(LocalDateTime.now().minusHours(2L), LocalDateTime.now());
+        aggregatesDao.aggregateByHour(
+                AggregationType.PAYOUT,
+                LocalDateTime.now().minusHours(2L),
+                LocalDateTime.now()
+        );
         List<PayoutAggsByHourRecord> payoutsAggsByHour =
-                payoutDao.getPayoutsAggsByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPayoutsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
         assertEquals(2, payoutsAggsByHour.size());
         PayoutAggsByHourRecord payoutAggsByHourRecord = payoutsAggsByHour.get(0);
         assertEquals(Long.valueOf(50000L), payoutAggsByHourRecord.getAmount());

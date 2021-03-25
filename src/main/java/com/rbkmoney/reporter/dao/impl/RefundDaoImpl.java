@@ -5,7 +5,6 @@ import com.rbkmoney.reporter.dao.RefundDao;
 import com.rbkmoney.reporter.domain.enums.RefundStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Refund;
 import com.rbkmoney.reporter.domain.tables.pojos.RefundAdditionalInfo;
-import com.rbkmoney.reporter.domain.tables.records.RefundAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.Cursor;
@@ -16,11 +15,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Refund.REFUND;
 import static com.rbkmoney.reporter.domain.tables.RefundAdditionalInfo.REFUND_ADDITIONAL_INFO;
-import static com.rbkmoney.reporter.domain.tables.RefundAggsByHour.REFUND_AGGS_BY_HOUR;
 
 @Component
 public class RefundDaoImpl extends AbstractDao implements RefundDao {
@@ -81,54 +78,4 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .fetchLazy();
     }
 
-    @Override
-    public Optional<LocalDateTime> getLastAggregationDate() {
-        return getLastRefundAggsByHourDateTime()
-                .or(this::getFirstRefundDateTime);
-    }
-
-    @Override
-    public void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        String sql = "INSERT INTO rpt.refund_aggs_by_hour (created_at, party_id, shop_id, amount, currency_code, " +
-                "     fee, provider_fee, external_fee)" +
-                "SELECT date_trunc('hour', status_created_at), party_id, shop_id, \n" +
-                "       sum(amount), currency_code, sum(fee), sum(provider_fee), sum(external_fee) \n" +
-                "FROM  rpt.refund \n" +
-                "WHERE status_created_at >= {0} AND status_created_at < {1} \n" +
-                "  AND status = {2} \n" +
-                "GROUP BY date_trunc('hour', status_created_at), party_id, shop_id, currency_code \n" +
-                "ON CONFLICT (party_id, shop_id, created_at, currency_code) \n" +
-                "DO UPDATE \n" +
-                "SET amount = EXCLUDED.amount, fee = EXCLUDED.fee, provider_fee = EXCLUDED.provider_fee, " +
-                "    external_fee = EXCLUDED.external_fee;";
-        getDslContext().execute(sql, dateFrom, dateTo, RefundStatus.succeeded);
-    }
-
-    @Override
-    public List<RefundAggsByHourRecord> getRefundAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        return getDslContext()
-                .selectFrom(REFUND_AGGS_BY_HOUR)
-                .where(REFUND_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
-                        .and(REFUND_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))
-                .fetch();
-    }
-
-    private Optional<LocalDateTime> getLastRefundAggsByHourDateTime() {
-        return Optional.ofNullable(
-                getDslContext()
-                        .selectFrom(REFUND_AGGS_BY_HOUR)
-                        .orderBy(REFUND_AGGS_BY_HOUR.CREATED_AT.desc())
-                        .limit(1)
-                        .fetchOne())
-                .map(RefundAggsByHourRecord::getCreatedAt);
-    }
-
-    private Optional<LocalDateTime> getFirstRefundDateTime() {
-        return Optional.ofNullable(
-                getDslContext().selectFrom(REFUND)
-                        .orderBy(REFUND.CREATED_AT.asc())
-                        .limit(1)
-                        .fetchOne())
-                .map(RefundRecord::getCreatedAt);
-    }
 }

@@ -2,13 +2,11 @@ package com.rbkmoney.reporter.dao.impl;
 
 import com.rbkmoney.reporter.dao.AbstractDao;
 import com.rbkmoney.reporter.dao.PayoutDao;
-import com.rbkmoney.reporter.domain.enums.PayoutStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
 import com.rbkmoney.reporter.domain.tables.records.PayoutAccountRecord;
-import com.rbkmoney.reporter.domain.tables.records.PayoutAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.PayoutInternationalAccountRecord;
 import com.rbkmoney.reporter.domain.tables.records.PayoutRecord;
 import com.rbkmoney.reporter.domain.tables.records.PayoutStateRecord;
@@ -17,13 +15,10 @@ import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Payout.PAYOUT;
 import static com.rbkmoney.reporter.domain.tables.PayoutAccount.PAYOUT_ACCOUNT;
-import static com.rbkmoney.reporter.domain.tables.PayoutAggsByHour.PAYOUT_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.domain.tables.PayoutInternationalAccount.PAYOUT_INTERNATIONAL_ACCOUNT;
 import static com.rbkmoney.reporter.domain.tables.PayoutState.PAYOUT_STATE;
 
@@ -130,55 +125,4 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
 
     }
 
-    @Override
-    public Optional<LocalDateTime> getLastAggregationDate() {
-        return getLastPayoutAggsByHourDateTime().or(this::getFirstPayoutDateTime);
-    }
-
-    @Override
-    public void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        String sql =
-                "INSERT INTO rpt.payout_aggs_by_hour (created_at, party_id, shop_id, amount, fee, currency_code, type)" +
-                        "SELECT date_trunc('hour', ps.event_created_at), pay.party_id, \n" +
-                        "       pay.shop_id, sum(pay.amount), sum(pay.fee), pay.currency_code, pay.type \n" +
-                        "FROM rpt.payout_state as ps \n" +
-                        "JOIN rpt.payout as pay on pay.id = ps.ext_payout_id \n" +
-                        "WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
-                        "  AND ps.status = {2}" +
-                        "GROUP BY date_trunc('hour', ps.event_created_at), pay.party_id, " +
-                        "         pay.shop_id, pay.currency_code, pay.type \n" +
-                        "ON CONFLICT (party_id, shop_id, created_at, type, currency_code) \n" +
-                        "DO UPDATE \n" +
-                        "SET amount = EXCLUDED.amount, fee = EXCLUDED.fee;";
-        getDslContext().execute(sql, dateFrom, dateTo, PayoutStatus.paid);
-    }
-
-    @Override
-    public List<PayoutAggsByHourRecord> getPayoutsAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        return getDslContext()
-                .selectFrom(PAYOUT_AGGS_BY_HOUR)
-                .where(PAYOUT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
-                        .and(PAYOUT_AGGS_BY_HOUR.CREATED_AT.lessThan(dateTo)))
-                .fetch();
-    }
-
-    private Optional<LocalDateTime> getLastPayoutAggsByHourDateTime() {
-        return Optional.ofNullable(
-                getDslContext()
-                        .selectFrom(PAYOUT_AGGS_BY_HOUR)
-                        .orderBy(PAYOUT_AGGS_BY_HOUR.CREATED_AT.desc())
-                        .limit(1)
-                        .fetchOne())
-                .map(PayoutAggsByHourRecord::getCreatedAt);
-    }
-
-    private Optional<LocalDateTime> getFirstPayoutDateTime() {
-        return Optional.ofNullable(
-                getDslContext()
-                        .selectFrom(PAYOUT)
-                        .orderBy(PAYOUT.CREATED_AT.asc())
-                        .limit(1)
-                        .fetchOne())
-                .map(PayoutRecord::getCreatedAt);
-    }
 }

@@ -4,13 +4,10 @@ import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
-import com.rbkmoney.reporter.domain.tables.records.PayoutAggsByHourRecord;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
-public interface PayoutDao extends AggregatesDao {
+public interface PayoutDao {
 
     Long savePayout(Payout payout);
 
@@ -29,11 +26,5 @@ public interface PayoutDao extends AggregatesDao {
     PayoutState getPayoutState(Long extPayoutId);
 
     Optional<Long> getLastEventId();
-
-    Optional<LocalDateTime> getLastAggregationDate();
-
-    void aggregateForDate(LocalDateTime dateFrom, LocalDateTime dateTo);
-
-    List<PayoutAggsByHourRecord> getPayoutsAggsByHour(LocalDateTime dateFrom, LocalDateTime dateTo);
 
 }
