@@ -24,6 +24,8 @@ public class AggregationServiceImpl implements AggregationService {
 
     private final AggregatesDao aggregatesDao;
 
+    private final static long AGGREGSTION_STEP = 6L;
+
     @Override
     @Transactional
     @Scheduled(fixedDelayString = "${aggregation.invoicing.timeout}")
@@ -63,19 +65,23 @@ public class AggregationServiceImpl implements AggregationService {
         LocalDateTime lastAggregationDate = lastAggregationDateOptional.get();
 
         log.info("For '{}' aggregation last aggregation date is '{}'", methodName, lastAggregationDate);
-        LocalDateTime now = LocalDateTime.now();
-        long untilNow = lastAggregationDate.until(now, ChronoUnit.HOURS);
+        LocalDateTime highBordefOfAggregation;
+        long untilNow = lastAggregationDate.until(LocalDateTime.now(), ChronoUnit.HOURS);
         if (untilNow == 0) {
             log.info("Current time delta for '{}' aggregation less than one hour", methodName);
             return;
+        } else if (untilNow < AGGREGSTION_STEP) {
+            highBordefOfAggregation = lastAggregationDate.plusHours(untilNow);
+        } else {
+            highBordefOfAggregation = lastAggregationDate.plusHours(AGGREGSTION_STEP);
         }
         aggregatesDao.aggregateByHour(
                 aggregationType,
-                lastAggregationDate.minusHours(3L),
-                lastAggregationDate.plusHours(2L).truncatedTo(ChronoUnit.HOURS)
+                lastAggregationDate.minusHours(1L).truncatedTo(ChronoUnit.HOURS),
+                highBordefOfAggregation.truncatedTo(ChronoUnit.HOURS)
         );
         aggregatesDao.saveLastAggregationDate(
-                createLastAggregationTime(aggregationType, lastAggregationDate.plusHours(1L))
+                createLastAggregationTime(aggregationType, highBordefOfAggregation.minusHours(1L))
         );
         log.info("'{}' aggregation was finished", methodName);
     }

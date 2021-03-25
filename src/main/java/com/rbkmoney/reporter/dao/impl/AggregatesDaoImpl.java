@@ -84,6 +84,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
                 "FROM rpt.payment \n" +
                 "WHERE status_created_at >= {0} AND status_created_at < {1} \n" +
                 "  AND status = {2} \n" +
+                "  AND party_id IS NOT NULL \n" +
+                "  AND shop_id IS NOT NULL \n" +
                 "GROUP BY date_trunc('hour', status_created_at), \n" +
                 "         party_id, shop_id, currency_code \n" +
                 "ON CONFLICT (party_id, shop_id, created_at, currency_code) \n" +
@@ -111,6 +113,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
                 "FROM  rpt.refund \n" +
                 "WHERE status_created_at >= {0} AND status_created_at < {1} \n" +
                 "  AND status = {2} \n" +
+                "  AND party_id IS NOT NULL \n" +
+                "  AND shop_id IS NOT NULL \n" +
                 "GROUP BY date_trunc('hour', status_created_at), party_id, shop_id, currency_code \n" +
                 "ON CONFLICT (party_id, shop_id, created_at, currency_code) \n" +
                 "DO UPDATE \n" +
@@ -138,6 +142,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
                         "JOIN rpt.payout as pay on pay.id = ps.ext_payout_id \n" +
                         "WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
                         "  AND ps.status = {2}" +
+                        "  AND party_id IS NOT NULL \n" +
+                        "  AND shop_id IS NOT NULL \n" +
                         "GROUP BY date_trunc('hour', ps.event_created_at), pay.party_id, " +
                         "         pay.shop_id, pay.currency_code, pay.type \n" +
                         "ON CONFLICT (party_id, shop_id, created_at, type, currency_code) \n" +
@@ -162,6 +168,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
                 "FROM  rpt.adjustment \n" +
                 "WHERE status_created_at >= {0} AND status_created_at < {1} \n" +
                 "  AND status = {2} \n" +
+                "  AND party_id IS NOT NULL \n" +
+                "  AND shop_id IS NOT NULL \n" +
                 "GROUP BY date_trunc('hour', status_created_at), party_id, shop_id, currency_code \n" +
                 "ON CONFLICT (party_id, shop_id, created_at, currency_code) \n" +
                 "DO UPDATE \n" +
