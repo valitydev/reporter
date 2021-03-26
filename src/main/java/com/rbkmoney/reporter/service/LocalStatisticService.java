@@ -14,18 +14,21 @@ public interface LocalStatisticService {
 
     ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, LocalDateTime toTime);
 
-    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, LocalDateTime fromTime, LocalDateTime toTime);
+    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, LocalDateTime fromTime,
+                                          LocalDateTime toTime);
 
     Map<String, String> getPurposes(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
 
     InvoiceRecord getInvoice(String invoiceId);
 
-    Cursor<PaymentRecord> getPaymentsCursor(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
+    Cursor<PaymentRecord> getPaymentsCursor(String partyId, String shopId, LocalDateTime fromTime,
+                                            LocalDateTime toTime);
 
     PaymentRecord getCapturedPayment(String partyId, String shopId, String invoiceId, String paymentId);
 
     Cursor<RefundRecord> getRefundsCursor(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
 
-    Cursor<AdjustmentRecord> getAdjustmentCursor(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
+    Cursor<AdjustmentRecord> getAdjustmentCursor(String partyId, String shopId, LocalDateTime fromTime,
+                                                 LocalDateTime toTime);
 
 }

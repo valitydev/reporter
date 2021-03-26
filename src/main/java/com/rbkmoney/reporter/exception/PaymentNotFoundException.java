@@ -14,7 +14,8 @@ public class PaymentNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public PaymentNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public PaymentNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                    boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

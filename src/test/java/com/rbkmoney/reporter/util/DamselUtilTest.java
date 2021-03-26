@@ -30,36 +30,48 @@ public final class DamselUtilTest {
         List<FinalCashFlowPosting> paymentCashFlow = List.of(
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923))
         );
 
         List<FinalCashFlowPosting> oldCashFlow = List.of(
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923))
         );
 
@@ -78,18 +90,24 @@ public final class DamselUtilTest {
         List<FinalCashFlowPosting> paymentCashFlow = List.of(
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923))
         );
 
@@ -97,18 +115,24 @@ public final class DamselUtilTest {
 
         List<FinalCashFlowPosting> newCashFlow = List.of(
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500)),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923))
         );
 

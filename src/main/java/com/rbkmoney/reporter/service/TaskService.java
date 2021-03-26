@@ -8,8 +8,11 @@ import com.rbkmoney.reporter.exception.StorageException;
 
 public interface TaskService {
 
-     void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId, BusinessScheduleRef scheduleRef, Representative signer) throws ScheduleProcessingException, NotFoundException, StorageException;
+    void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId,
+                                       BusinessScheduleRef scheduleRef, Representative signer)
+            throws ScheduleProcessingException, NotFoundException, StorageException;
 
-     void deregisterProvisionOfServiceJob(String partyId, String contractId) throws ScheduleProcessingException, StorageException;
+    void deregisterProvisionOfServiceJob(String partyId, String contractId)
+            throws ScheduleProcessingException, StorageException;
 
 }

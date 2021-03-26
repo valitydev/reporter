@@ -44,7 +44,8 @@ public class LocalProvisionOfServiceTemplateImpl implements ReportTemplate {
             LocalStatisticService localStatisticService,
             PartyService partyService,
             ContractMetaDao contractMetaDao,
-            @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}") ClassPathResource resource
+            @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}")
+                    ClassPathResource resource
     ) {
         this.localStatisticService = localStatisticService;
         this.partyService = partyService;
@@ -62,24 +63,24 @@ public class LocalProvisionOfServiceTemplateImpl implements ReportTemplate {
         try {
             String partyId = report.getPartyId();
             String shopId = report.getPartyShopId();
-            LocalDateTime fromTime = report.getFromTime();
-            LocalDateTime toTime = report.getToTime();
             Party party = partyService.getParty(partyId);
             Shop shop = getShop(party, shopId, partyId);
 
             String contractId = shop.getContractId();
-            ContractMeta contractMeta = getContractMeta(contractId, partyId);
             contractMetaDao.updateLastReportCreatedAt(partyId, contractId, report.getCreatedAt());
 
             Context context = new Context();
             ZoneId reportZoneId = ZoneId.of(report.getTimezone());
             context.putVar("party_id", partyId);
             context.putVar("shop_id", shopId);
+            ContractMeta contractMeta = getContractMeta(contractId, partyId);
             context.putVar("contract_id", contractMeta.getContractId());
             context.putVar("created_at",
                     TimeUtil.toLocalizedDate(report.getCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
+            LocalDateTime fromTime = report.getFromTime();
             context.putVar("from_time",
                     TimeUtil.toLocalizedDate(fromTime.toInstant(ZoneOffset.UTC), reportZoneId));
+            LocalDateTime toTime = report.getToTime();
             context.putVar("to_time",
                     TimeUtil.toLocalizedDate(toTime.minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId));
 

@@ -24,6 +24,7 @@ public interface ContractMetaDao {
 
     void disableContract(String partyId, String contractId) throws DaoException;
 
-    void updateLastReportCreatedAt(String partyId, String contractId, LocalDateTime reportCreatedAt) throws DaoException;
+    void updateLastReportCreatedAt(String partyId, String contractId, LocalDateTime reportCreatedAt)
+            throws DaoException;
 
 }

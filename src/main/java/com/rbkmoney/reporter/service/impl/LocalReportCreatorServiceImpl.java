@@ -32,14 +32,11 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class LocalReportCreatorServiceImpl implements ReportCreatorService<LocalReportCreatorDto> {
 
+    private static final int PACKAGE_SIZE = 100;
     private final LocalStatisticService localStatisticService;
-
     @Value("${report.includeAdjustments}")
     private boolean includeAdjustments;
-
     private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
-
-    private static final int PACKAGE_SIZE = 100;
 
     @Override
     public void createReport(LocalReportCreatorDto reportCreatorDto) throws IOException {
@@ -48,11 +45,11 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             AtomicInteger rownum = new AtomicInteger(0);
 
             sh = createPaymentTable(reportCreatorDto, wb, sh, rownum);
-            sh = addIndent(wb, sh,rownum);
+            sh = addIndent(wb, sh, rownum);
             sh = createRefundTable(reportCreatorDto, wb, sh, rownum);
 
             if (includeAdjustments) {
-                sh = addIndent(wb, sh,rownum);
+                sh = addIndent(wb, sh, rownum);
                 createAdjustmentTable(reportCreatorDto, wb, sh, rownum);
             }
 
@@ -273,7 +270,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
         Cell cellFirstRefunds = rowFirstAdjustments.getCell(0);
-        cellFirstRefunds.setCellValue(String.format("Корректировки за период с %s по %s", reportCreatorDto.getFromTime(), reportCreatorDto.getToTime()));
+        cellFirstRefunds.setCellValue(
+                String.format("Корректировки за период с %s по %s", reportCreatorDto.getFromTime(),
+                        reportCreatorDto.getToTime()));
         CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
         CellUtil.setFont(cellFirstRefunds, createBoldFont(wb));
     }

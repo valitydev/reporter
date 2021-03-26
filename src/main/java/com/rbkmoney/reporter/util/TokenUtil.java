@@ -19,14 +19,16 @@ public class TokenUtil {
 
     @SneakyThrows
     public static String buildToken(ReportRequest request, List<String> reportTypes, String createdAfter) {
-        return Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(new TokenData(request, reportTypes, createdAfter)));
+        return Base64.getEncoder()
+                .encodeToString(objectMapper.writeValueAsBytes(new TokenData(request, reportTypes, createdAfter)));
     }
 
     public static boolean isValid(StatReportRequest statReportRequest) {
         try {
             String sourceToken = statReportRequest.getContinuationToken();
             String sourceTime = extractTime(sourceToken);
-            String generatedToken = buildToken(statReportRequest.getRequest(), statReportRequest.getReportTypes(), sourceTime);
+            String generatedToken =
+                    buildToken(statReportRequest.getRequest(), statReportRequest.getReportTypes(), sourceTime);
             return sourceToken.equals(generatedToken);
         } catch (Exception e) {
             return false;
@@ -50,7 +52,8 @@ public class TokenUtil {
         private String createdAfter;
 
         public TokenData(ReportRequest request, List<String> reportTypes, String createdAfter) {
-            this(request.getPartyId(), request.getShopId(), request.getTimeRange().getFromTime(), request.getTimeRange().getToTime(), reportTypes, createdAfter);
+            this(request.getPartyId(), request.getShopId(), request.getTimeRange().getFromTime(),
+                    request.getTimeRange().getToTime(), reportTypes, createdAfter);
         }
     }
 }

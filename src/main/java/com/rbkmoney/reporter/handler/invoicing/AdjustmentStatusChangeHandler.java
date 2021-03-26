@@ -81,6 +81,7 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
     public boolean isAccept(InvoiceChange change) {
         return change.isSetInvoicePaymentChange()
                 && change.getInvoicePaymentChange().getPayload().isSetInvoicePaymentAdjustmentChange()
-                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentAdjustmentChange().getPayload().isSetInvoicePaymentAdjustmentStatusChanged();
+                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentAdjustmentChange().getPayload()
+                .isSetInvoicePaymentAdjustmentStatusChanged();
     }
 }

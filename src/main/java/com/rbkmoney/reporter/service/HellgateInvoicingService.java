@@ -1,6 +1,6 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.damsel.payment_processing.*;
+import com.rbkmoney.damsel.payment_processing.Invoice;
 
 public interface HellgateInvoicingService {
 

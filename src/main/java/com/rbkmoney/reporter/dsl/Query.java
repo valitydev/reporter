@@ -3,8 +3,6 @@ package com.rbkmoney.reporter.dsl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Objects;
-
 @Data
 public class Query {
 

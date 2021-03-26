@@ -57,7 +57,8 @@ public class BuildUtils {
         refund.setId("id" + i);
         refund.setPaymentId("paymentId" + i);
         refund.setInvoiceId("invoiceId" + i);
-        refund.setStatus(InvoicePaymentRefundStatus.succeeded(new InvoicePaymentRefundSucceeded("201" + i + "-03-22T06:12:27Z")));
+        refund.setStatus(InvoicePaymentRefundStatus
+                .succeeded(new InvoicePaymentRefundSucceeded("201" + i + "-03-22T06:12:27Z")));
         refund.setAmount(123L + i);
         refund.setShopId("shopId" + i);
         refund.setId("" + i);
@@ -117,6 +118,18 @@ public class BuildUtils {
         return payment;
     }
 
+    public static StatPayment buildStatPayment() {
+        StatPayment payment = new StatPayment();
+        InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
+        invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
+        payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
+        PaymentResourcePayer paymentResourcePayer =
+                new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
+        paymentResourcePayer.setEmail("xyz@mail.ru");
+        payment.setPayer(Payer.payment_resource(paymentResourcePayer));
+        return payment;
+    }
+
     public static PaymentRecord buildPaymentRecord(int i, String partyId, String shopId) {
         PaymentRecord payment = new PaymentRecord();
         payment.setCreatedAt(LocalDateTime.now());
@@ -127,7 +140,8 @@ public class BuildUtils {
         payment.setTool(com.rbkmoney.reporter.domain.enums.PaymentTool.bank_card);
         payment.setFlow(PaymentFlow.instant);
         payment.setStatus(com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus.captured);
-        payment.setStatusCreatedAt(Instant.parse("201" + i + "-03-22T06:12:27Z").atZone(ZoneOffset.UTC).toLocalDateTime());
+        payment.setStatusCreatedAt(
+                Instant.parse("201" + i + "-03-22T06:12:27Z").atZone(ZoneOffset.UTC).toLocalDateTime());
         payment.setPayerType(PaymentPayerType.payment_resource);
         payment.setEmail("abc" + i + "@mail.ru");
         payment.setAmount(123L + i);
@@ -142,16 +156,5 @@ public class BuildUtils {
             purposes.put("invoiceId" + i, "product" + i);
         }
         return purposes;
-    }
-
-    public static StatPayment buildStatPayment() {
-        StatPayment payment = new StatPayment();
-        InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
-        invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
-        payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
-        paymentResourcePayer.setEmail("xyz@mail.ru");
-        payment.setPayer(Payer.payment_resource(paymentResourcePayer));
-        return payment;
     }
 }

@@ -64,14 +64,18 @@ public class RefundsQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         RefundsQuery that = (RefundsQuery) o;
-        return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(shopId, that.shopId) &&
-                Objects.equals(fromTime, that.fromTime) &&
-                Objects.equals(toTime, that.toTime) &&
-                Objects.equals(refundStatus, that.refundStatus);
+        return Objects.equals(merchantId, that.merchantId)
+                && Objects.equals(shopId, that.shopId)
+                && Objects.equals(fromTime, that.fromTime)
+                && Objects.equals(toTime, that.toTime)
+                && Objects.equals(refundStatus, that.refundStatus);
     }
 
     @Override

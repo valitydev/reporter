@@ -35,20 +35,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Slf4j
 public abstract class AbstractInvoicingServiceConfig {
 
-    @MockBean
-    private ReportNewProtoService reportNewProtoService;
-
-    @MockBean
-    private StorageService S3StorageServiceImpl;
-
-    @MockBean
-    private TaskServiceImpl taskService;
-
     private static TestContainers testContainers =
             TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
-            .addPostgresqlTestContainer()
-            .build();
-
+                    .addPostgresqlTestContainer()
+                    .build();
     @ClassRule
     public static final FailureDetectingExternalResource resource = new FailureDetectingExternalResource() {
 
@@ -67,6 +57,21 @@ public abstract class AbstractInvoicingServiceConfig {
             testContainers.stopTestContainers();
         }
     };
+    @MockBean
+    private ReportNewProtoService reportNewProtoService;
+    @MockBean
+    private StorageService s3StorageServiceImpl;
+    @MockBean
+    private TaskServiceImpl taskService;
+
+    private static Supplier<TestContainersParameters> getTestContainersParametersSupplier() {
+        return () -> {
+            TestContainersParameters testContainersParameters = new TestContainersParameters();
+            testContainersParameters.setPostgresqlJdbcUrl("jdbc:postgresql://localhost:5432/reporter");
+
+            return testContainersParameters;
+        };
+    }
 
     public static class Initializer extends ConfigFileApplicationContextInitializer {
 
@@ -81,15 +86,6 @@ public abstract class AbstractInvoicingServiceConfig {
             )
                     .applyTo(configurableApplicationContext);
         }
-    }
-
-    private static Supplier<TestContainersParameters> getTestContainersParametersSupplier() {
-        return () -> {
-            TestContainersParameters testContainersParameters = new TestContainersParameters();
-            testContainersParameters.setPostgresqlJdbcUrl("jdbc:postgresql://localhost:5432/reporter");
-
-            return testContainersParameters;
-        };
     }
 
 }

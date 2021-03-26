@@ -43,7 +43,8 @@ public class ProvisionOfServiceTemplateImpl implements ReportTemplate {
             StatisticService statisticService,
             PartyService partyService,
             ContractMetaDao contractMetaDao,
-            @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}") ClassPathResource resource
+            @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}")
+                    ClassPathResource resource
     ) {
         this.statisticService = statisticService;
         this.partyService = partyService;
@@ -63,14 +64,14 @@ public class ProvisionOfServiceTemplateImpl implements ReportTemplate {
             Shop shop = party.getShops().get(report.getPartyShopId());
             if (shop == null) {
                 throw new NotFoundException(String.format("Failed to find shop for provision of service report " +
-                                "(partyId='%s', shopId='%s')", report.getPartyId(), report.getPartyShopId()));
+                        "(partyId='%s', shopId='%s')", report.getPartyId(), report.getPartyShopId()));
             }
 
             String contractId = shop.getContractId();
             ContractMeta contractMeta = contractMetaDao.getExclusive(report.getPartyId(), contractId);
             if (contractMeta == null) {
                 throw new NotFoundException(String.format("Failed to find meta data for provision of service report " +
-                                "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
+                        "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
             }
             contractMetaDao.updateLastReportCreatedAt(report.getPartyId(), contractId, report.getCreatedAt());
 
@@ -89,7 +90,7 @@ public class ProvisionOfServiceTemplateImpl implements ReportTemplate {
             Contract contract = party.getContracts().get(contractId);
             if (contract == null) {
                 throw new NotFoundException(String.format("Failed to find contract for provision of service report" +
-                                "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
+                        "(partyId='%s', contractId='%s')", report.getPartyId(), contractId));
             }
 
             if (contract.isSetLegalAgreement()) {

@@ -53,15 +53,18 @@ public class PartyServiceImpl implements PartyService {
             return party;
         } catch (PartyNotFound ex) {
             throw new PartyNotFoundException(
-                    String.format("Party not found, partyId='%s', partyRevisionParam='%s'", partyId, partyRevisionParam), ex
+                    String.format("Party not found, partyId='%s', partyRevisionParam='%s'", partyId,
+                            partyRevisionParam), ex
             );
         } catch (InvalidPartyRevision ex) {
             throw new PartyNotFoundException(
-                    String.format("Invalid party revision, partyId='%s', partyRevisionParam='%s'", partyId, partyRevisionParam), ex
+                    String.format("Invalid party revision, partyId='%s', partyRevisionParam='%s'", partyId,
+                            partyRevisionParam), ex
             );
         } catch (TException ex) {
             throw new RuntimeException(
-                    String.format("Failed to get party, partyId='%s', partyRevisionParam='%s'", partyId, partyRevisionParam), ex
+                    String.format("Failed to get party, partyId='%s', partyRevisionParam='%s'", partyId,
+                            partyRevisionParam), ex
             );
         }
     }
@@ -72,27 +75,34 @@ public class PartyServiceImpl implements PartyService {
         Party party = getParty(partyId);
         Shop shop = party.getShops().get(shopId);
         if (shop == null) {
-            throw new ShopNotFoundException(String.format("Shop not found, partyId='%s', shopId='%s'", partyId, shopId));
+            throw new ShopNotFoundException(
+                    String.format("Shop not found, partyId='%s', shopId='%s'", partyId, shopId));
         }
         log.info("Shop has been found, partyId='{}', shopId='{}'", partyId, shopId);
         return shop;
     }
 
     @Override
-    public Shop getShop(String partyId, String shopId, long partyRevision) throws ShopNotFoundException, PartyNotFoundException {
+    public Shop getShop(String partyId, String shopId, long partyRevision)
+            throws ShopNotFoundException, PartyNotFoundException {
         return getShop(partyId, shopId, PartyRevisionParam.revision(partyRevision));
     }
 
     @Override
-    public Shop getShop(String partyId, String shopId, PartyRevisionParam partyRevisionParam) throws ShopNotFoundException, PartyNotFoundException {
-        log.info("Trying to get shop, partyId='{}', shopId='{}', partyRevisionParam='{}'", partyId, shopId, partyRevisionParam);
+    public Shop getShop(String partyId, String shopId, PartyRevisionParam partyRevisionParam)
+            throws ShopNotFoundException, PartyNotFoundException {
+        log.info("Trying to get shop, partyId='{}', shopId='{}', partyRevisionParam='{}'", partyId, shopId,
+                partyRevisionParam);
         Party party = getParty(partyId, partyRevisionParam);
 
         Shop shop = party.getShops().get(shopId);
         if (shop == null) {
-            throw new ShopNotFoundException(String.format("Shop not found, partyId='%s', shopId='%s', partyRevisionParam='%s'", partyId, shopId, partyRevisionParam));
+            throw new ShopNotFoundException(
+                    String.format("Shop not found, partyId='%s', shopId='%s', partyRevisionParam='%s'", partyId, shopId,
+                            partyRevisionParam));
         }
-        log.info("Shop has been found, partyId='{}', shopId='{}', partyRevisionParam='{}'", partyId, shopId, partyRevisionParam);
+        log.info("Shop has been found, partyId='{}', shopId='{}', partyRevisionParam='{}'", partyId, shopId,
+                partyRevisionParam);
         return shop;
     }
 
@@ -111,56 +121,73 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public Contract getContract(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
+    public Contract getContract(String partyId, String contractId)
+            throws ContractNotFoundException, PartyNotFoundException {
         log.info("Trying to get contract, partyId='{}', contractId='{}'", partyId, contractId);
         Party party = getParty(partyId);
         Contract contract = party.getContracts().get(contractId);
         if (contract == null) {
-            throw new ContractNotFoundException(String.format("Contract not found, partyId='%s', contractId='%s'", partyId, contractId));
+            throw new ContractNotFoundException(
+                    String.format("Contract not found, partyId='%s', contractId='%s'", partyId, contractId));
         }
         log.info("Contract has been found, partyId='{}', contractId='{}'", partyId, contractId);
         return contract;
     }
 
     @Override
-    public Contract getContract(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException {
+    public Contract getContract(String partyId, String contractId, long partyRevision)
+            throws ContractNotFoundException, PartyNotFoundException {
         return getContract(partyId, contractId, PartyRevisionParam.revision(partyRevision));
     }
 
     @Override
-    public Contract getContract(String partyId, String contractId, PartyRevisionParam partyRevisionParam) throws ContractNotFoundException, PartyNotFoundException {
-        log.info("Trying to get contract, partyId='{}', contractId='{}', partyRevisionParam='{}'", partyId, contractId, partyRevisionParam);
+    public Contract getContract(String partyId, String contractId, PartyRevisionParam partyRevisionParam)
+            throws ContractNotFoundException, PartyNotFoundException {
+        log.info("Trying to get contract, partyId='{}', contractId='{}', partyRevisionParam='{}'", partyId, contractId,
+                partyRevisionParam);
         Party party = getParty(partyId, partyRevisionParam);
 
         Contract contract = party.getContracts().get(contractId);
         if (contract == null) {
-            throw new ContractNotFoundException(String.format("Contract not found, partyId='%s', contractId='%s', partyRevisionParam='%s'", partyId, contractId, partyRevisionParam));
+            throw new ContractNotFoundException(
+                    String.format("Contract not found, partyId='%s', contractId='%s', partyRevisionParam='%s'", partyId,
+                            contractId, partyRevisionParam));
         }
-        log.info("Contract has been found, partyId='{}', contractId='{}', partyRevisionParam='{}'", partyId, contractId, partyRevisionParam);
+        log.info("Contract has been found, partyId='{}', contractId='{}', partyRevisionParam='{}'", partyId, contractId,
+                partyRevisionParam);
         return contract;
     }
 
     @Override
-    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException {
+    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId)
+            throws ContractNotFoundException, PartyNotFoundException {
         return getPaymentInstitutionRef(partyId, contractId, getPartyRevision(partyId));
     }
 
     @Override
-    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException {
+    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, long partyRevision)
+            throws ContractNotFoundException, PartyNotFoundException {
         return getPaymentInstitutionRef(partyId, contractId, PartyRevisionParam.revision(partyRevision));
     }
 
     @Override
-    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, PartyRevisionParam partyRevisionParam) throws ContractNotFoundException, PartyNotFoundException {
-        log.debug("Trying to get paymentInstitutionRef, partyId='{}', contractId='{}', partyRevisionParam='{}'", partyId, contractId, partyRevisionParam);
+    public PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId,
+                                                          PartyRevisionParam partyRevisionParam)
+            throws ContractNotFoundException, PartyNotFoundException {
+        log.debug("Trying to get paymentInstitutionRef, partyId='{}', contractId='{}', partyRevisionParam='{}'",
+                partyId, contractId, partyRevisionParam);
         Contract contract = getContract(partyId, contractId, partyRevisionParam);
 
         if (!contract.isSetPaymentInstitution()) {
-            throw new NotFoundException(String.format("PaymentInstitutionRef not found, partyId='%s', contractId='%s', partyRevisionParam='%s'", partyId, contractId, partyRevisionParam));
+            throw new NotFoundException(String.format(
+                    "PaymentInstitutionRef not found, partyId='%s', contractId='%s', partyRevisionParam='%s'", partyId,
+                    contractId, partyRevisionParam));
         }
 
         PaymentInstitutionRef paymentInstitutionRef = contract.getPaymentInstitution();
-        log.info("PaymentInstitutionRef has been found, partyId='{}', contractId='{}', paymentInstitutionRef='{}', partyRevisionParam='{}'", partyId, contractId, paymentInstitutionRef, partyRevisionParam);
+        log.info("PaymentInstitutionRef has been found, partyId='{}', contractId='{}, " +
+                        "paymentInstitutionRef='{}', partyRevisionParam='{}'",
+                partyId, contractId, paymentInstitutionRef, partyRevisionParam);
         return paymentInstitutionRef;
     }
 

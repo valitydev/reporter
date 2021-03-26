@@ -22,7 +22,6 @@ public class PayoutStatusChangedChangeEventHandler extends AbstractPayoutHandler
 
     @Override
     public void handle(PayoutChange payload, Event event) {
-        var damselPayoutStatus = payload.getPayoutStatusChanged().getStatus();
         String payoutId = event.getSource().getPayoutId();
 
         log.info("Start payout status changed handling, payoutId={}", payoutId);
@@ -37,6 +36,7 @@ public class PayoutStatusChangedChangeEventHandler extends AbstractPayoutHandler
         payoutState.setExtPayoutId(payout.getId());
         payoutState.setEventCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         payoutState.setPayoutId(payoutId);
+        var damselPayoutStatus = payload.getPayoutStatusChanged().getStatus();
         payoutState.setStatus(TBaseUtil.unionFieldToEnum(damselPayoutStatus, PayoutStatus.class));
         if (damselPayoutStatus.isSetCancelled()) {
             payoutState.setCancelDetails(damselPayoutStatus.getCancelled().getDetails());

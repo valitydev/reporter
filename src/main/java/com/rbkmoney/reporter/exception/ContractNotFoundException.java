@@ -14,7 +14,8 @@ public class ContractNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public ContractNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ContractNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                     boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

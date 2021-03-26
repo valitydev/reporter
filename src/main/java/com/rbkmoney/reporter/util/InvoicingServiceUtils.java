@@ -1,9 +1,9 @@
 package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustment;
-import com.rbkmoney.damsel.payment_processing.InvoicePaymentChargeback;
 import com.rbkmoney.damsel.payment_processing.Invoice;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
+import com.rbkmoney.damsel.payment_processing.InvoicePaymentChargeback;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund;
 import com.rbkmoney.reporter.exception.NotFoundException;
 import lombok.AccessLevel;
@@ -38,7 +38,8 @@ public final class InvoicingServiceUtils {
                 .filter(hgAdj -> adjustmentId.equals(hgAdj.getId()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("InvoicePaymentAdjustment for payment " +
-                        "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId, changeId)));
+                                "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId,
+                        changeId)));
     }
 
     public static InvoicePaymentChargeback getInvoicePaymentChargebackById(InvoicePayment invoicePayment,
@@ -54,8 +55,9 @@ public final class InvoicingServiceUtils {
                 .filter(hgChbk -> chargeback.equals(hgChbk.getChargeback().getId()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("InvoicePaymentChargeback for payment " +
-                        "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId, changeId)));
-}
+                                "(invoice id '%s', sequence id '%d', change id '%d') not found!", invoiceId, sequenceId,
+                        changeId)));
+    }
 
     public static InvoicePaymentRefund getInvoicePaymentRefundById(InvoicePayment invoicePayment,
                                                                    String refundId,
@@ -70,7 +72,7 @@ public final class InvoicingServiceUtils {
                 .filter(hgRefund -> refundId.equals(hgRefund.getRefund().getId()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("InvoicePaymentRefund or sessions for refund " +
-                        "(invoice id '%s', sequence id '%d', change id '%d') not found!",
+                                "(invoice id '%s', sequence id '%d', change id '%d') not found!",
                         invoiceId, sequenceId, changeId)));
     }
 

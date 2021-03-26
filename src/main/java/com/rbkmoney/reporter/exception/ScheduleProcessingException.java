@@ -17,7 +17,8 @@ public class ScheduleProcessingException extends RuntimeException {
         super(cause);
     }
 
-    public ScheduleProcessingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ScheduleProcessingException(String message, Throwable cause, boolean enableSuppression,
+                                       boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

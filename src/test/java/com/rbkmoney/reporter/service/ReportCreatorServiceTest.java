@@ -30,7 +30,8 @@ public class ReportCreatorServiceTest {
     @Test
     public void createBigSizeReportTest() throws IOException {
         StatisticService statisticsService = Mockito.mock(StatisticServiceImpl.class);
-        when(statisticsService.getCapturedPayment(any(String.class), any(String.class), any(String.class), any(String.class)))
+        when(statisticsService
+                .getCapturedPayment(any(String.class), any(String.class), any(String.class), any(String.class)))
                 .thenReturn(BuildUtils.buildStatPayment(1));
 
         Iterator<StatPayment> paymentsIterator = IntStream.range(1, 10)

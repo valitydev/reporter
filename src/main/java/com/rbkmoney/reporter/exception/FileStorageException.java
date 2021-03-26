@@ -14,7 +14,8 @@ public class FileStorageException extends RuntimeException {
         super(cause);
     }
 
-    public FileStorageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public FileStorageException(String message, Throwable cause, boolean enableSuppression,
+                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

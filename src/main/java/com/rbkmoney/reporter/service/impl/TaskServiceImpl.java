@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.damsel.base.TimeSpan;
-import com.rbkmoney.damsel.domain.Calendar;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.Calendar;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.dao.ContractMetaDao;
 import com.rbkmoney.reporter.domain.enums.ReportType;
@@ -74,7 +74,9 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                 List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                 if (triggers.isEmpty() || !triggers.stream().allMatch(this::isTriggerOnNormalState)) {
                     if (scheduler.checkExists(jobKey)) {
-                        log.warn("Inactive job found, please check it manually. Job will be restored, contractMeta='{}'", contractMeta);
+                        log.warn("Inactive job found, please check it manually. " +
+                                        "Job will be restored, contractMeta='{}'",
+                                contractMeta);
                     }
                     createJob(
                             contractMeta.getPartyId(),
@@ -97,14 +99,18 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
             log.debug("Trigger '{}' on '{}' state", trigger, triggerState);
             return triggerState == Trigger.TriggerState.NORMAL;
         } catch (SchedulerException ex) {
-            throw new ScheduleProcessingException(String.format("Failed to get trigger state, triggerKey='%s'", trigger.getKey()), ex);
+            throw new ScheduleProcessingException(
+                    String.format("Failed to get trigger state, triggerKey='%s'", trigger.getKey()), ex);
         }
     }
 
     @Override
     @Transactional
-    public void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId, BusinessScheduleRef scheduleRef, Representative signer) throws ScheduleProcessingException, NotFoundException, StorageException {
-        log.info("Trying to register provision of service job, partyId='{}', contractId='{}', scheduleId='{}', signer='{}'",
+    public void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId,
+                                              BusinessScheduleRef scheduleRef, Representative signer)
+            throws ScheduleProcessingException, NotFoundException, StorageException {
+        log.info("Trying to register provision of service job, partyId='{}'," +
+                        " contractId='{}', scheduleId='{}', signer='{}'",
                 partyId, contractId, scheduleRef, signer);
         PaymentInstitutionRef paymentInstitutionRef = partyService.getPaymentInstitutionRef(partyId, contractId);
         PaymentInstitution paymentInstitution = domainConfigService.getPaymentInstitution(paymentInstitutionRef);
@@ -131,17 +137,20 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                 LegalAgreement legalAgreement = signer.getDocument().getPowerOfAttorney();
                 contractMeta.setLegalAgreementId(legalAgreement.getLegalAgreementId());
                 contractMeta.setLegalAgreementSignedAt(TypeUtil.stringToLocalDateTime(legalAgreement.getSignedAt()));
-                contractMeta.setLegalAgreementValidUntil(TypeUtil.stringToLocalDateTime(legalAgreement.getValidUntil()));
+                contractMeta
+                        .setLegalAgreementValidUntil(TypeUtil.stringToLocalDateTime(legalAgreement.getValidUntil()));
             }
 
             contractMetaDao.save(contractMeta);
             createJob(partyId, contractId, calendarRef, scheduleRef);
-            log.info("Job have been successfully enabled, partyId='{}', contractId='{}', scheduleRef='{}', calendarRef='{}'",
+            log.info("Job have been successfully enabled, partyId='{}', c" +
+                            "ontractId='{}', scheduleRef='{}', calendarRef='{}'",
                     partyId, contractId, scheduleRef, calendarRef);
         } catch (DaoException ex) {
             throw new StorageException(
                     String.format(
-                            "Failed to save job on storage, partyId='%s', contractId='%s', scheduleRef='%s', calendarRef='%s'",
+                            "Failed to save job on storage, partyId='%s', " +
+                                    "contractId='%s', scheduleRef='%s', calendarRef='%s'",
                             partyId, contractId, scheduleRef, calendarRef), ex);
         }
     }
@@ -186,7 +195,8 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                 }
 
                 FreezeTimeCronTrigger trigger = TriggerBuilder.newTrigger()
-                        .withIdentity(buildTriggerKey(partyId, contractId, calendarRef.getId(), scheduleRef.getId(), triggerId))
+                        .withIdentity(buildTriggerKey(partyId, contractId, calendarRef.getId(), scheduleRef.getId(),
+                                triggerId))
                         .withDescription(schedule.getDescription())
                         .forJob(jobDetail)
                         .withSchedule(freezeTimeCronScheduleBuilder)
@@ -195,31 +205,39 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
                 triggers.add(trigger);
             }
             scheduler.scheduleJob(jobDetail, triggers, true);
-            log.info("Jobs have been successfully created or updated, partyId='{}', contractId='{}', calendarRef='{}', scheduleRef='{}', jobDetail='{}', triggers='{}'", partyId, contractId, calendarRef, scheduleRef, jobDetail, triggers);
+            log.info("Jobs have been successfully created or updated, partyId='{}', contractId='{}', " +
+                            "calendarRef='{}', scheduleRef='{}', jobDetail='{}', triggers='{}'",
+                    partyId, contractId, calendarRef, scheduleRef, jobDetail, triggers);
         } catch (NotFoundException | SchedulerException ex) {
             throw new ScheduleProcessingException(
-                    String.format("Failed to create job, partyId='%s', contractId='%s', calendarRef='%s', scheduleRef='%s'",
+                    String.format(
+                            "Failed to create job, partyId='%s', contractId='%s', calendarRef='%s', scheduleRef='%s'",
                             partyId, contractId, calendarRef, scheduleRef), ex);
         }
     }
 
     @Override
     @Transactional
-    public void deregisterProvisionOfServiceJob(String partyId, String contractId) throws ScheduleProcessingException, StorageException {
+    public void deregisterProvisionOfServiceJob(String partyId, String contractId)
+            throws ScheduleProcessingException, StorageException {
         log.info("Trying to deregister provision of service job, partyId='{}', contractId='{}'", partyId, contractId);
         try {
             ContractMeta contractMeta = contractMetaDao.get(partyId, contractId);
             if (contractMeta != null) {
                 contractMetaDao.disableContract(partyId, contractId);
                 removeJob(contractMeta);
-                log.info("Provision of service job have been successfully disabled, partyId='{}', contractId='{}', scheduleId='{}', calendarId='{}'",
+                log.info("Provision of service job have been successfully disabled, partyId='{}', " +
+                                "contractId='{}', scheduleId='{}', calendarId='{}'",
                         partyId, contractId, contractMeta.getScheduleId(), contractMeta.getCalendarId());
             } else {
-                log.warn("Not possible to disable provision of service job, contract meta not found, partyId='{}', contractId='{}'", partyId, contractId);
+                log.warn("Not possible to disable provision of service job, contract meta not found, " +
+                                "partyId='{}', contractId='{}'",
+                        partyId, contractId);
             }
         } catch (DaoException ex) {
             throw new StorageException(
-                    String.format("Failed to disable provision of service job on storage, partyId='%s', contractId='%s'",
+                    String.format(
+                            "Failed to disable provision of service job on storage, partyId='%s', contractId='%s'",
                             partyId, contractId), ex);
         }
     }

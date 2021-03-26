@@ -37,9 +37,10 @@ import java.util.function.Supplier;
 @Slf4j
 public abstract class AbstractKafkaConfig extends AbstractTestUtils {
 
-    private static TestContainers testContainers = TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
-            .addKafkaTestContainer()
-            .build();
+    private static TestContainers testContainers =
+            TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
+                    .addKafkaTestContainer()
+                    .build();
 
     @ClassRule
     public static final FailureDetectingExternalResource resource = new FailureDetectingExternalResource() {
@@ -60,16 +61,6 @@ public abstract class AbstractKafkaConfig extends AbstractTestUtils {
         }
     };
 
-    public static class Initializer extends ConfigFileApplicationContextInitializer {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            super.initialize(configurableApplicationContext);
-            TestPropertyValues.of(testContainers.getEnvironmentProperties(getEnvironmentPropertiesConsumer()))
-                    .applyTo(configurableApplicationContext);
-        }
-    }
-
     private static Supplier<TestContainersParameters> getTestContainersParametersSupplier() {
         return () -> {
             TestContainersParameters testContainersParameters = new TestContainersParameters();
@@ -84,5 +75,15 @@ public abstract class AbstractKafkaConfig extends AbstractTestUtils {
             environmentProperties.put("kafka.topics.party-management.enabled", "true");
             environmentProperties.put("kafka.topics.invoicing.enabled", "true");
         };
+    }
+
+    public static class Initializer extends ConfigFileApplicationContextInitializer {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            super.initialize(configurableApplicationContext);
+            TestPropertyValues.of(testContainers.getEnvironmentProperties(getEnvironmentPropertiesConsumer()))
+                    .applyTo(configurableApplicationContext);
+        }
     }
 }

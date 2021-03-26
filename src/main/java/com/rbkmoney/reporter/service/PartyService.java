@@ -27,23 +27,31 @@ public interface PartyService {
 
     Shop getShop(String partyId, String shopId) throws ShopNotFoundException, PartyNotFoundException;
 
-    Shop getShop(String partyId, String shopId, long partyRevision) throws ShopNotFoundException, PartyNotFoundException;
+    Shop getShop(String partyId, String shopId, long partyRevision)
+            throws ShopNotFoundException, PartyNotFoundException;
 
-    Shop getShop(String partyId, String shopId, PartyRevisionParam partyRevisionParam) throws ShopNotFoundException, PartyNotFoundException;
+    Shop getShop(String partyId, String shopId, PartyRevisionParam partyRevisionParam)
+            throws ShopNotFoundException, PartyNotFoundException;
 
     long getPartyRevision(String partyId);
 
     Contract getContract(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException;
 
-    Contract getContract(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException;
+    Contract getContract(String partyId, String contractId, long partyRevision)
+            throws ContractNotFoundException, PartyNotFoundException;
 
-    Contract getContract(String partyId, String contractId, PartyRevisionParam partyRevisionParam) throws ContractNotFoundException, PartyNotFoundException;
+    Contract getContract(String partyId, String contractId, PartyRevisionParam partyRevisionParam)
+            throws ContractNotFoundException, PartyNotFoundException;
 
-    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId) throws ContractNotFoundException, PartyNotFoundException;
+    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId)
+            throws ContractNotFoundException, PartyNotFoundException;
 
-    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, long partyRevision) throws ContractNotFoundException, PartyNotFoundException;
+    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, long partyRevision)
+            throws ContractNotFoundException, PartyNotFoundException;
 
-    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId, PartyRevisionParam partyRevisionParam) throws ContractNotFoundException, PartyNotFoundException;
+    PaymentInstitutionRef getPaymentInstitutionRef(String partyId, String contractId,
+                                                   PartyRevisionParam partyRevisionParam)
+            throws ContractNotFoundException, PartyNotFoundException;
 
     String getShopUrl(String partyId, String shopId) throws PartyNotFoundException, ShopNotFoundException;
 

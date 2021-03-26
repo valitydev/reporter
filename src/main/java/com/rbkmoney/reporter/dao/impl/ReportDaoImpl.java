@@ -126,7 +126,8 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
         return fetch(query, reportRowMapper);
     }
 
-    private Condition buildCondition(String partyId, String shopId, List<ReportType> reportTypes, LocalDateTime fromTime, LocalDateTime toTime) {
+    private Condition buildCondition(String partyId, String shopId, List<ReportType> reportTypes,
+                                     LocalDateTime fromTime, LocalDateTime toTime) {
         Condition condition = REPORT.PARTY_ID.eq(partyId)
                 .and(ofNullable(shopId).map(REPORT.PARTY_SHOP_ID::eq).orElse(trueCondition()))
                 .and(REPORT.CREATED_AT.ge(fromTime))

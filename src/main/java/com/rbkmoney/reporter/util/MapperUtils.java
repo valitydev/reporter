@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.base.Content;
-import com.rbkmoney.damsel.domain.PaymentTool;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.PaymentTool;
 import com.rbkmoney.damsel.payment_processing.InvoicePayment;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentSession;
 import com.rbkmoney.damsel.payment_processing.InvoicePaymentStatusChanged;
@@ -10,13 +10,13 @@ import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.enums.BankCardTokenProvider;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
 import com.rbkmoney.reporter.domain.enums.InvoiceStatus;
 import com.rbkmoney.reporter.domain.enums.OnHoldExpiration;
-import com.rbkmoney.reporter.domain.enums.*;
-import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
+import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,6 @@ public final class MapperUtils {
         var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
         InvoicePaymentRefund hgInnerRefund = hgRefund.getRefund();
-        Map<FeeType, Long> fees = DamselUtil.getFees(hgRefund.getCashFlow());
         Map<FeeType, String> currencies = DamselUtil.getCurrency(hgRefund.getCashFlow());
 
         Refund refund = new Refund();
@@ -56,6 +55,7 @@ public final class MapperUtils {
             refund.setAmount(cash.getAmount());
             refund.setCurrencyCode(cash.getCurrency().getSymbolicCode());
         }
+        Map<FeeType, Long> fees = DamselUtil.getFees(hgRefund.getCashFlow());
         if (refund.getAmount() == null && isContainsAmount(fees)) {
             refund.setAmount(fees.get(FeeType.AMOUNT));
             refund.setCurrencyCode(currencies.get(FeeType.AMOUNT));
@@ -271,8 +271,9 @@ public final class MapperUtils {
             additionalInfo.setCavv(additionalTrxInfo.getCavv());
             additionalInfo.setCavvAlgorithm(additionalTrxInfo.getCavvAlgorithm());
             additionalInfo.setXid(additionalTrxInfo.getXid());
-            additionalInfo.setThreeDsVerification(additionalTrxInfo.getThreeDsVerification() == null ?
-                    null : additionalTrxInfo.getThreeDsVerification().name());
+            additionalInfo.setThreeDsVerification(additionalTrxInfo.getThreeDsVerification() == null
+                    ? null
+                    : additionalTrxInfo.getThreeDsVerification().name());
         }
     }
 

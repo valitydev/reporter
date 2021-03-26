@@ -14,7 +14,8 @@ public class ShopNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public ShopNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ShopNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                 boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

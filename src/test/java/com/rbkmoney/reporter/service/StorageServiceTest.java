@@ -33,7 +33,8 @@ public class StorageServiceTest extends AbstractStorageServiceConfig {
         try {
             Files.write(expectedFile, "4815162342".getBytes());
             FileMeta fileMeta = storageService.saveFile(expectedFile);
-            URL url = storageService.getFileUrl(fileMeta.getFileId(), fileMeta.getBucketId(), LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
+            URL url = storageService.getFileUrl(fileMeta.getFileId(), fileMeta.getBucketId(),
+                    LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
             assertNotNull(url);
 
             try (InputStream in = url.openStream()) {

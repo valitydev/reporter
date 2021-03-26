@@ -30,31 +30,12 @@ import static org.mockito.Mockito.verify;
 )
 public class PartyManagementHandlersTest extends AbstractHandlerConfig {
 
+    private static final  String CONTRACT_EFFECT_CREATED = "created";
+    private static final  String CONTRACT_EFFECT_REPORT_PREFERENCES = "report_preferences";
     @Autowired
     private EventHandler<PartyChange> partyManagementEventHandler;
-
     @MockBean
     private TaskService taskService;
-
-    private final static String CONTRACT_EFFECT_CREATED = "created";
-
-    private final static String CONTRACT_EFFECT_REPORT_PREFERENCES = "report_preferences";
-
-    @Test
-    public void partyManagementEventHandlerTest() throws Exception {
-        PartyEventData partyEventData = createTestPartyEventData();
-        for (PartyChange change : partyEventData.getChanges()) {
-            partyManagementEventHandler.handle(createTestKafkaEvent(), change, 0);
-        }
-        verify(taskService, times(2))
-                .registerProvisionOfServiceJob(
-                        anyString(), // party id
-                        anyString(), // contract id
-                        anyLong(),   // event id
-                        any(BusinessScheduleRef.class),
-                        any(Representative.class)
-                );
-    }
 
     private static KafkaEvent createTestKafkaEvent() {
         return new KafkaEvent("test", 1, 1, createTestMachineEvent());
@@ -82,11 +63,8 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
     }
 
     private static PartyChange createTestPartyChange() {
-        PartyChange partyChange = new PartyChange();
         ClaimStatusChanged claimStatusChanged = new ClaimStatusChanged();
         claimStatusChanged.setId(random(Long.class));
-        ClaimStatus status = new ClaimStatus();
-        ClaimAccepted accepted = new ClaimAccepted();
         List<ClaimEffect> claimEffectList = new ArrayList<>();
         // there must be 2 successful operations
         claimEffectList.add(createTestClaimEffect(CONTRACT_EFFECT_CREATED, true, true));
@@ -95,9 +73,12 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
         claimEffectList.add(createTestClaimEffect(CONTRACT_EFFECT_REPORT_PREFERENCES, false, true));
         claimEffectList.add(createTestClaimEffect(CONTRACT_EFFECT_REPORT_PREFERENCES, false, false));
         claimEffectList.add(createTestClaimEffect(Strings.EMPTY, false, false));
+        ClaimAccepted accepted = new ClaimAccepted();
         accepted.setEffects(claimEffectList);
+        ClaimStatus status = new ClaimStatus();
         status.setAccepted(accepted);
         claimStatusChanged.setStatus(status);
+        PartyChange partyChange = new PartyChange();
         partyChange.setClaimStatusChanged(claimStatusChanged);
         return partyChange;
     }
@@ -105,7 +86,6 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
     private static ClaimEffect createTestClaimEffect(String contractorEffect,
                                                      boolean isSetReport,
                                                      boolean isSetCreatedAct) {
-        ClaimEffect claimEffect = new ClaimEffect();
         ContractEffectUnit contractEffectUnit = new ContractEffectUnit();
         contractEffectUnit.setContractId(random(String.class));
         ContractEffect contractEffect = new ContractEffect();
@@ -121,6 +101,7 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
         }
 
         contractEffectUnit.setEffect(contractEffect);
+        ClaimEffect claimEffect = new ClaimEffect();
         claimEffect.setContractEffect(contractEffectUnit);
         return claimEffect;
     }
@@ -148,6 +129,22 @@ public class PartyManagementHandlersTest extends AbstractHandlerConfig {
             reportPreferences.setServiceAcceptanceActPreferences(actPreferences);
         }
         return reportPreferences;
+    }
+
+    @Test
+    public void partyManagementEventHandlerTest() throws Exception {
+        PartyEventData partyEventData = createTestPartyEventData();
+        for (PartyChange change : partyEventData.getChanges()) {
+            partyManagementEventHandler.handle(createTestKafkaEvent(), change, 0);
+        }
+        verify(taskService, times(2))
+                .registerProvisionOfServiceJob(
+                        anyString(), // party id
+                        anyString(), // contract id
+                        anyLong(),   // event id
+                        any(BusinessScheduleRef.class),
+                        any(Representative.class)
+                );
     }
 
 }

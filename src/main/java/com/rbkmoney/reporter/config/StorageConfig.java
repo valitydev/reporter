@@ -37,7 +37,8 @@ public class StorageConfig {
     private int maxErrorRetry;
 
     @Bean
-    public AmazonS3 storageClient(AWSCredentialsProviderChain credentialsProviderChain, ClientConfiguration clientConfiguration) {
+    public AmazonS3 storageClient(AWSCredentialsProviderChain credentialsProviderChain,
+                                  ClientConfiguration clientConfiguration) {
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(credentialsProviderChain)
                 .withPathStyleAccessEnabled(true)

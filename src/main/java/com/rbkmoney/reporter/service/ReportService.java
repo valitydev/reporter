@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ValidationException;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -67,15 +68,18 @@ public class ReportService {
         try {
             return reportDao.getReportFiles(reportId);
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to get report files from storage, reportId='%d'", reportId), ex);
+            throw new StorageException(
+                    String.format("Failed to get report files from storage, reportId='%d'", reportId), ex);
         }
     }
 
-    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException {
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType)
+            throws PartyNotFoundException, ShopNotFoundException {
         return createReport(partyId, shopId, fromTime, toTime, reportType, defaultTimeZone, Instant.now());
     }
 
-    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType, ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType,
+                             ZoneId timezone, Instant createdAt) throws PartyNotFoundException, ShopNotFoundException {
         log.info("Trying to create report, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
                 partyId, shopId, reportType, fromTime, toTime);
 
@@ -89,11 +93,14 @@ public class ReportService {
                     timezone.getId(),
                     LocalDateTime.ofInstant(createdAt, ZoneOffset.UTC)
             );
-            log.info("Report has been successfully created, reportId={}, partyId={}, shopId={}, reportType={}, fromTime={}, toTime={}",
+            log.info("Report has been successfully created, reportId={}, partyId={}, " +
+                            "shopId={}, reportType={}, fromTime={}, toTime={}",
                     reportId, partyId, shopId, reportType, fromTime, toTime);
             return reportId;
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to save report in storage, partyId='%s', shopId='%s', fromTime='%s', toTime='%s', reportType='%s'",
+            throw new StorageException(String.format(
+                    "Failed to save report in storage, partyId='%s', shopId='%s', " +
+                            "fromTime='%s', toTime='%s', reportType='%s'",
                     partyId, shopId, fromTime, toTime, reportType), ex);
         }
     }
@@ -115,22 +122,28 @@ public class ReportService {
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
     public void generateReport(Report report) {
-        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+        log.info("Trying to process report, reportId='{}', reportType='{}', partyId='{}', " +
+                        "shopId='{}', fromTime='{}', toTime='{}'",
+                report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(),
+                report.getToTime());
         try {
             Report forUpdateReport = reportDao.getReportDoUpdateSkipLocked(report.getId());
             if (forUpdateReport != null && forUpdateReport.getStatus() == ReportStatus.pending) {
                 List<FileMeta> reportFiles = processSignAndUpload(report);
                 finishedReportTask(report.getId(), reportFiles);
-                log.info("Report has been successfully processed, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                        report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime());
+                log.info("Report has been successfully processed, reportId='{}', reportType='{}', " +
+                                "partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
+                        report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(),
+                        report.getFromTime(), report.getToTime());
             }
         } catch (ValidationException | NotFoundException ex) {
             log.error("Report data validation failed, reportId='{}'", report.getId(), ex);
             changeReportStatus(report, ReportStatus.cancelled);
         } catch (Throwable throwable) {
-            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', shopId='{}', fromTime='{}', toTime='{}'",
-                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(), report.getFromTime(), report.getToTime(), throwable);
+            log.error("The report has failed to process, reportId='{}', reportType='{}', partyId='{}', " +
+                            "shopId='{}', fromTime='{}', toTime='{}'",
+                    report.getId(), report.getType(), report.getPartyId(), report.getPartyShopId(),
+                    report.getFromTime(), report.getToTime(), throwable);
         }
     }
 
@@ -138,9 +151,12 @@ public class ReportService {
         log.info("Trying to change report status, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
         try {
             reportDao.changeReportStatus(report.getId(), reportStatus);
-            log.info("Report status have been successfully changed, reportId='{}', reportStatus='{}'", report.getId(), reportStatus);
+            log.info("Report status have been successfully changed, reportId='{}', reportStatus='{}'", report.getId(),
+                    reportStatus);
         } catch (DaoException ex) {
-            throw new StorageException(String.format("Failed to change report status, reportId='%d', reportStatus='%s'", report.getId(), reportStatus), ex);
+            throw new StorageException(
+                    String.format("Failed to change report status, reportId='%d', reportStatus='%s'", report.getId(),
+                            reportStatus), ex);
         }
     }
 

@@ -4,11 +4,8 @@ import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain_config.VersionedObject;
 import com.rbkmoney.geck.common.util.TypeUtil;
-import com.rbkmoney.reporter.domain.enums.AdjustmentStatus;
+import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
-import com.rbkmoney.reporter.domain.enums.PayoutStatus;
-import com.rbkmoney.reporter.domain.enums.PayoutType;
-import com.rbkmoney.reporter.domain.enums.RefundStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
 
 import java.time.Instant;

@@ -10,7 +10,8 @@ import java.time.Instant;
 
 public interface StorageService {
 
-    URL getFileUrl(String fileId, String bucketId, Instant expiresIn) throws FileNotFoundException, FileStorageException;
+    URL getFileUrl(String fileId, String bucketId, Instant expiresIn)
+            throws FileNotFoundException, FileStorageException;
 
     FileMeta saveFile(Path file) throws FileStorageException;
 

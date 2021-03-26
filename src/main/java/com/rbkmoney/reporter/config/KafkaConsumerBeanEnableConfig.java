@@ -2,13 +2,9 @@ package com.rbkmoney.reporter.config;
 
 import com.rbkmoney.damsel.payment_processing.EventPayload;
 import com.rbkmoney.damsel.payment_processing.PartyEventData;
-import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.listener.InvoicingListener;
 import com.rbkmoney.reporter.listener.PartyManagementListener;
 import com.rbkmoney.reporter.service.EventService;
-import com.rbkmoney.reporter.service.impl.InvoicingService;
-import com.rbkmoney.reporter.service.impl.PartyManagementService;
-import com.rbkmoney.sink.common.parser.Parser;
 import com.rbkmoney.sink.common.parser.impl.MachineEventParser;
 import com.rbkmoney.sink.common.parser.impl.PartyEventDataMachineEventParser;
 import com.rbkmoney.sink.common.parser.impl.PaymentEventPayloadMachineEventParser;
@@ -42,12 +38,14 @@ public class KafkaConsumerBeanEnableConfig {
     }
 
     @Bean
-    public MachineEventParser<EventPayload> paymentMachineEventParser(BinaryDeserializer<EventPayload> paymentEventPayloadDeserializer) {
+    public MachineEventParser<EventPayload> paymentMachineEventParser(
+            BinaryDeserializer<EventPayload> paymentEventPayloadDeserializer) {
         return new PaymentEventPayloadMachineEventParser(paymentEventPayloadDeserializer);
     }
 
     @Bean
-    public MachineEventParser<PartyEventData> partyEventDataMachineEventParser(BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer) {
+    public MachineEventParser<PartyEventData> partyEventDataMachineEventParser(
+            BinaryDeserializer<PartyEventData> partyEventDataBinaryDeserializer) {
         return new PartyEventDataMachineEventParser(partyEventDataBinaryDeserializer);
     }
 

@@ -2,8 +2,6 @@ package com.rbkmoney.reporter.handler.report;
 
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.*;
-import com.rbkmoney.reporter.base.InvalidRequest;
-import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.exception.FileNotFoundException;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
@@ -38,7 +36,8 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
     private final ReportNewProtoService reportService;
 
     @Override
-    public long createReport(ReportRequest reportRequest, String reportType) throws PartyNotFound, ShopNotFound, InvalidRequest, TException {
+    public long createReport(ReportRequest reportRequest, String reportType)
+            throws TException {
         try {
             Instant fromTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getFromTime());
             Instant toTime = TypeUtil.stringToInstant(reportRequest.getTimeRange().getToTime());
@@ -68,7 +67,8 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
     }
 
     @Override
-    public StatReportResponse getReports(StatReportRequest statReportRequest) throws DatasetTooBig, InvalidRequest, BadToken, TException {
+    public StatReportResponse getReports(StatReportRequest statReportRequest)
+            throws TException {
         try {
             ReportRequest reportRequest = statReportRequest.getRequest();
             List<String> reportTypes = statReportRequest.getReportTypes();
@@ -87,24 +87,25 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
 
             List<com.rbkmoney.reporter.domain.tables.pojos.Report> reports = reportService.getReportsWithToken(
                     reportRequest.getPartyId(),
-                    reportRequest.isSetShopIds()
-                            ? reportRequest.getShopIds()
-                            : Optional.ofNullable(reportRequest.getShopId()).map(Collections::singletonList).orElseGet(Collections::emptyList),
+                    getShopIds(reportRequest),
                     reportTypes != null ? reportTypes(reportTypes) : null,
                     fromTime,
                     toTime,
-                    statReportRequest.isSetContinuationToken() ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken)) : null,
+                    statReportRequest.isSetContinuationToken()
+                            ? TypeUtil.stringToInstant(TokenUtil.extractTime(continuationToken))
+                            : null,
                     limit
             );
             List<Report> reportsFiltered = reports.stream()
-                    .filter(report -> report.getStatus() != ReportStatus.cancelled)
+                    .filter(report -> report.getStatus() != com.rbkmoney.reporter.domain.enums.ReportStatus.cancelled)
                     .map(report -> toNewProtoReport(report, reportService.getReportFiles(report.getId())))
                     .collect(Collectors.toList());
 
             StatReportResponse statReportResponse = new StatReportResponse(reportsFiltered);
             if (reports.size() >= limit) {
                 String nextCreatedAfter = TypeUtil.temporalToString(reports.get(reports.size() - 1).getCreatedAt());
-                statReportResponse.setContinuationToken(TokenUtil.buildToken(reportRequest, reportTypes, nextCreatedAfter));
+                statReportResponse
+                        .setContinuationToken(TokenUtil.buildToken(reportRequest, reportTypes, nextCreatedAfter));
             }
             return statReportResponse;
         } catch (IllegalArgumentException ex) {
@@ -112,8 +113,20 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
         }
     }
 
+    private List<String> getShopIds(ReportRequest reportRequest) {
+        return reportRequest.isSetShopIds()
+                ? reportRequest.getShopIds()
+                : getShopId(reportRequest);
+    }
+
+    private List<String> getShopId(ReportRequest reportRequest) {
+        return Optional.ofNullable(reportRequest.getShopId())
+                .map(Collections::singletonList)
+                .orElseGet(Collections::emptyList);
+    }
+
     @Override
-    public Report getReport(long reportId) throws ReportNotFound, TException {
+    public Report getReport(long reportId) throws TException {
         try {
             return toNewProtoReport(
                     reportService.getReport(reportId, false),
@@ -125,7 +138,7 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
     }
 
     @Override
-    public void cancelReport(long reportId) throws ReportNotFound, TException {
+    public void cancelReport(long reportId) throws TException {
         try {
             reportService.cancelReport(reportId);
         } catch (ReportNotFoundException ex) {
@@ -134,7 +147,8 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
     }
 
     @Override
-    public String generatePresignedUrl(String fileId, String expiresIn) throws FileNotFound, InvalidRequest, TException {
+    public String generatePresignedUrl(String fileId, String expiresIn)
+            throws TException {
         try {
             Instant expiresInInstant = TypeUtil.stringToInstant(expiresIn);
             URL url = reportService.generatePresignedUrl(fileId, expiresInInstant);

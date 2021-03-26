@@ -29,7 +29,7 @@ public class ContractReportPreferencesHandler implements JobRegistratorEventHand
         ReportPreferences reportPreferences = contractEffect.getReportPreferencesChanged();
         if (reportPreferences.isSetServiceAcceptanceActPreferences()) {
             log.info("Register job by created changes (party id = '{}', contract id = '{}', event id ='{}', " +
-                            "change id = '{}')", partyId, contractId, eventId, changeId);
+                    "change id = '{}')", partyId, contractId, eventId, changeId);
             ServiceAcceptanceActPreferences preferences =
                     reportPreferences.getServiceAcceptanceActPreferences();
             taskService.registerProvisionOfServiceJob(
@@ -41,7 +41,7 @@ public class ContractReportPreferencesHandler implements JobRegistratorEventHand
             );
         } else {
             log.info("Deregister job by created changes (party id = '{}', contract id = '{}', " +
-                            "event id ='{}', change id = '{}')", partyId, contractId, eventId, changeId);
+                    "event id ='{}', change id = '{}')", partyId, contractId, eventId, changeId);
             taskService.deregisterProvisionOfServiceJob(partyId, contractId);
         }
     }

@@ -116,7 +116,8 @@ public class DaoTest extends AbstractDaoConfig {
 
         assertEquals(1, reportDao.getReportsByRange(partyId, shopId, new ArrayList<>(), fromTime, toTime).size());
 
-        assertEquals(1, reportDao.getReportsByRange(partyId, shopId, Arrays.asList(reportType), fromTime, toTime).size());
+        assertEquals(1,
+                reportDao.getReportsByRange(partyId, shopId, Arrays.asList(reportType), fromTime, toTime).size());
 
         assertEquals(1, reportDao.getReportsByRange(partyId, null, Arrays.asList(reportType), fromTime, toTime).size());
 
@@ -131,11 +132,14 @@ public class DaoTest extends AbstractDaoConfig {
         LocalDateTime currMoment = LocalDateTime.now();
         createReports(count, currMoment);
 
-        List<Report> reports = reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
-                currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
+        List<Report> reports =
+                reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
+                        currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
         assertEquals(10, reports.size());
-        List<Report> reportsWithTime = reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
-                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
+        List<Report> reportsWithTime =
+                reportDao.getReportsWithToken("partyId", Collections.singletonList("shopId"), Collections.emptyList(),
+                        currMoment.minusMinutes(1), currMoment.plusMinutes(1),
+                        currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
         assertEquals(5, reportsWithTime.size());
     }
 
@@ -148,8 +152,10 @@ public class DaoTest extends AbstractDaoConfig {
         List<Report> reports = reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
                 currMoment.minusMinutes(1), currMoment.plusMinutes(1), null, 10);
         assertEquals(10, reports.size());
-        List<Report> reportsWithTime = reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
-                currMoment.minusMinutes(1), currMoment.plusMinutes(1), currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
+        List<Report> reportsWithTime =
+                reportDao.getReportsWithToken("partyId", List.of("shopId"), Collections.emptyList(),
+                        currMoment.minusMinutes(1), currMoment.plusMinutes(1),
+                        currMoment.plusSeconds(count + 1).minusSeconds(10), 10);
         assertEquals(5, reportsWithTime.size());
     }
 

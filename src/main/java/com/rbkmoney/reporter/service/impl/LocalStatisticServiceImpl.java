@@ -22,6 +22,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -110,9 +111,9 @@ public class LocalStatisticServiceImpl implements LocalStatisticService {
 
     @Override
     public PaymentRecord getCapturedPayment(String partyId,
-                                          String shopId,
-                                          String invoiceId,
-                                          String paymentId) {
+                                            String shopId,
+                                            String invoiceId,
+                                            String paymentId) {
         PaymentRecord payment = paymentDao.getPayment(partyId, shopId, invoiceId, paymentId);
         if (payment == null) {
             throw new PaymentNotFoundException(String.format("Payment not found, " +

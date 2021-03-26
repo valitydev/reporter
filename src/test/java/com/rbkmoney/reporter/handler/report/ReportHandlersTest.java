@@ -20,7 +20,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -56,7 +55,8 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
 
         when(partyService.getShop(anyString(), anyString())).thenReturn(new Shop());
 
-        when(reportNewProtoService.createReport(eq(partyId), eq(shopId), any(), any(), eq(ReportType.valueOf(reportType))))
+        when(reportNewProtoService
+                .createReport(eq(partyId), eq(shopId), any(), any(), eq(ReportType.valueOf(reportType))))
                 .thenReturn(random.nextLong());
 
         LocalDateTime currMoment = LocalDateTime.now();
@@ -103,7 +103,8 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
                 .thenReturn(getReports(30));
         when(reportNewProtoService.getReportFiles(anyLong())).thenReturn(randomListOf(1, FileMeta.class));
 
-        StatReportResponse statReportResponseSecond = handler.getReports(statReportRequest.setContinuationToken(statReportResponseFirst.getContinuationToken()));
+        StatReportResponse statReportResponseSecond = handler.getReports(
+                statReportRequest.setContinuationToken(statReportResponseFirst.getContinuationToken()));
 
         assertEquals(30, statReportResponseSecond.getReportsSize());
         assertNull(statReportResponseSecond.getContinuationToken());

@@ -11,7 +11,8 @@ import java.util.List;
 
 public interface ReportNewProtoService {
 
-    long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException;
+    long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType)
+            throws PartyNotFoundException, ShopNotFoundException;
 
     Report getReport(long reportId, boolean withLock);
 

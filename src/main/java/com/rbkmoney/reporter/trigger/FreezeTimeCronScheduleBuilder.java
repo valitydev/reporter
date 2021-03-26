@@ -32,6 +32,18 @@ public class FreezeTimeCronScheduleBuilder extends ScheduleBuilder<FreezeTimeCro
         this.cronExpression = cronExpression;
     }
 
+    public static FreezeTimeCronScheduleBuilder cronSchedule(String cronExpression) {
+        try {
+            return cronSchedule(new CronExpression(cronExpression));
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException(String.format("CronExpression '%s' is invalid.", cronExpression), ex);
+        }
+    }
+
+    public static FreezeTimeCronScheduleBuilder cronSchedule(CronExpression cronExpression) {
+        return new FreezeTimeCronScheduleBuilder(cronExpression);
+    }
+
     @Override
     public FreezeTimeCronTriggerImpl build() {
         FreezeTimeCronTriggerImpl freezeTimeCronTrigger = new FreezeTimeCronTriggerImpl();
@@ -46,18 +58,6 @@ public class FreezeTimeCronScheduleBuilder extends ScheduleBuilder<FreezeTimeCro
         freezeTimeCronTrigger.withSeconds(seconds);
 
         return freezeTimeCronTrigger;
-    }
-
-    public static FreezeTimeCronScheduleBuilder cronSchedule(String cronExpression) {
-        try {
-            return cronSchedule(new CronExpression(cronExpression));
-        } catch (ParseException ex) {
-            throw new IllegalArgumentException(String.format("CronExpression '%s' is invalid.", cronExpression), ex);
-        }
-    }
-
-    public static FreezeTimeCronScheduleBuilder cronSchedule(CronExpression cronExpression) {
-        return new FreezeTimeCronScheduleBuilder(cronExpression);
     }
 
     public FreezeTimeCronScheduleBuilder inTimeZone(TimeZone timezone) {

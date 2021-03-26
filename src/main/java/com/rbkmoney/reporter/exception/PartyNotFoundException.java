@@ -14,7 +14,8 @@ public class PartyNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public PartyNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public PartyNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                  boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

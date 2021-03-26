@@ -1,6 +1,7 @@
 package com.rbkmoney.reporter.template;
 
-import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.damsel.merch_stat.StatPayment;
+import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
@@ -41,7 +42,8 @@ public class PaymentRegistryTemplateImpl implements ReportTemplate {
             IOException {
         ZoneId reportZoneId = ZoneId.of(report.getTimezone());
         String fromTime = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), reportZoneId);
-        String toTime = TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
+        String toTime =
+                TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
 
         Iterator<StatPayment> paymentsIterator = statisticService.getCapturedPaymentsIterator(
                 report.getPartyId(),

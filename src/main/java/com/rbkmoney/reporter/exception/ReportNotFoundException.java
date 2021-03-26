@@ -18,7 +18,8 @@ public class ReportNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public ReportNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ReportNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                   boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

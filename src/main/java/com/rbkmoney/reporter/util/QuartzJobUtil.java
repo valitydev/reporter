@@ -15,7 +15,8 @@ public final class QuartzJobUtil {
         );
     }
 
-    public static TriggerKey buildTriggerKey(String partyId, String contractId, int calendarId, int scheduleId, int triggerId) {
+    public static TriggerKey buildTriggerKey(String partyId, String contractId, int calendarId, int scheduleId,
+                                             int triggerId) {
         return TriggerKey.triggerKey(
                 String.format("trigger-%s-%s-%d", partyId, contractId, triggerId),
                 buildGroupKey(calendarId, scheduleId)

@@ -58,7 +58,7 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
             log.warn("Refund received from kafka (topic: '{}', partition: '{}', offset: {}) " +
                             "with status '{}' have incorrect status in HG (invoiceId = '{}', " +
                             "sequenceId = '{}', changeId = '{}')", kafkaEvent.getTopic(),
-                    kafkaEvent.getPartition(), kafkaEvent.getOffset(),  status, hgRefundStatus, invoiceId,
+                    kafkaEvent.getPartition(), kafkaEvent.getOffset(), status, hgRefundStatus, invoiceId,
                     sequenceId, changeId);
             if (faultyEventsService.isFaultyEvent(kafkaEvent)) {
                 return;
@@ -77,6 +77,7 @@ public class RefundStatusChangeHandler implements InvoicingEventHandler {
     public boolean isAccept(InvoiceChange change) {
         return change.isSetInvoicePaymentChange()
                 && change.getInvoicePaymentChange().getPayload().isSetInvoicePaymentRefundChange()
-                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentRefundChange().getPayload().isSetInvoicePaymentRefundStatusChanged();
+                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentRefundChange().getPayload()
+                .isSetInvoicePaymentRefundStatusChanged();
     }
 }

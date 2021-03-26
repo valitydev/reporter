@@ -27,16 +27,12 @@ import static org.mockito.Mockito.verify;
 public class PartyManagementKafkaListenerTest extends AbstractKafkaConfig {
 
     private static final long DEFAULT_KAFKA_SYNC_TIMEOUT = 5000L;
-
-    @Value("${kafka.bootstrap-servers}")
-    private String bootstrapServers;
-
     @Value("${kafka.topics.invoicing.id}")
     public String invoicingTopic;
-
     @Value("${kafka.topics.party-management.id}")
     public String partyTopic;
-
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
     @MockBean
     private EventService eventService;
 

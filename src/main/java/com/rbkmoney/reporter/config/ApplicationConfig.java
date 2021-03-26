@@ -53,7 +53,7 @@ public class ApplicationConfig {
     public SignerSrv.Iface signerClient(
             @Value("${signer.url}") Resource resource,
             @Value("${signer.timeout}") int timeout
-            ) throws IOException {
+    ) throws IOException {
         return new THSpawnClientBuilder()
                 .withNetworkTimeout(timeout)
                 .withAddress(resource.getURI()).build(SignerSrv.Iface.class);

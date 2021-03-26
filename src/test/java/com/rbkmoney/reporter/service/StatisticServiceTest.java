@@ -15,11 +15,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import static java.time.LocalDateTime.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -38,16 +40,22 @@ public class StatisticServiceTest extends AbstractStatisticServiceConfig {
     @Test
     public void testCreatePaymentRequest() {
         assertEquals(
-                new StatRequest("{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
-                DslUtil.createPaymentRequest("partyId", "shopId", "invoiceId", "paymentId", objectMapper)
+                new StatRequest(
+                        "{\"query\":{\"payments_for_report\":{\"merchant_id\":\"partyId\"," +
+                                "\"shop_id\":\"shopId\",\"invoice_id\":\"invoiceId\",\"payment_id\":\"paymentId\"}}}"),
+                DslUtil.createPaymentRequest("partyId", "shopId", "invoiceId",
+                        "paymentId", objectMapper)
         );
         assertEquals(
-                new StatRequest("{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\",\"shop_id\":\"shopId\",\"from_time\":\"2018-10-28T09:15:00Z\",\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
+                new StatRequest(
+                        "{\"query\":{\"size\":1000,\"payments_for_report\":{\"merchant_id\":\"partyId\"," +
+                                "\"shop_id\":\"shopId\",\"from_time\":\"2018-10-28T09:15:00Z\"," +
+                                "\"to_time\":\"2018-10-28T09:15:00Z\"}}}"),
                 DslUtil.createPaymentsRequest(
                         "partyId",
                         "shopId",
-                        LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
-                        LocalDateTime.of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
+                        of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
+                        of(2018, 10, 28, 9, 15).toInstant(ZoneOffset.UTC),
                         null,
                         1000,
                         objectMapper)
@@ -101,7 +109,8 @@ public class StatisticServiceTest extends AbstractStatisticServiceConfig {
         given(merchantStatisticsClient.getStatistics(any()))
                 .willReturn(new StatResponse(StatResponseData.records(Arrays.asList(adjustmentResponse))));
 
-        Iterator<StatAdjustment> adjustmentIterator = statisticService.getAdjustmentsIterator("partyId", "shopId", Instant.MIN, Instant.MAX);
+        Iterator<StatAdjustment> adjustmentIterator =
+                statisticService.getAdjustmentsIterator("partyId", "shopId", Instant.MIN, Instant.MAX);
         assertTrue(adjustmentIterator.hasNext());
         StatAdjustment statAdjustment = adjustmentIterator.next();
         assertEquals(adjustmentResponse.get("invoice_id"), statAdjustment.getInvoiceId());
@@ -109,7 +118,9 @@ public class StatisticServiceTest extends AbstractStatisticServiceConfig {
         assertEquals(adjustmentResponse.get("adjustment_id"), statAdjustment.getAdjustmentId());
         assertEquals(adjustmentResponse.get("adjustment_reason"), statAdjustment.getAdjustmentReason());
         assertEquals(adjustmentResponse.get("adjustment_amount"), statAdjustment.getAdjustmentAmount().toString());
-        assertEquals(adjustmentResponse.get("adjustment_created_at"), statAdjustment.getAdjustmentCreatedAt().toString());
-        assertEquals(adjustmentResponse.get("adjustment_status_created_at"), statAdjustment.getAdjustmentStatusCreatedAt().toString());
+        assertEquals(adjustmentResponse.get("adjustment_created_at"),
+                statAdjustment.getAdjustmentCreatedAt().toString());
+        assertEquals(adjustmentResponse.get("adjustment_status_created_at"),
+                statAdjustment.getAdjustmentStatusCreatedAt().toString());
     }
 }

@@ -1,13 +1,13 @@
 package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.damsel.merch_stat.BankCard;
 import com.rbkmoney.damsel.merch_stat.InvoicePaymentCaptured;
 import com.rbkmoney.damsel.merch_stat.InvoicePaymentStatus;
 import com.rbkmoney.damsel.merch_stat.Payer;
 import com.rbkmoney.damsel.merch_stat.PaymentResourcePayer;
 import com.rbkmoney.damsel.merch_stat.PaymentTool;
-import com.rbkmoney.damsel.merch_stat.*;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.config.AbstractTemplateConfig;
@@ -19,9 +19,9 @@ import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.model.StatAdjustment;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
+import com.rbkmoney.reporter.util.BuildUtils;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
-import com.rbkmoney.reporter.util.BuildUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -97,7 +97,8 @@ public class TemplateTest extends AbstractTemplateConfig {
             InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
             invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
             payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-            PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
+            PaymentResourcePayer paymentResourcePayer =
+                    new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
             paymentResourcePayer.setEmail("xyz@mail.ru");
             payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
@@ -126,11 +127,14 @@ public class TemplateTest extends AbstractTemplateConfig {
             Sheet sheet = wb.getSheetAt(0);
 
 
-            String from = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), ZoneId.of(report.getTimezone()));
-            String to = TimeUtil.toLocalizedDate(report.getToTime().toInstant(ZoneOffset.UTC), ZoneId.of(report.getTimezone()));
+            String from = TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC),
+                    ZoneId.of(report.getTimezone()));
+            String to = TimeUtil.toLocalizedDate(report.getToTime().toInstant(ZoneOffset.UTC),
+                    ZoneId.of(report.getTimezone()));
 
             Cell paymentsHeaderCell = sheet.getRow(0).getCell(0);
-            assertEquals(String.format("Платежи за период с %s по %s", from, to), paymentsHeaderCell.getStringCellValue());
+            assertEquals(String.format("Платежи за период с %s по %s", from, to),
+                    paymentsHeaderCell.getStringCellValue());
 
             Row paymentsFirstRow = sheet.getRow(2);
             assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
@@ -141,7 +145,8 @@ public class TemplateTest extends AbstractTemplateConfig {
             assertEquals(FormatUtil.formatCurrency(expectedSum), paymentsTotalSum.getStringCellValue());
 
             Cell refundsHeaderCell = sheet.getRow(8).getCell(0);
-            assertEquals(String.format("Возвраты за период с %s по %s", from, to), refundsHeaderCell.getStringCellValue());
+            assertEquals(String.format("Возвраты за период с %s по %s", from, to),
+                    refundsHeaderCell.getStringCellValue());
 
             Row refundsFirstRow = sheet.getRow(10);
             assertEquals("0", refundsFirstRow.getCell(8).getStringCellValue());
@@ -172,11 +177,13 @@ public class TemplateTest extends AbstractTemplateConfig {
         mockPartyManagementClient(contractId, report, registeredName, legalSignedAt, legalAgreementId);
 
         ShopAccountingModel previousAccounting = random(ShopAccountingModel.class);
-        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC)))
+        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB",
+                report.getFromTime().toInstant(ZoneOffset.UTC)))
                 .willReturn(previousAccounting);
 
         ShopAccountingModel currentAccounting = random(ShopAccountingModel.class);
-        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB", report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC)))
+        given(statisticService.getShopAccounting(report.getPartyId(), report.getPartyShopId(), "RUB",
+                report.getFromTime().toInstant(ZoneOffset.UTC), report.getToTime().toInstant(ZoneOffset.UTC)))
                 .willReturn(currentAccounting);
 
         ContractMeta contractMeta = random(ContractMeta.class, "lastClosingBalance");
@@ -184,7 +191,8 @@ public class TemplateTest extends AbstractTemplateConfig {
         contractMeta.setContractId(contractId);
 
         when(contractMetaDao.getExclusive(eq(report.getPartyId()), eq(contractId))).thenReturn(contractMeta);
-        doNothing().when(contractMetaDao).updateLastReportCreatedAt(eq(report.getPartyId()), eq(contractId), eq(report.getCreatedAt()));
+        doNothing().when(contractMetaDao)
+                .updateLastReportCreatedAt(eq(report.getPartyId()), eq(contractId), eq(report.getCreatedAt()));
 
         try {
             provisionOfServiceTemplate.processReportTemplate(report, Files.newOutputStream(tempFile));
@@ -217,12 +225,14 @@ public class TemplateTest extends AbstractTemplateConfig {
             Row dateRow = sheet.getRow(14);
             Cell fromTimeCell = dateRow.getCell(1);
             assertEquals(
-                    TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC), ZoneId.of(report.getTimezone())),
+                    TimeUtil.toLocalizedDate(report.getFromTime().toInstant(ZoneOffset.UTC),
+                            ZoneId.of(report.getTimezone())),
                     fromTimeCell.getStringCellValue()
             );
             Cell toTimeCell = dateRow.getCell(3);
             assertEquals(
-                    TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC), ZoneId.of(report.getTimezone())),
+                    TimeUtil.toLocalizedDate(report.getToTime().minusNanos(1).toInstant(ZoneOffset.UTC),
+                            ZoneId.of(report.getTimezone())),
                     toTimeCell.getStringCellValue()
             );
 
@@ -250,7 +260,8 @@ public class TemplateTest extends AbstractTemplateConfig {
             Cell closingBalanceCell = sheet.getRow(29).getCell(3);
             assertEquals("#,##0.00", closingBalanceCell.getCellStyle().getDataFormatString());
             assertEquals(
-                    FormatUtil.formatCurrency(previousAccounting.getAvailableFunds() + currentAccounting.getAvailableFunds()),
+                    FormatUtil.formatCurrency(
+                            previousAccounting.getAvailableFunds() + currentAccounting.getAvailableFunds()),
                     closingBalanceCell.getStringCellValue()
             );
 
@@ -290,7 +301,8 @@ public class TemplateTest extends AbstractTemplateConfig {
         }
     }
 
-    private void mockPartyManagementClient(String contractId, Report report, String registeredName, String legalSignedAt, String legalAgreementId) throws TException {
+    private void mockPartyManagementClient(String contractId, Report report, String registeredName,
+                                           String legalSignedAt, String legalAgreementId) throws TException {
         Shop shop = new Shop();
         shop.setId(report.getPartyId());
         shop.setContractId(contractId);

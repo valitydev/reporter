@@ -24,13 +24,13 @@ import static java.time.temporal.ChronoUnit.*;
 public class FreezeTimeCronTriggerImpl
         extends AbstractTrigger<FreezeTimeCronTrigger> implements FreezeTimeCronTrigger, CoreTrigger {
 
+    protected static final int YEAR_TO_GIVEUP_SCHEDULING_AT = CronExpression.MAX_YEAR;
     private CronExpression cronExpression = null;
     private Date startTime = null;
     private Date endTime = null;
     private Date nextFireTime = null;
     private Date previousFireTime = null;
     private transient TimeZone timeZone = null;
-
     private int years;
     private int months;
     private int days;
@@ -39,8 +39,6 @@ public class FreezeTimeCronTriggerImpl
     private long seconds;
     private Date currentCronTime;
     private Date nextCronTime;
-
-    protected static final int YEAR_TO_GIVEUP_SCHEDULING_AT = CronExpression.MAX_YEAR;
 
     public FreezeTimeCronTriggerImpl() {
         super();
@@ -68,19 +66,6 @@ public class FreezeTimeCronTriggerImpl
 
     public void withSeconds(long seconds) {
         this.seconds = seconds;
-    }
-
-    public void setTimeZone(TimeZone timeZone) {
-        if(cronExpression != null) {
-            cronExpression.setTimeZone(timeZone);
-        }
-        this.timeZone = timeZone;
-    }
-
-    public void setCronExpression(CronExpression cronExpression) {
-        TimeZone origTz = getTimeZone();
-        this.cronExpression = cronExpression;
-        this.cronExpression.setTimeZone(origTz);
     }
 
     @Override
@@ -112,8 +97,8 @@ public class FreezeTimeCronTriggerImpl
             throw new IllegalArgumentException("Start time cannot be null");
         }
 
-        Date eTime = getEndTime();
-        if (eTime != null && eTime.before(startTime)) {
+        Date endTime = getEndTime();
+        if (endTime != null && endTime.before(startTime)) {
             throw new IllegalArgumentException(
                     "End time cannot be before start time");
         }
@@ -130,9 +115,14 @@ public class FreezeTimeCronTriggerImpl
     }
 
     @Override
+    public Date getEndTime() {
+        return this.endTime;
+    }
+
+    @Override
     public void setEndTime(Date endTime) {
-        Date sTime = getStartTime();
-        if (sTime != null && endTime != null && sTime.after(endTime)) {
+        Date startTime = getStartTime();
+        if (startTime != null && endTime != null && startTime.after(endTime)) {
             throw new IllegalArgumentException(
                     "End time cannot be before start time");
         }
@@ -141,18 +131,23 @@ public class FreezeTimeCronTriggerImpl
     }
 
     @Override
-    public Date getEndTime() {
-        return this.endTime;
-    }
-
-    @Override
     public Date getNextFireTime() {
         return this.nextFireTime;
     }
 
     @Override
+    public void setNextFireTime(Date nextFireTime) {
+        this.nextFireTime = nextFireTime;
+    }
+
+    @Override
     public Date getPreviousFireTime() {
         return this.previousFireTime;
+    }
+
+    @Override
+    public void setPreviousFireTime(Date previousFireTime) {
+        this.previousFireTime = previousFireTime;
     }
 
     @Override
@@ -177,7 +172,7 @@ public class FreezeTimeCronTriggerImpl
     public Date getFinalFireTime() {
         Date resultTime;
         if (getEndTime() != null) {
-            resultTime = getTimeBefore(new Date(getEndTime().getTime() + 1000l));
+            resultTime = getTimeBefore(new Date(getEndTime().getTime() + 1000L));
         } else {
             resultTime = (cronExpression == null) ? null : cronExpression.getFinalFireTime();
         }
@@ -199,8 +194,9 @@ public class FreezeTimeCronTriggerImpl
     public void updateAfterMisfire(Calendar calendar) {
         int instr = getMisfireInstruction();
 
-        if (instr == Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
+        if (instr == Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY) {
             return;
+        }
 
         if (instr == MISFIRE_INSTRUCTION_SMART_POLICY) {
             instr = MISFIRE_INSTRUCTION_FIRE_ONCE_NOW;
@@ -217,7 +213,8 @@ public class FreezeTimeCronTriggerImpl
     @Override
     public void updateWithNewCalendar(Calendar calendar, long misfireThreshold) {
         Instant now = Instant.now();
-        nextFireTime(computePrevFireTime(Optional.ofNullable(getPreviousFireTime()).orElse(new Date()), calendar), calendar);
+        nextFireTime(computePrevFireTime(Optional.ofNullable(getPreviousFireTime()).orElse(new Date()), calendar),
+                calendar);
 
         if (getNextFireTime() != null && getNextFireTime().toInstant().isBefore(now)) {
             long diff = Duration.between(getNextFireTime().toInstant(), now).toMillis();
@@ -242,24 +239,18 @@ public class FreezeTimeCronTriggerImpl
         FreezeTimeCronScheduleBuilder cb = FreezeTimeCronScheduleBuilder.cronSchedule(getCronExpression())
                 .inTimeZone(getTimeZone());
 
-        switch(getMisfireInstruction()) {
-            case MISFIRE_INSTRUCTION_DO_NOTHING : cb.withMisfireHandlingInstructionDoNothing();
+        switch (getMisfireInstruction()) {
+            case MISFIRE_INSTRUCTION_DO_NOTHING:
+                cb.withMisfireHandlingInstructionDoNothing();
                 break;
-            case MISFIRE_INSTRUCTION_FIRE_ONCE_NOW : cb.withMisfireHandlingInstructionFireAndProceed();
+            case MISFIRE_INSTRUCTION_FIRE_ONCE_NOW:
+                cb.withMisfireHandlingInstructionFireAndProceed();
                 break;
+            default:
+                throw new IllegalArgumentException();
         }
 
         return cb;
-    }
-
-    @Override
-    public void setNextFireTime(Date nextFireTime) {
-        this.nextFireTime = nextFireTime;
-    }
-
-    @Override
-    public void setPreviousFireTime(Date previousFireTime) {
-        this.previousFireTime = previousFireTime;
     }
 
     @Override
@@ -267,9 +258,15 @@ public class FreezeTimeCronTriggerImpl
         return cronExpression == null ? null : cronExpression.getCronExpression();
     }
 
+    public void setCronExpression(CronExpression cronExpression) {
+        TimeZone origTz = getTimeZone();
+        this.cronExpression = cronExpression;
+        this.cronExpression.setTimeZone(origTz);
+    }
+
     @Override
     public TimeZone getTimeZone() {
-        if(cronExpression != null) {
+        if (cronExpression != null) {
             return cronExpression.getTimeZone();
         }
 
@@ -277,6 +274,13 @@ public class FreezeTimeCronTriggerImpl
             timeZone = TimeZone.getDefault();
         }
         return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        if (cronExpression != null) {
+            cronExpression.setTimeZone(timeZone);
+        }
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -297,22 +301,24 @@ public class FreezeTimeCronTriggerImpl
      * NOT YET IMPLEMENTED: Returns the time before the given time
      * that this <code>CronTrigger</code> will fire.
      */
-    protected Date getTimeBefore(Date eTime) {
-        return (cronExpression == null) ? null : cronExpression.getTimeBefore(eTime);
+    protected Date getTimeBefore(Date date) {
+        return (cronExpression == null) ? null : cronExpression.getTimeBefore(date);
     }
 
 
     private Date computePrevFireTime(Date cronTime, Calendar calendar) {
         return Optional.ofNullable(cronTime)
                 .map(time -> Date.from(
-                        computeBoundByDuration(cronTime.toInstant(), -1, computeBackwardFreezeTimeDuration(cronTime), calendar)
+                        computeBoundByDuration(cronTime.toInstant(), -1, computeBackwardFreezeTimeDuration(cronTime),
+                                calendar)
                 )).orElse(null);
     }
 
     private Date computeNextFireTime(Date cronTime, Calendar calendar) {
         return Optional.ofNullable(cronTime)
                 .map(time -> Date.from(
-                        computeBoundByDuration(cronTime.toInstant(), 1, computeForwardFreezeTimeDuration(cronTime), calendar)
+                        computeBoundByDuration(cronTime.toInstant(), 1, computeForwardFreezeTimeDuration(cronTime),
+                                calendar)
                 )).orElse(null);
     }
 
@@ -321,7 +327,8 @@ public class FreezeTimeCronTriggerImpl
             cronTime = skipExcludedTimes(cronTime, amountToAdd, temporalUnit, calendar);
             long unitCount = duration.getSeconds() / temporalUnit.getDuration().getSeconds();
             for (int unit = 0; unit < unitCount; unit++) {
-                cronTime = skipExcludedTimes(cronTime.plus(amountToAdd, temporalUnit), amountToAdd, temporalUnit, calendar);
+                cronTime = skipExcludedTimes(cronTime.plus(amountToAdd, temporalUnit), amountToAdd, temporalUnit,
+                        calendar);
             }
             duration = duration.minus(unitCount, temporalUnit);
         }

@@ -38,36 +38,27 @@ import static org.mockito.Mockito.when;
 
 public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
 
-    @Autowired
-    private InvoicingService invoicingService;
-
-    @Autowired
-    private InvoiceDao invoiceDao;
-
-    @Autowired
-    private PaymentDao paymentDao;
-
-    @Autowired
-    private RefundDao refundDao;
-
-    @Autowired
-    private AdjustmentDao adjustmentDao;
-
-    @Autowired
-    private InvoiceStatusChangeHandler invoiceStatusChangeHandler;
-
-    @MockBean
-    private Parser<MachineEvent, EventPayload> paymentMachineEventParser;
-
-    @MockBean
-    private HellgateInvoicingService hgInvoicingService;
-
     private static final String INVOICE_ID = "inv-1";
     private static final String INVOICE_ID_2 = "inv-2";
     private static final String PAYMENT_ID = "pay-1";
     private static final String REFUND_ID = "ref-1";
     private static final String ADJUSTMENT_ID = "adj-1";
-
+    @Autowired
+    private InvoicingService invoicingService;
+    @Autowired
+    private InvoiceDao invoiceDao;
+    @Autowired
+    private PaymentDao paymentDao;
+    @Autowired
+    private RefundDao refundDao;
+    @Autowired
+    private AdjustmentDao adjustmentDao;
+    @Autowired
+    private InvoiceStatusChangeHandler invoiceStatusChangeHandler;
+    @MockBean
+    private Parser<MachineEvent, EventPayload> paymentMachineEventParser;
+    @MockBean
+    private HellgateInvoicingService hgInvoicingService;
     private MachineEvent machineEventOne = createMachineEvent(INVOICE_ID);
     private MachineEvent machineEventTwo = createMachineEvent(INVOICE_ID_2);
 
@@ -101,7 +92,8 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         List<Invoice> invoices = invoiceDao.getInvoicesByState(
                 LocalDateTime.now().minus(10L, ChronoUnit.MINUTES),
                 LocalDateTime.now(),
-                Arrays.asList(InvoiceStatus.paid, InvoiceStatus.unpaid, InvoiceStatus.cancelled, InvoiceStatus.fulfilled)
+                Arrays.asList(InvoiceStatus.paid, InvoiceStatus.unpaid, InvoiceStatus.cancelled,
+                        InvoiceStatus.fulfilled)
         );
         assertEquals("Received count of invoices is not equal to expected", 1, invoices.size());
         Invoice invoice = invoices.get(0);

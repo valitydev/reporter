@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 
 public class NewProtoUtil {
 
-    public static Report toNewProtoReport(com.rbkmoney.reporter.domain.tables.pojos.Report report, List<com.rbkmoney.reporter.domain.tables.pojos.FileMeta> files) throws IllegalArgumentException {
+    public static Report toNewProtoReport(com.rbkmoney.reporter.domain.tables.pojos.Report report,
+                                          List<com.rbkmoney.reporter.domain.tables.pojos.FileMeta> files)
+            throws IllegalArgumentException {
         ReportTimeRange timeRange = new ReportTimeRange(
                 TypeUtil.temporalToString(report.getFromTime()),
                 TypeUtil.temporalToString(report.getToTime())

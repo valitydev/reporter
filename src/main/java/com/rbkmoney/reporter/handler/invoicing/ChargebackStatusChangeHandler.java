@@ -79,6 +79,7 @@ public class ChargebackStatusChangeHandler implements InvoicingEventHandler {
     public boolean isAccept(InvoiceChange change) {
         return change.isSetInvoicePaymentChange()
                 && change.getInvoicePaymentChange().getPayload().isSetInvoicePaymentChargebackChange()
-                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload().isSetInvoicePaymentChargebackStatusChanged();
+                && change.getInvoicePaymentChange().getPayload().getInvoicePaymentChargebackChange().getPayload()
+                .isSetInvoicePaymentChargebackStatusChanged();
     }
 }

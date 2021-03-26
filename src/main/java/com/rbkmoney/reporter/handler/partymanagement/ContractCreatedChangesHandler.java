@@ -32,7 +32,7 @@ public class ContractCreatedChangesHandler implements JobRegistratorEventHandler
             ReportPreferences preferences = contract.getReportPreferences();
             if (preferences.isSetServiceAcceptanceActPreferences()) {
                 log.info("Register job by created changes (party id = '{}', " +
-                        "contract id = '{}', event id ='{}', change id = '{}')", partyId, contractId,
+                                "contract id = '{}', event id ='{}', change id = '{}')", partyId, contractId,
                         eventId, changeId);
                 ServiceAcceptanceActPreferences actPreferences =
                         preferences.getServiceAcceptanceActPreferences();

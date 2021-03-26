@@ -16,9 +16,9 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
+
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,42 +36,9 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant fromTime, Instant toTime) {
+    public ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant fromTime,
+                                                 Instant toTime) {
         return getShopAccounting(partyId, shopId, currencyCode, Optional.of(fromTime), toTime);
-    }
-
-    @Override
-    public Map<String, String> getPurposes(String partyId, String shopId, Instant fromTime, Instant toTime) {
-        try {
-            String continuationToken = null;
-            int size = 1000;
-            Map<String, String> purposes = new HashMap<>();
-            List<StatInvoice> nextInvoices;
-            do {
-                StatResponse statResponse = merchantStatisticsClient.getInvoices(DslUtil.createInvoicesRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
-                nextInvoices = statResponse.getData().getInvoices();
-                nextInvoices.forEach(i -> purposes.put(i.getId(), i.getProduct()));
-                continuationToken = statResponse.getContinuationToken();
-            } while (continuationToken != null);
-            return purposes;
-        } catch (TException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-        public StatInvoice getInvoice(String invoiceId) {
-        try {
-            return merchantStatisticsClient.getPayments(
-                    DslUtil.createInvoiceRequest(invoiceId, objectMapper))
-                    .getData()
-                    .getInvoices()
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new InvoiceNotFoundException(String.format("Invoice not found, invoiceId='%s'", invoiceId)));
-        } catch (TException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     private ShopAccountingModel getShopAccounting(String partyId,
@@ -81,13 +48,15 @@ public class StatisticServiceImpl implements StatisticService {
                                                   Instant toTime) {
         try {
             StatResponse statistics = merchantStatisticsClient.getStatistics(
-                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime, objectMapper)
+                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime,
+                            objectMapper)
             );
             StatResponseData data = statistics.getData();
             List<Map<String, String>> records = data.getRecords();
 
             ShopAccountingModel shopAccounting = merchantStatisticsClient.getStatistics(
-                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime, objectMapper)
+                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime,
+                            objectMapper)
             ).getData()
                     .getRecords()
                     .stream()
@@ -102,13 +71,50 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
+    public Map<String, String> getPurposes(String partyId, String shopId, Instant fromTime, Instant toTime) {
+        try {
+            String continuationToken = null;
+            int size = 1000;
+            Map<String, String> purposes = new HashMap<>();
+            List<StatInvoice> nextInvoices;
+            do {
+                StatResponse statResponse = merchantStatisticsClient.getInvoices(
+                        DslUtil.createInvoicesRequest(partyId, shopId, fromTime, toTime, continuationToken, size,
+                                objectMapper));
+                nextInvoices = statResponse.getData().getInvoices();
+                nextInvoices.forEach(i -> purposes.put(i.getId(), i.getProduct()));
+                continuationToken = statResponse.getContinuationToken();
+            } while (continuationToken != null);
+            return purposes;
+        } catch (TException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public StatInvoice getInvoice(String invoiceId) {
+        try {
+            return merchantStatisticsClient.getPayments(
+                    DslUtil.createInvoiceRequest(invoiceId, objectMapper))
+                    .getData()
+                    .getInvoices()
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new InvoiceNotFoundException(
+                            String.format("Invoice not found, invoiceId='%s'", invoiceId)));
+        } catch (TException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
     public Iterator<StatPayment> getCapturedPaymentsIterator(String partyId,
                                                              String shopId,
                                                              Instant fromTime,
                                                              Instant toTime) {
         return new Iterator<>() {
-            private String continuationToken = null;
             private final int size = 1000;
+            private String continuationToken = null;
             private Iterator<StatPayment> iterator = null;
 
             @Override
@@ -137,12 +143,14 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public StatPayment getCapturedPayment(String partyId, String shopId, String invoiceId, String paymentId) {
         try {
-            return merchantStatisticsClient.getPayments(DslUtil.createPaymentRequest(partyId, shopId, invoiceId, paymentId, objectMapper))
+            return merchantStatisticsClient
+                    .getPayments(DslUtil.createPaymentRequest(partyId, shopId, invoiceId, paymentId, objectMapper))
                     .getData()
                     .getPayments()
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new PaymentNotFoundException(String.format("Payment not found, invoiceId='%s', paymentId='%s'", invoiceId, paymentId)));
+                    .orElseThrow(() -> new PaymentNotFoundException(
+                            String.format("Payment not found, invoiceId='%s', paymentId='%s'", invoiceId, paymentId)));
         } catch (TException ex) {
             throw new RuntimeException(ex);
         }
@@ -154,8 +162,8 @@ public class StatisticServiceImpl implements StatisticService {
                                                    Instant fromTime,
                                                    Instant toTime) {
         return new Iterator<>() {
-            private String continuationToken = null;
             private final int size = 1000;
+            private String continuationToken = null;
             private Iterator<StatRefund> iterator = null;
 
             @Override
@@ -190,18 +198,21 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public Iterator<StatAdjustment> getAdjustmentsIterator(String partyId, String shopId, Instant fromTime, Instant toTime) {
+    public Iterator<StatAdjustment> getAdjustmentsIterator(String partyId, String shopId, Instant fromTime,
+                                                           Instant toTime) {
         return new Iterator<>() {
 
-            private String continuationToken = null;
             private final int size = 1000;
+            private String continuationToken = null;
             private Iterator<Map<String, String>> iterator = null;
 
             @Override
             public boolean hasNext() {
                 if (iterator == null || ((!iterator.hasNext()) && continuationToken != null)) {
                     try {
-                        StatResponse statResponse = merchantStatisticsClient.getStatistics(DslUtil.createAdjustmentsRequest(partyId, shopId, fromTime, toTime, continuationToken, size, objectMapper));
+                        StatResponse statResponse = merchantStatisticsClient.getStatistics(
+                                DslUtil.createAdjustmentsRequest(partyId, shopId, fromTime, toTime, continuationToken,
+                                        size, objectMapper));
                         iterator = statResponse.getData().getRecords().iterator();
                         continuationToken = statResponse.getContinuationToken();
                     } catch (TException e) {

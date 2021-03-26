@@ -6,14 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+
 import java.io.IOException;
 
 @WebServlet("/reports/new-proto")
 public class ReportsNewProtoServlet extends GenericServlet {
 
-    private Servlet thriftServlet;
-
     private final ReportingSrv.Iface requestHandler;
+    private Servlet thriftServlet;
 
     @Autowired
     public ReportsNewProtoServlet(ReportingSrv.Iface requestHandler) {

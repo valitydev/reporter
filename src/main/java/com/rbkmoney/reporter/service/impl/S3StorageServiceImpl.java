@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -53,17 +54,24 @@ public class S3StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public URL getFileUrl(String fileId, String bucketId, Instant expiresIn) throws FileStorageException, FileNotFoundException {
+    public URL getFileUrl(String fileId, String bucketId, Instant expiresIn)
+            throws FileStorageException, FileNotFoundException {
         try {
-            log.info("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'", fileId, bucketId, expiresIn);
+            log.info("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'", fileId, bucketId,
+                    expiresIn);
             URL url = storageClient.generatePresignedUrl(bucketId, fileId, Date.from(expiresIn));
             if (Objects.isNull(url)) {
-                throw new FileNotFoundException(String.format("Presigned url is null, fileId='%s', bucketId='%s'", fileId, bucketId));
+                throw new FileNotFoundException(
+                        String.format("Presigned url is null, fileId='%s', bucketId='%s'", fileId, bucketId));
             }
-            log.info("Presigned url have been successfully generated, url='{}', fileId='{}', bucketId='{}', expiresIn='{}'", url, fileId, bucketId, expiresIn);
+            log.info("Presigned url have been successfully generated, url='{}', " +
+                            "fileId='{}', bucketId='{}', expiresIn='{}'",
+                    url, fileId, bucketId, expiresIn);
             return url;
         } catch (AmazonClientException ex) {
-            throw new FileStorageException(String.format("Failed to generate presigned url, fileId='%s', bucketId='%s', expiresIn='%s'", fileId, bucketId, expiresIn), ex);
+            throw new FileStorageException(
+                    String.format("Failed to generate presigned url, fileId='%s', bucketId='%s', expiresIn='%s'",
+                            fileId, bucketId, expiresIn), ex);
         }
     }
 
@@ -78,13 +86,6 @@ public class S3StorageServiceImpl implements StorageService {
                 fileId = UUID.randomUUID().toString();
             } while (storageClient.doesObjectExist(bucketName, fileId));
 
-            FileMeta fileMeta = createFileMeta(
-                    fileId,
-                    bucketName,
-                    filename,
-                    DigestUtils.md5Hex(Files.newInputStream(file)),
-                    DigestUtils.sha256Hex(Files.newInputStream(file))
-            );
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileId, file.toFile());
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentDisposition("attachment;filename=" + filename);
@@ -95,13 +96,24 @@ public class S3StorageServiceImpl implements StorageService {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            log.info("File have been successfully uploaded, fileId='{}', bucketId='{}', filename='{}', md5='{}', sha256='{}'",
-                    fileMeta.getFileId(), fileMeta.getBucketId(), fileMeta.getFilename(), fileMeta.getMd5(), fileMeta.getSha256());
+            FileMeta fileMeta = createFileMeta(
+                    fileId,
+                    bucketName,
+                    filename,
+                    DigestUtils.md5Hex(Files.newInputStream(file)),
+                    DigestUtils.sha256Hex(Files.newInputStream(file))
+            );
+            log.info("File have been successfully uploaded, fileId='{}', " +
+                            "bucketId='{}', filename='{}', md5='{}', sha256='{}'",
+                    fileMeta.getFileId(), fileMeta.getBucketId(), fileMeta.getFilename(), fileMeta.getMd5(),
+                    fileMeta.getSha256());
 
             return fileMeta;
 
         } catch (IOException | AmazonClientException ex) {
-            throw new FileStorageException(String.format("Failed to upload file to storage, filename='%s', bucketId='%s'", filename, bucketName), ex);
+            throw new FileStorageException(
+                    String.format("Failed to upload file to storage, filename='%s', bucketId='%s'", filename,
+                            bucketName), ex);
         }
     }
 

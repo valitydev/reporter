@@ -111,7 +111,8 @@ public class ContractMetaDaoImpl extends AbstractGenericDao implements ContractM
     }
 
     @Override
-    public void updateLastReportCreatedAt(String partyId, String contractId, LocalDateTime reportCreatedAt) throws DaoException {
+    public void updateLastReportCreatedAt(String partyId, String contractId, LocalDateTime reportCreatedAt)
+            throws DaoException {
         Query query = getDslContext()
                 .update(CONTRACT_META)
                 .set(CONTRACT_META.LAST_REPORT_CREATED_AT, reportCreatedAt)

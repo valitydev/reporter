@@ -54,12 +54,13 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
                 localStatisticService.getPurposes(partyId, shopId, fromTime, toTime);
         Map<String, String> shopUrls = partyService.getShopUrls(partyId);
 
-        try (Cursor<PaymentRecord> paymentsCursor =
-                     localStatisticService.getPaymentsCursor(partyId, shopId, fromTime, toTime);
-             Cursor<RefundRecord> refundsCursor =
-                     localStatisticService.getRefundsCursor(partyId, shopId, fromTime, toTime);
-             Cursor<AdjustmentRecord> adjustmentCursor =
-                     localStatisticService.getAdjustmentCursor(partyId, shopId, fromTime, toTime)
+        try (
+                Cursor<PaymentRecord> paymentsCursor =
+                        localStatisticService.getPaymentsCursor(partyId, shopId, fromTime, toTime);
+                Cursor<RefundRecord> refundsCursor =
+                        localStatisticService.getRefundsCursor(partyId, shopId, fromTime, toTime);
+                Cursor<AdjustmentRecord> adjustmentCursor =
+                        localStatisticService.getAdjustmentCursor(partyId, shopId, fromTime, toTime)
         ) {
             LocalReportCreatorDto reportCreatorDto = LocalReportCreatorDto.builder()
                     .fromTime(formattedFromTime)

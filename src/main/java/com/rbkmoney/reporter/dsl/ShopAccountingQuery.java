@@ -68,14 +68,18 @@ public class ShopAccountingQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ShopAccountingQuery that = (ShopAccountingQuery) o;
-        return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(shopId, that.shopId) &&
-                Objects.equals(currencyCode, that.currencyCode) &&
-                Objects.equals(fromTime, that.fromTime) &&
-                Objects.equals(toTime, that.toTime);
+        return Objects.equals(merchantId, that.merchantId)
+                && Objects.equals(shopId, that.shopId)
+                && Objects.equals(currencyCode, that.currencyCode)
+                && Objects.equals(fromTime, that.fromTime)
+                && Objects.equals(toTime, that.toTime);
     }
 
     @Override

@@ -21,23 +21,25 @@ import java.util.stream.Collectors;
 
 public class DamselUtil {
 
-    public static Report toDamselReport(com.rbkmoney.reporter.domain.tables.pojos.Report report, List<com.rbkmoney.reporter.domain.tables.pojos.FileMeta> files) throws IllegalArgumentException {
-        Report dReport = new Report();
-        dReport.setReportId(report.getId());
-        dReport.setStatus(ReportStatus.valueOf(report.getStatus().getLiteral()));
+    public static Report toDamselReport(com.rbkmoney.reporter.domain.tables.pojos.Report report,
+                                        List<com.rbkmoney.reporter.domain.tables.pojos.FileMeta> files)
+            throws IllegalArgumentException {
+        Report damselReport = new Report();
+        damselReport.setReportId(report.getId());
+        damselReport.setStatus(ReportStatus.valueOf(report.getStatus().getLiteral()));
         ReportTimeRange timeRange = new ReportTimeRange(
                 TypeUtil.temporalToString(report.getFromTime()),
                 TypeUtil.temporalToString(report.getToTime())
         );
-        dReport.setTimeRange(timeRange);
-        dReport.setReportType(ReportType.valueOf(report.getType().name()));
-        dReport.setCreatedAt(TypeUtil.temporalToString(report.getCreatedAt()));
+        damselReport.setTimeRange(timeRange);
+        damselReport.setReportType(ReportType.valueOf(report.getType().name()));
+        damselReport.setCreatedAt(TypeUtil.temporalToString(report.getCreatedAt()));
 
-        dReport.setFiles(files.stream()
+        damselReport.setFiles(files.stream()
                 .map(DamselUtil::toDamselFile)
                 .collect(Collectors.toList()));
 
-        return dReport;
+        return damselReport;
     }
 
     public static FileMeta toDamselFile(com.rbkmoney.reporter.domain.tables.pojos.FileMeta file) {
@@ -82,13 +84,13 @@ public class DamselUtil {
                 ).collect(Collectors.toList());
     }
 
-    public static String toJsonString(TBase tBase) {
-        return toJson(tBase).toString();
+    public static String toJsonString(TBase base) {
+        return toJson(base).toString();
     }
 
-    public static JsonNode toJson(TBase tBase) {
+    public static JsonNode toJson(TBase base) {
         try {
-            return new TBaseProcessor().process(tBase, new JsonHandler());
+            return new TBaseProcessor().process(base, new JsonHandler());
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex);
         }
@@ -190,8 +192,8 @@ public class DamselUtil {
     }
 
     private static boolean isMerchantSettlement(CashFlowAccount cashFlowAccount) {
-        return cashFlowAccount.isSetMerchant() &&
-                cashFlowAccount.getMerchant() == MerchantCashFlowAccount.settlement;
+        return cashFlowAccount.isSetMerchant()
+                && cashFlowAccount.getMerchant() == MerchantCashFlowAccount.settlement;
     }
 
 }

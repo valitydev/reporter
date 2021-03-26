@@ -1,7 +1,6 @@
 package com.rbkmoney.reporter.handler.payout;
 
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.payout_processing.Event;
 import com.rbkmoney.damsel.payout_processing.*;
 import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
@@ -109,7 +108,6 @@ public class PayoutCreatedChangeEventHandler extends AbstractPayoutHandler {
         InternationalPayoutAccount account = payoutAccount.getInternationalPayoutAccount();
         InternationalLegalEntity legalEntity = account.getLegalEntity();
         InternationalBankAccount bankAccount = account.getBankAccount();
-        LegalAgreement legalAgreement = account.getLegalAgreement();
 
         var payoutAccountInfo = new com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount();
         PayoutInternationalAccount internationalAccount = new PayoutInternationalAccount();
@@ -130,6 +128,7 @@ public class PayoutCreatedChangeEventHandler extends AbstractPayoutHandler {
         if (bankAccount.isSetCorrespondentAccount()) {
             fillCorrespondentAccount(bankAccount.getCorrespondentAccount(), internationalAccount);
         }
+        LegalAgreement legalAgreement = account.getLegalAgreement();
         payoutAccountInfo.setLegalAgreementId(legalAgreement.getLegalAgreementId());
         payoutAccountInfo.setLegalAgreementSignedAt(TypeUtil.stringToLocalDateTime(legalAgreement.getSignedAt()));
         payoutAccountInfo.setExtPayoutId(extPayoutId);

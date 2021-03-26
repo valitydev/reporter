@@ -9,8 +9,9 @@ import java.time.format.DateTimeFormatter;
 
 public class TimeUtil {
 
-    private final static DateTimeFormatter DEFAULT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-    private final static DateTimeFormatter DEFAULT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private static final DateTimeFormatter DEFAULT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public static String toLocalizedDate(String dateTimeUtc, ZoneId zoneId) {
         return toFormattedDateTime(TypeUtil.stringToInstant(dateTimeUtc), zoneId, DEFAULT_DATE_FORMAT);
@@ -28,15 +29,18 @@ public class TimeUtil {
         return toFormattedDateTime(instant, zoneId, DEFAULT_DATE_TIME_FORMAT);
     }
 
-    public static String toFormattedDateTime(Instant instant, ZoneId zoneId, DateTimeFormatter dateTimeFormatter) {
-        return instant.atZone(zoneId).format(dateTimeFormatter);
-    }
-
     public static String toLocalizedDateTime(LocalDateTime localDateTime, ZoneId zoneId) {
         return toFormattedDateTime(localDateTime, zoneId, DEFAULT_DATE_TIME_FORMAT);
     }
 
-    public static String toFormattedDateTime(LocalDateTime localDateTime, ZoneId zoneId, DateTimeFormatter dateTimeFormatter) {
+    public static String toFormattedDateTime(Instant instant, ZoneId zoneId, DateTimeFormatter dateTimeFormatter) {
+        return instant.atZone(zoneId).format(dateTimeFormatter);
+    }
+
+    public static String toFormattedDateTime(
+            LocalDateTime localDateTime,
+            ZoneId zoneId, DateTimeFormatter dateTimeFormatter
+    ) {
         return localDateTime.atZone(zoneId).format(dateTimeFormatter);
     }
 }

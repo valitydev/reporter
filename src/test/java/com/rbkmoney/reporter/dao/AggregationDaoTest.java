@@ -1,8 +1,9 @@
 package com.rbkmoney.reporter.dao;
 
 import com.rbkmoney.reporter.config.AbstractDaoConfig;
-import com.rbkmoney.reporter.domain.enums.*;
-import com.rbkmoney.reporter.domain.tables.pojos.*;
+import com.rbkmoney.reporter.domain.enums.AggregationType;
+import com.rbkmoney.reporter.domain.enums.PayoutStatus;
+import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
 import com.rbkmoney.reporter.domain.tables.records.AdjustmentAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentAggsByHourRecord;
 import com.rbkmoney.reporter.domain.tables.records.PayoutAggsByHourRecord;
@@ -83,8 +84,8 @@ public class AggregationDaoTest extends AbstractDaoConfig {
         String partyId = random(String.class);
         String shopId = random(String.class);
 
-        int сount = 100;
-        for (int i = 0; i < сount; i++) {
+        int count = 100;
+        for (int i = 0; i < count; i++) {
             adjustmentDao.saveAdjustment(createTestAdjustment(partyId, shopId, LocalDateTime.now(), i));
         }
         aggregatesDao.aggregateByHour(
@@ -104,8 +105,8 @@ public class AggregationDaoTest extends AbstractDaoConfig {
         String partyId = random(String.class);
         String shopId = random(String.class);
 
-        int сount = 100;
-        for (int i = 0; i < сount; i++) {
+        int count = 100;
+        for (int i = 0; i < count; i++) {
             Long extPayoutId = payoutDao.savePayout(createTestPayout(partyId, shopId, LocalDateTime.now(), i));
             PayoutState payoutState = createTestPayoutState(extPayoutId, LocalDateTime.now(), PayoutStatus.unpaid);
             payoutDao.savePayoutState(payoutState);

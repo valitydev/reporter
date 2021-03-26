@@ -33,9 +33,10 @@ import java.util.function.Supplier;
 @Slf4j
 public abstract class AbstractStorageServiceConfig extends AbstractTestUtils {
 
-    private static TestContainers testContainers = TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
-            .addCephTestContainer()
-            .build();
+    private static TestContainers testContainers =
+            TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
+                    .addCephTestContainer()
+                    .build();
 
     @ClassRule
     public static final FailureDetectingExternalResource resource = new FailureDetectingExternalResource() {
@@ -56,6 +57,15 @@ public abstract class AbstractStorageServiceConfig extends AbstractTestUtils {
         }
     };
 
+    private static Supplier<TestContainersParameters> getTestContainersParametersSupplier() {
+        return () -> {
+            TestContainersParameters testContainersParameters = new TestContainersParameters();
+            testContainersParameters.setPostgresqlJdbcUrl("jdbc:postgresql://localhost:5432/reporter");
+
+            return testContainersParameters;
+        };
+    }
+
     public static class Initializer extends ConfigFileApplicationContextInitializer {
 
         @Override
@@ -69,14 +79,5 @@ public abstract class AbstractStorageServiceConfig extends AbstractTestUtils {
             )
                     .applyTo(configurableApplicationContext);
         }
-    }
-
-    private static Supplier<TestContainersParameters> getTestContainersParametersSupplier() {
-        return () -> {
-            TestContainersParameters testContainersParameters = new TestContainersParameters();
-            testContainersParameters.setPostgresqlJdbcUrl("jdbc:postgresql://localhost:5432/reporter");
-
-            return testContainersParameters;
-        };
     }
 }

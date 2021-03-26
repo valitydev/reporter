@@ -48,46 +48,37 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class QuartzSchedulerTest extends AbstractSchedulerConfig {
 
-    @MockBean
-    private StatisticService statisticService;
-
-    @MockBean
-    private SignService signService;
-
-    @MockBean
-    private StorageService storageService;
-
-    @MockBean
-    private PaymentRegistryTemplateImpl paymentRegistryTemplate;
-
-    @MockBean
-    private ProvisionOfServiceTemplateImpl provisionOfServiceTemplate;
-
-    @MockBean
-    private RepositoryClientSrv.Iface dominantClient;
-
-    @MockBean
-    private PartyManagementSrv.Iface partyManagementClient;
-
-    @Autowired
-    private Scheduler scheduler;
-
-    @Autowired
-    private ReportDao reportDao;
-
-    private static AtomicInteger schedulerCounter = new AtomicInteger(0);
-
     private static final String CRON = "0/2 * * * * ?";
     private static final String partyId = "TestPartyID";
     private static final String shopId = "TestShopID";
     private static final String contractId = "TestContractIdID";
     private static final Party testParty = getTestParty(partyId, shopId, contractId);
+    private static AtomicInteger schedulerCounter = new AtomicInteger(0);
+    @MockBean
+    private StatisticService statisticService;
+    @MockBean
+    private SignService signService;
+    @MockBean
+    private StorageService storageService;
+    @MockBean
+    private PaymentRegistryTemplateImpl paymentRegistryTemplate;
+    @MockBean
+    private ProvisionOfServiceTemplateImpl provisionOfServiceTemplate;
+    @MockBean
+    private RepositoryClientSrv.Iface dominantClient;
+    @MockBean
+    private PartyManagementSrv.Iface partyManagementClient;
+    @Autowired
+    private Scheduler scheduler;
+    @Autowired
+    private ReportDao reportDao;
 
     @Before
     public void setUp() throws Exception {
         ShopAccountingModel shopAccountingModel = random(ShopAccountingModel.class);
 
-        given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any())).willReturn(getStatPayment());
+        given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any()))
+                .willReturn(getStatPayment());
         given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any())).willReturn(getStatRefund());
         given(statisticService.getShopAccounting(anyString(), anyString(), anyString(), any(Instant.class)))
                 .willReturn(shopAccountingModel);
@@ -95,7 +86,8 @@ public class QuartzSchedulerTest extends AbstractSchedulerConfig {
                 .willReturn(shopAccountingModel);
 
         when(storageService.saveFile(any())).thenAnswer(i -> random(FileMeta.class));
-        when(storageService.getFileUrl(anyString(), anyString(), any())).thenReturn(new URL("http://IP:4567/foldername/1234?abc=xyz"));
+        when(storageService.getFileUrl(anyString(), anyString(), any()))
+                .thenReturn(new URL("http://IP:4567/foldername/1234?abc=xyz"));
 
         when(paymentRegistryTemplate.isAccept(any())).thenCallRealMethod();
         doNothing().when(paymentRegistryTemplate).processReportTemplate(any(), any());
@@ -159,15 +151,6 @@ public class QuartzSchedulerTest extends AbstractSchedulerConfig {
                 (reports == null ? 0 : reports.size()) >= 2);
     }
 
-    @Slf4j
-    public static class SampleJob implements Job {
-
-        public void execute(JobExecutionContext context) throws JobExecutionException {
-            schedulerCounter.incrementAndGet();
-            log.warn("Sample Job Executing {}", schedulerCounter.get());
-        }
-    }
-
     private Iterator<StatPayment> getStatPayment() {
         return new Iterator<>() {
             @Override
@@ -194,5 +177,14 @@ public class QuartzSchedulerTest extends AbstractSchedulerConfig {
                 return new StatRefund();
             }
         };
+    }
+
+    @Slf4j
+    public static class SampleJob implements Job {
+
+        public void execute(JobExecutionContext context) throws JobExecutionException {
+            schedulerCounter.incrementAndGet();
+            log.warn("Sample Job Executing {}", schedulerCounter.get());
+        }
     }
 }

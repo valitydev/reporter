@@ -14,7 +14,8 @@ public class InvoiceNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public InvoiceNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public InvoiceNotFoundException(String message, Throwable cause, boolean enableSuppression,
+                                    boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

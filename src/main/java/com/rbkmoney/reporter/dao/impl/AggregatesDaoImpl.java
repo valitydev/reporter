@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.rbkmoney.reporter.domain.Tables.*;
+import static com.rbkmoney.reporter.domain.Tables.PAYOUT;
+import static com.rbkmoney.reporter.domain.Tables.REFUND;
 import static com.rbkmoney.reporter.domain.tables.Adjustment.ADJUSTMENT;
 import static com.rbkmoney.reporter.domain.tables.AdjustmentAggsByHour.ADJUSTMENT_AGGS_BY_HOUR;
+import static com.rbkmoney.reporter.domain.tables.LastAggregationTime.LAST_AGGREGATION_TIME;
 import static com.rbkmoney.reporter.domain.tables.Payment.PAYMENT;
 import static com.rbkmoney.reporter.domain.tables.PaymentAggsByHour.PAYMENT_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.domain.tables.PayoutAggsByHour.PAYOUT_AGGS_BY_HOUR;
@@ -70,6 +72,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
             case PAYOUT:
                 aggregatePayoutsByHour(dateFrom, dateTo);
                 break;
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
@@ -135,7 +139,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     @Override
     public void aggregatePayoutsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
         String sql =
-                "INSERT INTO rpt.payout_aggs_by_hour (created_at, party_id, shop_id, amount, fee, currency_code, type)" +
+                "INSERT INTO rpt.payout_aggs_by_hour " +
+                        "(created_at, party_id, shop_id, amount, fee, currency_code, type)" +
                         "SELECT date_trunc('hour', ps.event_created_at), pay.party_id, \n" +
                         "       pay.shop_id, sum(pay.amount), sum(pay.fee), pay.currency_code, pay.type \n" +
                         "FROM rpt.payout_state as ps \n" +
@@ -153,7 +158,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     }
 
     @Override
-    public List<AdjustmentAggsByHourRecord> getAdjustmentsAggregatesByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
+    public List<AdjustmentAggsByHourRecord> getAdjustmentsAggregatesByHour(LocalDateTime dateFrom,
+                                                                           LocalDateTime dateTo) {
         return getDslContext()
                 .selectFrom(ADJUSTMENT_AGGS_BY_HOUR)
                 .where(ADJUSTMENT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)

@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.data;
 
 import com.rbkmoney.damsel.base.Content;
-import com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentPending;
 import com.rbkmoney.damsel.domain.*;
+import com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentPending;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
@@ -125,46 +125,8 @@ public final class InvoicingData {
         return invoiceChange;
     }
 
-    public static InvoiceChange createCapturePaymentStatusChange() {
-        InvoiceChange invoiceChange = new InvoiceChange();
-        InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
-        invoicePaymentChange.setId(PAYMENT_ID);
-        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
-        InvoicePaymentStatusChanged changed = new InvoicePaymentStatusChanged();
-        InvoicePaymentStatus paymentStatus = new InvoicePaymentStatus();
-        paymentStatus.setCaptured(new InvoicePaymentCaptured());
-        changed.setStatus(paymentStatus);
-        payload.setInvoicePaymentStatusChanged(changed);
-        invoicePaymentChange.setPayload(payload);
-        invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
-        return invoiceChange;
-    }
-
-    public static InvoiceChange createSucceededRefundStatusChange() {
-        InvoiceChange invoiceChange = new InvoiceChange();
-        InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
-        invoicePaymentChange.setId(PAYMENT_ID);
-        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
-        InvoicePaymentRefundChange refundChange = new InvoicePaymentRefundChange();
-        refundChange.setId(REFUND_ID);
-        InvoicePaymentRefundChangePayload refundChangePayload = new InvoicePaymentRefundChangePayload();
-        InvoicePaymentRefundStatusChanged refundStatusChanged = new InvoicePaymentRefundStatusChanged();
-        refundStatusChanged.setStatus(
-                com.rbkmoney.damsel.domain.InvoicePaymentRefundStatus.succeeded(
-                        new InvoicePaymentRefundSucceeded()
-                )
-        );
-        refundChangePayload.setInvoicePaymentRefundStatusChanged(refundStatusChanged);
-        refundChange.setPayload(refundChangePayload);
-        payload.setInvoicePaymentRefundChange(refundChange);
-        invoicePaymentChange.setPayload(payload);
-        invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
-        return invoiceChange;
-    }
-
     private static InvoiceChange createPaymentStatusChange(String paymentId,
                                                            com.rbkmoney.damsel.domain.InvoicePaymentStatus status) {
-        InvoiceChange invoiceChange = new InvoiceChange();
         InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
         invoicePaymentChange.setId(paymentId);
 
@@ -173,6 +135,7 @@ public final class InvoicingData {
         statusChanged.setStatus(status);
         payload.setInvoicePaymentStatusChanged(statusChanged);
         invoicePaymentChange.setPayload(payload);
+        InvoiceChange invoiceChange = new InvoiceChange();
         invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
         return invoiceChange;
     }
@@ -182,10 +145,8 @@ public final class InvoicingData {
             String refundId,
             com.rbkmoney.damsel.domain.InvoicePaymentRefundStatus status
     ) {
-        InvoiceChange invoiceChange = new InvoiceChange();
         InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
         invoicePaymentChange.setId(paymentId);
-        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
         InvoicePaymentRefundChange invoicePaymentRefundChange = new InvoicePaymentRefundChange();
 
         invoicePaymentRefundChange.setId(refundId);
@@ -194,8 +155,10 @@ public final class InvoicingData {
         refundStatusChanged.setStatus(status);
         refundChangePayload.setInvoicePaymentRefundStatusChanged(refundStatusChanged);
         invoicePaymentRefundChange.setPayload(refundChangePayload);
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
         payload.setInvoicePaymentRefundChange(invoicePaymentRefundChange);
         invoicePaymentChange.setPayload(payload);
+        InvoiceChange invoiceChange = new InvoiceChange();
         invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
         return invoiceChange;
     }
@@ -205,10 +168,8 @@ public final class InvoicingData {
             String adjustmentId,
             com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentStatus status
     ) {
-        InvoiceChange invoiceChange = new InvoiceChange();
         InvoicePaymentChange invoicePaymentChange = new InvoicePaymentChange();
         invoicePaymentChange.setId(paymentId);
-        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
         InvoicePaymentAdjustmentChange adjustmentChange = new InvoicePaymentAdjustmentChange();
 
         adjustmentChange.setId(adjustmentId);
@@ -218,8 +179,10 @@ public final class InvoicingData {
         adjustmentChangePayload.setInvoicePaymentAdjustmentStatusChanged(statusChanged);
         adjustmentChange.setPayload(adjustmentChangePayload);
 
+        InvoicePaymentChangePayload payload = new InvoicePaymentChangePayload();
         payload.setInvoicePaymentAdjustmentChange(adjustmentChange);
         invoicePaymentChange.setPayload(payload);
+        InvoiceChange invoiceChange = new InvoiceChange();
         invoiceChange.setInvoicePaymentChange(invoicePaymentChange);
         return invoiceChange;
     }
@@ -361,18 +324,24 @@ public final class InvoicingData {
     public static List<FinalCashFlowPosting> createPaymentCashFlow() {
         return List.of(
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923).setCurrency(new CurrencyRef().setSymbolicCode("RUR")))
         );
     }
@@ -380,18 +349,24 @@ public final class InvoicingData {
     public static List<FinalCashFlowPosting> createNewCashFlow() {
         return List.of(
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(14505).setCurrency(new CurrencyRef().setSymbolicCode("RUR")))
         );
     }
@@ -400,18 +375,24 @@ public final class InvoicingData {
         return List.of(
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(8945).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.provider(ProviderCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(483500).setCurrency(new CurrencyRef().setSymbolicCode("RUR"))),
 
                 new FinalCashFlowPosting()
-                        .setSource(new FinalCashFlowAccount().setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
-                        .setDestination(new FinalCashFlowAccount().setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
+                        .setSource(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.system(SystemCashFlowAccount.settlement)))
+                        .setDestination(new FinalCashFlowAccount()
+                                .setAccountType(CashFlowAccount.merchant(MerchantCashFlowAccount.settlement)))
                         .setVolume(new Cash().setAmount(16923).setCurrency(new CurrencyRef().setSymbolicCode("RUR")))
         );
     }
@@ -431,7 +412,6 @@ public final class InvoicingData {
             String id,
             InvoicePaymentRefundStatus status
     ) {
-        var refund = new com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund();
         var hgRefund = new com.rbkmoney.damsel.domain.InvoicePaymentRefund();
         hgRefund.setId(id);
         hgRefund.setStatus(status);
@@ -444,6 +424,7 @@ public final class InvoicingData {
         hgRefund.setCash(cash);
         hgRefund.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
         hgRefund.setDomainRevision(1);
+        var refund = new com.rbkmoney.damsel.payment_processing.InvoicePaymentRefund();
         refund.setRefund(hgRefund);
         refund.setSessions(createInvoiceRefundSessionList());
         refund.setCashFlow(createCashFlowList());

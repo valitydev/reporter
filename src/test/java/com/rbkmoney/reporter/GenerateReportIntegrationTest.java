@@ -74,11 +74,13 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
 
     @Before
     public void setUp() throws Exception {
-        given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any())).willReturn(getStatPayment());
+        given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any()))
+                .willReturn(getStatPayment());
 
         given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any())).willReturn(getStatRefund());
 
-        given(statisticService.getAdjustmentsIterator(anyString(), anyString(), any(), any())).willReturn(getStatAdjustment());
+        given(statisticService.getAdjustmentsIterator(anyString(), anyString(), any(), any()))
+                .willReturn(getStatAdjustment());
 
         given(partyManagementClient.checkout(any(), any(), any()))
                 .willReturn(getTestParty(partyId, shopId, contractId));
@@ -98,13 +100,15 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
     }
 
     @Test
-    public void generateProvisionOfServiceReportTest() throws IOException, TException, InterruptedException, DaoException {
+    public void generateProvisionOfServiceReportTest()
+            throws IOException, TException, InterruptedException, DaoException {
         taskService.registerProvisionOfServiceJob(
                 partyId,
                 contractId,
                 1L,
                 new BusinessScheduleRef(1),
-                new Representative("test", "test", RepresentativeDocument.articles_of_association(new ArticlesOfAssociation()))
+                new Representative("test", "test",
+                        RepresentativeDocument.articles_of_association(new ArticlesOfAssociation()))
         );
 
         ReportType reportType = ReportType.provision_of_service;
@@ -123,7 +127,8 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
         List<FileMeta> reportFiles = reportService.getReportFiles(report.getId());
         assertEquals(2, reportFiles.size());
         for (FileMeta fileMeta : reportFiles) {
-            URL url = reportService.generatePresignedUrl(fileMeta.getFileId(), LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
+            URL url = reportService.generatePresignedUrl(fileMeta.getFileId(),
+                    LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
             assertNotNull(url);
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 try (InputStream inputStream = url.openStream()) {

@@ -47,12 +47,15 @@ public class GenerateReportJob implements Job {
         String contractId = jobDataMap.getString(CONTRACT_ID);
         ReportType reportType = TypeUtil.toEnumField(jobDataMap.getString(REPORT_TYPE), ReportType.class);
 
-        log.info("Trying to create report for contract, partyId='{}', contractId='{}', trigger='{}', jobExecutionContext='{}'",
+        log.info("Trying to create report for contract, partyId='{}', " +
+                        "contractId='{}', trigger='{}', jobExecutionContext='{}'",
                 partyId, contractId, trigger, jobExecutionContext);
         try {
             Instant toTime = trigger.getCurrentCronTime().toInstant();
             ZoneId zoneId = trigger.getTimeZone().toZoneId();
-            Instant fromTime = YearMonth.from(toLocalDateTime(toTime, zoneId)).minusMonths(1).atDay(1).atStartOfDay(zoneId).toInstant();
+            Instant fromTime =
+                    YearMonth.from(toLocalDateTime(toTime, zoneId)).minusMonths(1).atDay(1).atStartOfDay(zoneId)
+                            .toInstant();
 
             List<Shop> shops = partyService.getParty(partyId).getShops().values()
                     .stream().filter(shop -> shop.getContractId().equals(contractId))
@@ -64,16 +67,23 @@ public class GenerateReportJob implements Job {
                 return;
             }
 
-            shops.forEach(shop -> reportService.createReport(partyId, shop.getId(), fromTime, toTime, reportType, zoneId, jobExecutionContext.getFireTime().toInstant()));
+            shops.forEach(shop -> reportService
+                    .createReport(partyId, shop.getId(), fromTime, toTime, reportType, zoneId,
+                            jobExecutionContext.getFireTime().toInstant()));
 
-            log.info("Report for contract have been successfully created, partyId='{}', contractId='{}', trigger='{}', jobExecutionContext='{}'",
+            log.info("Report for contract have been successfully created, partyId='{}', " +
+                            "contractId='{}', trigger='{}', jobExecutionContext='{}'",
                     partyId, contractId, trigger, jobExecutionContext);
         } catch (StorageException | WRuntimeException ex) {
-            throw new JobExecutionException(String.format("Job execution failed (partyId='%s', contractId='%s', trigger='%s', jobExecutionContext='%s'), retry",
+            throw new JobExecutionException(String.format(
+                    "Job execution failed (partyId='%s', contractId='%s', " +
+                            "trigger='%s', jobExecutionContext='%s'), retry",
                     partyId, contractId, trigger, jobExecutionContext), ex, true);
         } catch (Exception ex) {
             JobExecutionException jobExecutionException = new JobExecutionException(
-                    String.format("Job execution failed (partyId='%s', contractId='%s', trigger='%s', jobExecutionContext='%s'), stop triggers",
+                    String.format(
+                            "Job execution failed (partyId='%s', contractId='%s', " +
+                                    "trigger='%s', jobExecutionContext='%s'), stop triggers",
                             partyId, contractId, trigger, jobExecutionContext), ex);
             jobExecutionException.setUnscheduleAllTriggers(true);
             throw jobExecutionException;

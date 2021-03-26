@@ -75,15 +75,19 @@ public class PaymentsForReportQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         PaymentsForReportQuery that = (PaymentsForReportQuery) o;
-        return Objects.equals(merchantId, that.merchantId) &&
-                Objects.equals(shopId, that.shopId) &&
-                Objects.equals(invoiceId, that.invoiceId) &&
-                Objects.equals(paymentId, that.paymentId) &&
-                Objects.equals(fromTime, that.fromTime) &&
-                Objects.equals(toTime, that.toTime);
+        return Objects.equals(merchantId, that.merchantId)
+                && Objects.equals(shopId, that.shopId)
+                && Objects.equals(invoiceId, that.invoiceId)
+                && Objects.equals(paymentId, that.paymentId)
+                && Objects.equals(fromTime, that.fromTime)
+                && Objects.equals(toTime, that.toTime);
     }
 
     @Override

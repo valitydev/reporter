@@ -80,7 +80,8 @@ public class SchedulerUtil {
 
     private static FieldExpression buildDaysOfWeekOnExpression(Set<DayOfWeek> days) {
         Set<Integer> dayValues = days.stream()
-                .map(dayValue -> ConstantsMapper.weekDayMapping(ConstantsMapper.JAVA8, ConstantsMapper.QUARTZ_WEEK_DAY, dayValue.getValue()))
+                .map(dayValue -> ConstantsMapper
+                        .weekDayMapping(ConstantsMapper.JAVA8, ConstantsMapper.QUARTZ_WEEK_DAY, dayValue.getValue()))
                 .collect(Collectors.toSet());
         return buildOnExpression(dayValues);
     }
@@ -169,7 +170,8 @@ public class SchedulerUtil {
         for (Map.Entry<Integer, Set<CalendarHoliday>> yearsHolidays : calendar.getHolidays().entrySet()) {
             int year = yearsHolidays.getKey();
             for (CalendarHoliday holiday : yearsHolidays.getValue()) {
-                Date excludedDate = Date.valueOf(LocalDate.of(year, holiday.getMonth().getValue(), (int) holiday.getDay()));
+                Date excludedDate =
+                        Date.valueOf(LocalDate.of(year, holiday.getMonth().getValue(), (int) holiday.getDay()));
 
                 holidayCalendar.addExcludedDate(excludedDate);
             }

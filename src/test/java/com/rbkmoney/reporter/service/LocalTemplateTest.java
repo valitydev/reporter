@@ -1,7 +1,8 @@
 package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.merch_stat.*;
+import com.rbkmoney.damsel.merch_stat.StatPayment;
+import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.reporter.config.AbstractLocalTemplateConfig;
@@ -36,7 +37,9 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
@@ -132,7 +135,6 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
             magistaReport = Files.createTempFile("registry_of_act_", "_test_report.xlsx");
             localReport = Files.createTempFile("local_registry_of_act_", "_test_report.xlsx");
 
-            String contractId = random(String.class);
             Report report = random(Report.class);
             report.setFromTime(LocalDateTime.now().minus(110L, ChronoUnit.YEARS));
             report.setToTime(LocalDateTime.now());
@@ -143,6 +145,7 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
             String legalSignedAt = TypeUtil.temporalToString(Instant.now());
             String legalAgreementId = random(String.class);
 
+            String contractId = random(String.class);
             mockPartyManagementClient(contractId, report, registeredName, legalSignedAt, legalAgreementId);
             paymentRegistryTemplate.processReportTemplate(report, Files.newOutputStream(magistaReport));
             localPaymentRegistryTemplate.processReportTemplate(report, Files.newOutputStream(localReport));
@@ -157,8 +160,10 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
 
             Row magistaPaymentsFirstRow = magistaSheet.getRow(2);
             Row localPaymentsFirstRow = localSheet.getRow(2);
-            assertEquals(magistaPaymentsFirstRow.getCell(8).getStringCellValue(), localPaymentsFirstRow.getCell(8).getStringCellValue());
-            assertEquals(magistaPaymentsFirstRow.getCell(9).getStringCellValue(), localPaymentsFirstRow.getCell(9).getStringCellValue());
+            assertEquals(magistaPaymentsFirstRow.getCell(8).getStringCellValue(),
+                    localPaymentsFirstRow.getCell(8).getStringCellValue());
+            assertEquals(magistaPaymentsFirstRow.getCell(9).getStringCellValue(),
+                    localPaymentsFirstRow.getCell(9).getStringCellValue());
 
             Cell magistaPaymentsTotalSum = magistaSheet.getRow(5).getCell(3);
             Cell localPaymentsTotalSum = localSheet.getRow(5).getCell(3);
@@ -171,8 +176,10 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
             Row magistaRefundsFirstRow = magistaSheet.getRow(10);
             Row localRefundsFirstRow = localSheet.getRow(10);
             assertEquals(magistaRefundsFirstRow.getCell(8).toString(), localRefundsFirstRow.getCell(8).toString());
-            assertEquals(magistaRefundsFirstRow.getCell(9).getStringCellValue(), localRefundsFirstRow.getCell(9).getStringCellValue());
-            assertEquals(magistaRefundsFirstRow.getCell(10).getStringCellValue(), localRefundsFirstRow.getCell(10).getStringCellValue());
+            assertEquals(magistaRefundsFirstRow.getCell(9).getStringCellValue(),
+                    localRefundsFirstRow.getCell(9).getStringCellValue());
+            assertEquals(magistaRefundsFirstRow.getCell(10).getStringCellValue(),
+                    localRefundsFirstRow.getCell(10).getStringCellValue());
 
             Cell magistaRefundsTotalSum = magistaSheet.getRow(13).getCell(3);
             Cell localRefundsTotalSum = localSheet.getRow(13).getCell(3);

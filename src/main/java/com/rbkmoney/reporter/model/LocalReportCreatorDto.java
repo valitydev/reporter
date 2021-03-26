@@ -4,7 +4,6 @@ import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.domain.tables.records.AdjustmentRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
-import com.rbkmoney.reporter.service.LocalStatisticService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

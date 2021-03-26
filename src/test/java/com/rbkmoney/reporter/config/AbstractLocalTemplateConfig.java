@@ -30,6 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -74,14 +75,6 @@ public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
 
     private static EmbeddedPostgres postgres;
 
-    @After
-    public void destroy() throws IOException {
-        if (postgres != null) {
-            postgres.close();
-            postgres = null;
-        }
-    }
-
     private static void startPgServer() {
         try {
             log.info("The PG server is starting...");
@@ -104,7 +97,7 @@ public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
             statement.execute("CREATE DATABASE " + dbName);
             statement.close();
         } catch (SQLException e) {
-            log.error("An error occurred while creating the database "+ dbName, e);
+            log.error("An error occurred while creating the database " + dbName, e);
             e.printStackTrace();
         }
     }
@@ -115,6 +108,14 @@ public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
         String dir = "target" + File.separator + "pgdata_" + currentDate;
         log.info("Postgres source files in {}", dir);
         return dir;
+    }
+
+    @After
+    public void destroy() throws IOException {
+        if (postgres != null) {
+            postgres.close();
+            postgres = null;
+        }
     }
 
     private DataSource getDataSource() {

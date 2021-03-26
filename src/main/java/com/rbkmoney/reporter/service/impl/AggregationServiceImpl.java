@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(value="aggregation.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "aggregation.enabled", havingValue = "true")
 public class AggregationServiceImpl implements AggregationService {
 
     private final AggregatesDao aggregatesDao;

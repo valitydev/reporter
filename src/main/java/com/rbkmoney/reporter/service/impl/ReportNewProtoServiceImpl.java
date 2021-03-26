@@ -30,7 +30,8 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
     private final ReportService reportService;
 
     @Override
-    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType) throws PartyNotFoundException, ShopNotFoundException {
+    public long createReport(String partyId, String shopId, Instant fromTime, Instant toTime, ReportType reportType)
+            throws PartyNotFoundException, ShopNotFoundException {
         return reportService.createReport(partyId, shopId, fromTime, toTime, reportType);
     }
 
@@ -72,7 +73,8 @@ public class ReportNewProtoServiceImpl implements ReportNewProtoService {
             );
         } catch (DaoException ex) {
             throw new StorageException(String.format("Failed to get reports with token, " +
-                            "partyId='%s', shopIds='%s', reportTypes='%s', fromTime='%s', toTime='%s', createdAfter='%s'",
+                            "partyId='%s', shopIds='%s', reportTypes='%s', " +
+                            "fromTime='%s', toTime='%s', createdAfter='%s'",
                     partyId, shopIds, reportTypes, fromTime, toTime, createdAfter), ex);
         }
     }

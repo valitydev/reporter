@@ -17,7 +17,8 @@ public interface StatisticService {
 
     ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant toTime);
 
-    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant fromTime, Instant toTime);
+    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, Instant fromTime,
+                                          Instant toTime);
 
     Map<String, String> getPurposes(String partyId, String shopId, Instant fromTime, Instant toTime);
 
