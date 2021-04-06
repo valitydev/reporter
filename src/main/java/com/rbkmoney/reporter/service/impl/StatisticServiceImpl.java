@@ -53,6 +53,13 @@ public class StatisticServiceImpl implements StatisticService {
                                                   Optional<Instant> fromTime,
                                                   Instant toTime) {
         try {
+            StatResponse statistics = merchantStatisticsClient.getStatistics(
+                    DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime,
+                            objectMapper)
+            );
+            StatResponseData data = statistics.getData();
+            List<Map<String, String>> records = data.getRecords();
+
             ShopAccountingModel shopAccounting = merchantStatisticsClient.getStatistics(
                     DslUtil.createShopAccountingStatRequest(partyId, shopId, currencyCode, fromTime, toTime,
                             objectMapper)
