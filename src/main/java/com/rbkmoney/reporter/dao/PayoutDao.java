@@ -5,6 +5,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PayoutDao {
@@ -26,5 +27,11 @@ public interface PayoutDao {
     PayoutState getPayoutState(Long extPayoutId);
 
     Optional<Long> getLastEventId();
+
+    Long getFundsPayOutAmount(String partyId,
+                              String partyShopId,
+                              String currencyCode,
+                              Optional<LocalDateTime> fromTime,
+                              LocalDateTime toTime);
 
 }

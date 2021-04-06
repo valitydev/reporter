@@ -55,19 +55,19 @@ public class AggregationServiceImpl implements AggregationService {
 
     private void aggregateData(AggregationType aggregationType) {
         String methodName = aggregationType.getLiteral();
-        log.info("Start '{}' aggregation", methodName);
+        log.debug("Start '{}' aggregation", methodName);
         Optional<LocalDateTime> lastAggregationDateOptional = aggregatesDao.getLastAggregationDate(aggregationType);
         if (lastAggregationDateOptional.isEmpty()) {
-            log.info("Last '{}' aggregation time is empty", methodName);
+            log.debug("Last '{}' aggregation time is empty", methodName);
             return;
         }
         LocalDateTime lastAggregationDate = lastAggregationDateOptional.get();
 
-        log.info("For '{}' aggregation last aggregation date is '{}'", methodName, lastAggregationDate);
+        log.debug("For '{}' aggregation last aggregation date is '{}'", methodName, lastAggregationDate);
         LocalDateTime highBordefOfAggregation;
         long untilNow = lastAggregationDate.until(LocalDateTime.now(), ChronoUnit.HOURS);
         if (untilNow == 0) {
-            log.info("Current time delta for '{}' aggregation less than one hour", methodName);
+            log.debug("Current time delta for '{}' aggregation less than one hour", methodName);
             return;
         } else if (untilNow < AGGREGATION_STEP) {
             highBordefOfAggregation = lastAggregationDate.plusHours(untilNow);
@@ -82,7 +82,7 @@ public class AggregationServiceImpl implements AggregationService {
         aggregatesDao.saveLastAggregationDate(
                 createLastAggregationTime(aggregationType, highBordefOfAggregation.minusHours(1L))
         );
-        log.info("'{}' aggregation was finished", methodName);
+        log.debug("'{}' aggregation was finished", methodName);
     }
 
     private LastAggregationTime createLastAggregationTime(AggregationType type,

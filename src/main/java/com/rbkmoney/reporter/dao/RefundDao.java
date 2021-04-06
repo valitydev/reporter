@@ -8,6 +8,7 @@ import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface RefundDao {
 
@@ -23,5 +24,11 @@ public interface RefundDao {
                                           String shopId,
                                           LocalDateTime fromTime,
                                           LocalDateTime toTime);
+
+    Long getFundsRefundedAmount(String partyId,
+                                String partyShopId,
+                                String currencyCode,
+                                Optional<LocalDateTime> fromTime,
+                                LocalDateTime toTime);
 
 }

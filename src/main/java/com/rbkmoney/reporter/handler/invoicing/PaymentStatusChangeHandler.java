@@ -39,7 +39,7 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
         }
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
-        log.info("Processing payment with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
+        log.debug("Processing payment with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", status, invoiceId, sequenceId, changeId);
         String paymentId = invoiceChange.getInvoicePaymentChange().getId();
         var hgInvoice = hgInvoicingService.getInvoice(invoiceId, sequenceId);

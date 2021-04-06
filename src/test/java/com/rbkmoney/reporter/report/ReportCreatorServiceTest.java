@@ -1,13 +1,14 @@
-package com.rbkmoney.reporter.service;
+package com.rbkmoney.reporter.report;
 
 import com.rbkmoney.damsel.merch_stat.StatPayment;
 import com.rbkmoney.damsel.merch_stat.StatRefund;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ReportCreatorDto;
 import com.rbkmoney.reporter.model.StatAdjustment;
+import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
 import com.rbkmoney.reporter.service.impl.StatisticServiceImpl;
-import com.rbkmoney.reporter.util.BuildUtils;
+import com.rbkmoney.reporter.data.ReportsTestData;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
@@ -32,16 +33,16 @@ public class ReportCreatorServiceTest {
         StatisticService statisticsService = Mockito.mock(StatisticServiceImpl.class);
         when(statisticsService
                 .getCapturedPayment(any(String.class), any(String.class), any(String.class), any(String.class)))
-                .thenReturn(BuildUtils.buildStatPayment(1));
+                .thenReturn(ReportsTestData.buildStatPayment(1));
 
         Iterator<StatPayment> paymentsIterator = IntStream.range(1, 10)
-                .mapToObj(BuildUtils::buildStatPayment).iterator();
+                .mapToObj(ReportsTestData::buildStatPayment).iterator();
 
         Iterator<StatRefund> refundsIterator = IntStream.range(1, 10)
-                .mapToObj(BuildUtils::buildStatRefund).iterator();
+                .mapToObj(ReportsTestData::buildStatRefund).iterator();
 
         Iterator<StatAdjustment> adjustmentsIterator = IntStream.range(1, 10)
-                .mapToObj(BuildUtils::buildStatAdjustment).iterator();
+                .mapToObj(ReportsTestData::buildStatAdjustment).iterator();
 
         Report report = new Report();
         report.setTimezone("UTC");

@@ -2,28 +2,35 @@ package com.rbkmoney.reporter.dao.impl;
 
 import com.rbkmoney.reporter.dao.AbstractDao;
 import com.rbkmoney.reporter.dao.PayoutDao;
+import com.rbkmoney.reporter.domain.enums.PayoutStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
-import com.rbkmoney.reporter.domain.tables.records.PayoutAccountRecord;
-import com.rbkmoney.reporter.domain.tables.records.PayoutInternationalAccountRecord;
-import com.rbkmoney.reporter.domain.tables.records.PayoutRecord;
-import com.rbkmoney.reporter.domain.tables.records.PayoutStateRecord;
+import com.rbkmoney.reporter.domain.tables.records.*;
 import com.zaxxer.hikari.HikariDataSource;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import static com.rbkmoney.reporter.domain.Tables.PAYOUT_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.domain.tables.Payout.PAYOUT;
 import static com.rbkmoney.reporter.domain.tables.PayoutAccount.PAYOUT_ACCOUNT;
 import static com.rbkmoney.reporter.domain.tables.PayoutInternationalAccount.PAYOUT_INTERNATIONAL_ACCOUNT;
 import static com.rbkmoney.reporter.domain.tables.PayoutState.PAYOUT_STATE;
+import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFundsAmountResult;
 
 @Component
 public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
+
+    private static final String AMOUNT_KEY = "funds_paid_out";
 
     @Autowired
     public PayoutDaoImpl(HikariDataSource dataSource) {
@@ -122,7 +129,68 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                         .from(PAYOUT_STATE).fetchOne()
                         .value1()
         );
+    }
 
+    @Override
+    public Long getFundsPayOutAmount(String partyId,
+                                     String shopId,
+                                     String currencyCode,
+                                     Optional<LocalDateTime> fromTime,
+                                     LocalDateTime toTime) {
+        LocalDateTime reportFromTime = fromTime.orElse(LocalDateTime.now());
+        LocalDateTime fromTimeTruncHour = reportFromTime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
+
+        var youngPayoutShopAccountingQuery = getPayoutFundsAmountQuery(
+                partyId, shopId, currencyCode, reportFromTime, fromTimeTruncHour.plusHours(1L)
+        );
+        var payoutAggByHourShopAccountingQuery = getAggByHourPayoutFundsAmountQuery(
+                partyId, shopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
+        );
+        var oldPayoutShopAccountingQuery = getPayoutFundsAmountQuery(
+                partyId, shopId, currencyCode, toTimeTruncHour, toTime
+        );
+        var fundsPayOutAmountResult = getDslContext()
+                .select(DSL.sum(DSL.field(AMOUNT_KEY, Long.class)).as(AMOUNT_KEY))
+                .from(
+                        youngPayoutShopAccountingQuery
+                                .unionAll(payoutAggByHourShopAccountingQuery)
+                                .unionAll(oldPayoutShopAccountingQuery)
+                )
+                .fetchOne();
+        return getFundsAmountResult(fundsPayOutAmountResult);
+    }
+
+    private SelectConditionStep<Record1<BigDecimal>> getAggByHourPayoutFundsAmountQuery(String partyId,
+                                                                                        String partyShopId,
+                                                                                        String currencyCode,
+                                                                                        LocalDateTime fromTime,
+                                                                                        LocalDateTime toTime) {
+        return getDslContext()
+                .select(DSL.sum(PAYOUT_AGGS_BY_HOUR.AMOUNT).as(AMOUNT_KEY))
+                .from(PAYOUT_AGGS_BY_HOUR)
+                .where(PAYOUT_AGGS_BY_HOUR.CREATED_AT.greaterThan(fromTime))
+                .and(PAYOUT_AGGS_BY_HOUR.CREATED_AT.lessThan(toTime))
+                .and(PAYOUT_AGGS_BY_HOUR.CURRENCY_CODE.eq(currencyCode))
+                .and(PAYOUT_AGGS_BY_HOUR.PARTY_ID.eq(partyId))
+                .and(PAYOUT_AGGS_BY_HOUR.SHOP_ID.eq(partyShopId));
+    }
+
+    private SelectConditionStep<Record1<BigDecimal>> getPayoutFundsAmountQuery(String partyId,
+                                                                               String partyShopId,
+                                                                               String currencyCode,
+                                                                               LocalDateTime fromTime,
+                                                                               LocalDateTime toTime) {
+        return getDslContext()
+                .select(DSL.sum(PAYOUT.AMOUNT).as(AMOUNT_KEY))
+                .from(PAYOUT_STATE)
+                .join(PAYOUT).on(PAYOUT.PAYOUT_ID.eq(PAYOUT_STATE.PAYOUT_ID))
+                .where(PAYOUT_STATE.EVENT_CREATED_AT.greaterOrEqual(fromTime))
+                .and(PAYOUT_STATE.EVENT_CREATED_AT.lessThan(toTime))
+                .and(PAYOUT_STATE.STATUS.eq(PayoutStatus.paid))
+                .and(PAYOUT.CURRENCY_CODE.eq(currencyCode))
+                .and(PAYOUT.PARTY_ID.eq(partyId))
+                .and(PAYOUT.SHOP_ID.eq(partyShopId));
     }
 
 }

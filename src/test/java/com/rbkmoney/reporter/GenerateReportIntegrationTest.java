@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.rbkmoney.reporter.util.TestDataUtil.*;
+import static com.rbkmoney.reporter.data.CommonTestData.*;
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -76,9 +76,8 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
     public void setUp() throws Exception {
         given(statisticService.getCapturedPaymentsIterator(anyString(), anyString(), any(), any()))
                 .willReturn(getStatPayment());
-
-        given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any())).willReturn(getStatRefund());
-
+        given(statisticService.getRefundsIterator(anyString(), anyString(), any(), any()))
+                .willReturn(getStatRefund());
         given(statisticService.getAdjustmentsIterator(anyString(), anyString(), any(), any()))
                 .willReturn(getStatAdjustment());
 

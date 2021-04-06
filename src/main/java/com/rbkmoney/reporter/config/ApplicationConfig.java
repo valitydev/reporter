@@ -56,7 +56,8 @@ public class ApplicationConfig {
     ) throws IOException {
         return new THSpawnClientBuilder()
                 .withNetworkTimeout(timeout)
-                .withAddress(resource.getURI()).build(SignerSrv.Iface.class);
+                .withAddress(resource.getURI())
+                .build(SignerSrv.Iface.class);
     }
 
     @Bean

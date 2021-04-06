@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.rbkmoney.reporter.util.TestDataUtil.*;
+import static com.rbkmoney.reporter.data.CommonTestData.*;
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertEquals;
 
@@ -39,19 +39,18 @@ public class AggregationDaoTest extends AbstractDaoConfig {
     public void paymentsAggragateDaoTest() {
         String partyId = random(String.class);
         String shopId = random(String.class);
+        LocalDateTime dateTo = LocalDateTime.now();
 
         int paymentsCount = 100;
         for (int i = 0; i < paymentsCount; i++) {
-            paymentDao.savePayment(createTestPayment(partyId, shopId, LocalDateTime.now(), i));
+            paymentDao.savePayment(createTestPayment(partyId, shopId, dateTo.minusHours(1L), i));
         }
-        aggregatesDao.aggregateByHour(
-                AggregationType.PAYMENT,
-                LocalDateTime.now().minusHours(2L),
-                LocalDateTime.now()
-        );
+        LocalDateTime dateFrom = dateTo.minusHours(3L);
+        aggregatesDao.aggregateByHour(AggregationType.PAYMENT, dateFrom, dateTo);
         List<PaymentAggsByHourRecord> paymentsAggregatesByHour =
-                aggregatesDao.getPaymentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPaymentsAggregatesByHour(dateFrom, dateTo);
         assertEquals(2, paymentsAggregatesByHour.size());
+
         PaymentAggsByHourRecord paymentAggsByHourRecord = paymentsAggregatesByHour.get(0);
         assertEquals(Long.valueOf(50000L), paymentAggsByHourRecord.getAmount());
         assertEquals(Long.valueOf(25000L), paymentAggsByHourRecord.getFee());
@@ -61,19 +60,18 @@ public class AggregationDaoTest extends AbstractDaoConfig {
     public void refundsAggragateDaoTest() {
         String partyId = random(String.class);
         String shopId = random(String.class);
+        LocalDateTime dateTo = LocalDateTime.now();
 
         int refundsCount = 100;
         for (int i = 0; i < refundsCount; i++) {
-            refundDao.saveRefund(createTestRefund(partyId, shopId, LocalDateTime.now(), i));
+            refundDao.saveRefund(createTestRefund(partyId, shopId, dateTo.minusHours(1L), i));
         }
-        aggregatesDao.aggregateByHour(
-                AggregationType.REFUND,
-                LocalDateTime.now().minusHours(2L),
-                LocalDateTime.now()
-        );
+        LocalDateTime dateFrom = dateTo.minusHours(3L);
+        aggregatesDao.aggregateByHour(AggregationType.REFUND, dateFrom, dateTo);
         List<RefundAggsByHourRecord> refundAggsByHour =
-                aggregatesDao.getRefundsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getRefundsAggregatesByHour(dateFrom, dateTo);
         assertEquals(2, refundAggsByHour.size());
+
         RefundAggsByHourRecord refundAggsByHourRecord = refundAggsByHour.get(0);
         assertEquals(Long.valueOf(50000L), refundAggsByHourRecord.getAmount());
         assertEquals(Long.valueOf(25000L), refundAggsByHourRecord.getFee());
@@ -83,19 +81,18 @@ public class AggregationDaoTest extends AbstractDaoConfig {
     public void adjustmentsAggragateDaoTest() {
         String partyId = random(String.class);
         String shopId = random(String.class);
+        LocalDateTime dateTo = LocalDateTime.now();
 
         int count = 100;
         for (int i = 0; i < count; i++) {
-            adjustmentDao.saveAdjustment(createTestAdjustment(partyId, shopId, LocalDateTime.now(), i));
+            adjustmentDao.saveAdjustment(createTestAdjustment(partyId, shopId, dateTo.minusHours(1L), i));
         }
-        aggregatesDao.aggregateByHour(
-                AggregationType.ADJUSTMENT,
-                LocalDateTime.now().minusHours(2L),
-                LocalDateTime.now()
-        );
+        LocalDateTime dateFrom = dateTo.minusHours(3L);
+        aggregatesDao.aggregateByHour(AggregationType.ADJUSTMENT, dateFrom, dateTo);
         List<AdjustmentAggsByHourRecord> adjustmentsAggsByHour =
-                aggregatesDao.getAdjustmentsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getAdjustmentsAggregatesByHour(dateFrom, dateTo);
         assertEquals(2, adjustmentsAggsByHour.size());
+
         AdjustmentAggsByHourRecord adjustmentAggsByHourRecord = adjustmentsAggsByHour.get(0);
         assertEquals(Long.valueOf(50000L), adjustmentAggsByHourRecord.getAmount());
     }
@@ -104,26 +101,26 @@ public class AggregationDaoTest extends AbstractDaoConfig {
     public void payoutsAggragateDaoTest() {
         String partyId = random(String.class);
         String shopId = random(String.class);
+        LocalDateTime dateTo = LocalDateTime.now();
 
-        int count = 100;
+        int count = 10;
         for (int i = 0; i < count; i++) {
-            Long extPayoutId = payoutDao.savePayout(createTestPayout(partyId, shopId, LocalDateTime.now(), i));
-            PayoutState payoutState = createTestPayoutState(extPayoutId, LocalDateTime.now(), PayoutStatus.unpaid);
+            LocalDateTime payoutDateTo = dateTo.minusHours(1L);
+            Long extPayoutId = payoutDao.savePayout(createTestPayout(partyId, shopId, payoutDateTo, i));
+            PayoutState payoutState = createTestPayoutState(extPayoutId, payoutDateTo, PayoutStatus.unpaid, i);
             payoutDao.savePayoutState(payoutState);
             payoutState.setStatus(PayoutStatus.paid);
             payoutDao.savePayoutState(payoutState);
         }
 
-        aggregatesDao.aggregateByHour(
-                AggregationType.PAYOUT,
-                LocalDateTime.now().minusHours(2L),
-                LocalDateTime.now()
-        );
+        LocalDateTime dateFrom = dateTo.minusHours(3L);
+        aggregatesDao.aggregateByHour(AggregationType.PAYOUT, dateFrom, dateTo);
         List<PayoutAggsByHourRecord> payoutsAggsByHour =
-                aggregatesDao.getPayoutsAggregatesByHour(LocalDateTime.now().minusHours(3L), LocalDateTime.now());
+                aggregatesDao.getPayoutsAggregatesByHour(dateFrom, dateTo);
         assertEquals(2, payoutsAggsByHour.size());
+
         PayoutAggsByHourRecord payoutAggsByHourRecord = payoutsAggsByHour.get(0);
-        assertEquals(Long.valueOf(50000L), payoutAggsByHourRecord.getAmount());
+        assertEquals(Long.valueOf(5000L), payoutAggsByHourRecord.getAmount());
     }
 
 }

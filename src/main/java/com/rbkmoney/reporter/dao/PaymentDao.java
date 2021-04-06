@@ -4,7 +4,7 @@ import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
-import com.rbkmoney.reporter.exception.DaoException;
+import com.rbkmoney.reporter.model.PaymentFundsAmount;
 import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
@@ -22,11 +22,11 @@ public interface PaymentDao {
 
     void saveAdditionalPaymentInfo(PaymentAdditionalInfo paymentAdditionalInfo);
 
-    Map<String, Long> getShopAccountingReportData(String partyId,
-                                                  String partyShopId,
-                                                  String currencyCode,
-                                                  Optional<LocalDateTime> fromTime,
-                                                  LocalDateTime toTime) throws DaoException;
+    PaymentFundsAmount getPaymentFundsAmount(String partyId,
+                                             String shopId,
+                                             String currencyCode,
+                                             Optional<LocalDateTime> fromTime,
+                                             LocalDateTime toTime);
 
     PaymentRecord getPayment(String partyId, String shopId, String invoiceId, String paymentId);
 

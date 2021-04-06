@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service;
+package com.rbkmoney.reporter.report;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.merch_stat.StatPayment;
@@ -16,9 +16,11 @@ import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import com.rbkmoney.reporter.model.StatAdjustment;
+import com.rbkmoney.reporter.service.LocalStatisticService;
+import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.template.LocalPaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
-import com.rbkmoney.reporter.util.BuildUtils;
+import com.rbkmoney.reporter.data.ReportsTestData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -36,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-public class LocalTemplateTest extends AbstractLocalTemplateConfig {
+public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateConfig {
 
     @Autowired
     private PaymentRegistryTemplateImpl paymentRegistryTemplate;
@@ -91,8 +94,8 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
         List<StatPayment> statPaymentList = new ArrayList<>();
         List<PaymentRecord> paymentRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            statPaymentList.add(BuildUtils.buildStatPayment(i, shopId));
-            PaymentRecord paymentRecord = BuildUtils.buildPaymentRecord(i, partyId, shopId);
+            statPaymentList.add(ReportsTestData.buildStatPayment(i, shopId));
+            PaymentRecord paymentRecord = ReportsTestData.buildPaymentRecord(i, partyId, shopId);
             paymentRecordList.add(paymentRecord);
             paymentDao.savePayment(paymentRecord.into(Payment.class));
         }
@@ -100,8 +103,11 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
         List<StatRefund> statRefundList = new ArrayList<>();
         List<RefundRecord> refundRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            statRefundList.add(BuildUtils.buildStatRefund(i, shopId));
-            RefundRecord refundRecord = BuildUtils.buildRefundRecord(i, partyId, shopId);
+            statRefundList.add(ReportsTestData.buildStatRefund(i, shopId));
+            LocalDateTime localDateTime = Instant.parse("201" + i + "-03-22T06:12:27Z")
+                    .atZone(ZoneOffset.UTC).toLocalDateTime();
+            RefundRecord refundRecord =
+                    ReportsTestData.buildRefundRecord(i, partyId, shopId, 123L + i, localDateTime);
             refundRecordList.add(refundRecord);
             refundDao.saveRefund(refundRecord.into(Refund.class));
         }
@@ -109,8 +115,11 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
         List<StatAdjustment> adjustmentList = new ArrayList<>();
         List<AdjustmentRecord> adjustmentRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            adjustmentList.add(BuildUtils.buildStatAdjustment(i, shopId));
-            AdjustmentRecord adjustmentRecord = BuildUtils.buildStatAdjustmentRecord(i, partyId, shopId);
+            adjustmentList.add(ReportsTestData.buildStatAdjustment(i, shopId));
+            LocalDateTime localDateTime =
+                    Instant.parse("2020-10-22T06:12:27Z").atZone(ZoneOffset.UTC).toLocalDateTime();
+            AdjustmentRecord adjustmentRecord =
+                    ReportsTestData.buildStatAdjustmentRecord(i, partyId, shopId, 123L + i, localDateTime);
             adjustmentRecordList.add(adjustmentRecord);
             adjustmentDao.saveAdjustment(adjustmentRecord.into(Adjustment.class));
         }
@@ -122,9 +131,9 @@ public class LocalTemplateTest extends AbstractLocalTemplateConfig {
         given(statisticService.getAdjustmentsIterator(any(), any(), any(), any()))
                 .willReturn(adjustmentList.iterator());
         given(statisticService.getCapturedPayment(any(), any(), any(), any()))
-                .willReturn(BuildUtils.buildStatPayment());
+                .willReturn(ReportsTestData.buildStatPayment());
         given(statisticService.getPurposes(any(), any(), any(), any()))
-                .willReturn(BuildUtils.buildPurposes(3));
+                .willReturn(ReportsTestData.buildPurposes(3));
     }
 
     @Test

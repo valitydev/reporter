@@ -95,12 +95,12 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
                 Arrays.asList(InvoiceStatus.paid, InvoiceStatus.unpaid, InvoiceStatus.cancelled,
                         InvoiceStatus.fulfilled)
         );
-        assertEquals("Received count of invoices is not equal to expected", 1, invoices.size());
+        assertEquals("Count of invoices is not equal to expected", 1, invoices.size());
         Invoice invoice = invoices.get(0);
-        assertTrue("Received invoice id is not equal to expected", INVOICE_ID.equals(invoice.getInvoiceId()));
-        assertTrue("Received invoice status is not equal to expected", invoice.getStatus() == InvoiceStatus.paid);
-        assertTrue("Received invoice currency is not equal to expected", "RUR".equals(invoice.getCurrencyCode()));
-        assertTrue("Received invoice amount is not equal to expected", invoice.getAmount() == 1000L);
+        assertEquals("Invoice id is not equal to expected", INVOICE_ID, invoice.getInvoiceId());
+        assertEquals("Invoice status is not equal to expected", InvoiceStatus.paid, invoice.getStatus());
+        assertEquals("Invoice currency is not equal to expected", "RUR", invoice.getCurrencyCode());
+        assertEquals("Invoice amount is not equal to expected", Long.valueOf(1000L), invoice.getAmount());
     }
 
     @Test
@@ -135,12 +135,12 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         );
         assertEquals("Received count of invoices is not equal to expected", 1, payments.size());
         Payment payment = payments.get(0);
-        assertTrue("Received payment invoice id is not equal to expected", INVOICE_ID.equals(payment.getInvoiceId()));
-        assertTrue("Received payment id is not equal to expected", PAYMENT_ID.equals(payment.getPaymentId()));
-        assertTrue("Received payment status is not equal to expected",
-                payment.getStatus() == com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus.captured);
-        assertTrue("Received payment currency is not equal to expected", "RUR".equals(payment.getCurrencyCode()));
-        assertTrue("Received payment amount is not equal to expected", payment.getAmount() == 1000L);
+        assertEquals("Payment invoice id is not equal to expected", INVOICE_ID, payment.getInvoiceId());
+        assertEquals("Payment id is not equal to expected", PAYMENT_ID, payment.getPaymentId());
+        assertEquals("Payment status is not equal to expected",
+                com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus.captured, payment.getStatus());
+        assertEquals("Payment currency is not equal to expected", "RUR", payment.getCurrencyCode());
+        assertEquals("Payment amount is not equal to expected", Long.valueOf(1000L), payment.getAmount());
     }
 
     @Test
@@ -171,15 +171,15 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
                 LocalDateTime.now(),
                 Arrays.asList(RefundStatus.failed, RefundStatus.succeeded)
         );
-        assertEquals("Received count of refunds is not equal to expected", 1, refunds.size());
+        assertEquals("Count of refunds is not equal to expected", 1, refunds.size());
 
         Refund refund = refunds.get(0);
-        assertTrue("Received refund invoice id is not equal to expected", INVOICE_ID.equals(refund.getInvoiceId()));
-        assertTrue("Received refund payment id is not equal to expected", PAYMENT_ID.equals(refund.getPaymentId()));
-        assertTrue("Received refund id is not equal to expected", REFUND_ID.equals(refund.getRefundId()));
-        assertTrue("Received refund status is not equal to expected", refund.getStatus() == RefundStatus.succeeded);
-        assertTrue("Received refund currency is not equal to expected", "RUR".equals(refund.getCurrencyCode()));
-        assertTrue("Received refund amount is not equal to expected", refund.getAmount() == 1000L);
+        assertEquals("Refund invoice id is not equal to expected", INVOICE_ID, refund.getInvoiceId());
+        assertEquals("Refund payment id is not equal to expected", PAYMENT_ID, refund.getPaymentId());
+        assertEquals("Refund id is not equal to expected", REFUND_ID, refund.getRefundId());
+        assertEquals("Refund status is not equal to expected", RefundStatus.succeeded, refund.getStatus());
+        assertEquals("Refund currency is not equal to expected", "RUR", refund.getCurrencyCode());
+        assertEquals("Refund amount is not equal to expected", Long.valueOf(1000L), refund.getAmount());
     }
 
     @Test
@@ -187,16 +187,19 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
         List<InvoicingData.AdjustmentChangeStatusInfo> statusInfoList = new ArrayList<>();
         var captureStatus = new com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentStatus();
         captureStatus.setCaptured(new InvoicePaymentAdjustmentCaptured());
-        statusInfoList.add(new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, ADJUSTMENT_ID, captureStatus));
+        statusInfoList.add(
+                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, ADJUSTMENT_ID, captureStatus));
 
         var pengingStatus = new com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentStatus();
         pengingStatus.setPending(new InvoicePaymentAdjustmentPending());
-        statusInfoList.add(new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-2", pengingStatus));
+        statusInfoList.add(
+                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-2", pengingStatus));
 
         List<InvoicingData.AdjustmentChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
         var pengingStatusTwo = new com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentStatus();
         pengingStatusTwo.setPending(new InvoicePaymentAdjustmentPending());
-        secondStatusInfoList.add(new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-3", pengingStatusTwo));
+        secondStatusInfoList.add(
+                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-3", pengingStatusTwo));
 
         when(paymentMachineEventParser.parse(machineEventOne))
                 .thenReturn(createTestAdjustmentEventPayload(statusInfoList));
@@ -211,16 +214,21 @@ public class InvoicingServiceTest extends AbstractInvoicingServiceConfig {
                 LocalDateTime.now(),
                 Arrays.asList(AdjustmentStatus.cancelled, AdjustmentStatus.captured)
         );
-        assertEquals("Received count of adjustments is not equal to expected", 1, adjustments.size());
+        assertEquals("Count of adjustments is not equal to expected", 1, adjustments.size());
 
         Adjustment adjustment = adjustments.get(0);
-        assertTrue("Received adjustment is not equal to expected", INVOICE_ID.equals(adjustment.getInvoiceId()));
-        assertTrue("Received adjustment is not equal to expected", PAYMENT_ID.equals(adjustment.getPaymentId()));
-        assertTrue("Received adjustment is not equal to expected", ADJUSTMENT_ID.equals(adjustment.getAdjustmentId()));
-        assertTrue("Received adjustment is not equal to expected",
-                adjustment.getStatus() == AdjustmentStatus.captured);
-        assertTrue("Received adjustment is not equal to expected", "RUR".equals(adjustment.getCurrencyCode()));
-        assertTrue("Received adjustment is not equal to expected", adjustment.getAmount() == 2418L);
+        assertEquals("Adjustment invoice id is not equal to expected",
+                INVOICE_ID, adjustment.getInvoiceId());
+        assertEquals("Adjustment payment id is not equal to expected",
+                PAYMENT_ID, adjustment.getPaymentId());
+        assertEquals("Adjustment adjustment id is not equal to expected",
+                ADJUSTMENT_ID, adjustment.getAdjustmentId());
+        assertEquals("Adjustment status is not equal to expected",
+                AdjustmentStatus.captured, adjustment.getStatus());
+        assertEquals("Adjustment currency is not equal to expected",
+                "RUR", adjustment.getCurrencyCode());
+        assertEquals("Adjustment amount is not equal to expected",
+                Long.valueOf(2418L), adjustment.getAmount());
     }
 
 }

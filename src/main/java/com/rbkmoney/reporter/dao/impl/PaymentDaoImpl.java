@@ -6,23 +6,31 @@ import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
 import com.rbkmoney.reporter.domain.tables.pojos.Payment;
 import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
+import com.rbkmoney.reporter.model.PaymentFundsAmount;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.Cursor;
 import org.jooq.Record2;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.rbkmoney.reporter.domain.tables.Payment.PAYMENT;
 import static com.rbkmoney.reporter.domain.tables.PaymentAdditionalInfo.PAYMENT_ADDITIONAL_INFO;
+import static com.rbkmoney.reporter.domain.tables.PaymentAggsByHour.PAYMENT_AGGS_BY_HOUR;
+import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFunds;
 
 @Component
 public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
+
+    private static final String AMOUNT_KEY = "funds_acquired";
+    private static final String FEE_KEY = "fee_charged";
 
     @Autowired
     public PaymentDaoImpl(HikariDataSource dataSource) {
@@ -52,7 +60,8 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                         .and(PAYMENT.STATUS_CREATED_AT.lessThan(dateTo))
                         .and(PAYMENT.STATUS.in(statuses)))
                 .fetch();
-        return records == null || records.isEmpty() ? new ArrayList<>() : records.into(Payment.class);
+        return records == null || records.isEmpty()
+                ? new ArrayList<>() : records.into(Payment.class);
     }
 
     @Override
@@ -66,36 +75,78 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
     }
 
     @Override
-    public Map<String, Long> getShopAccountingReportData(String partyId,
-                                                         String partyShopId,
-                                                         String currencyCode,
-                                                         Optional<LocalDateTime> fromTime,
-                                                         LocalDateTime toTime) {
-        String amountKey = "funds_acquired";
-        String feeKey = "fee_charged";
+    public PaymentFundsAmount getPaymentFundsAmount(String partyId,
+                                                    String shopId,
+                                                    String currencyCode,
+                                                    Optional<LocalDateTime> fromTime,
+                                                    LocalDateTime toTime) {
+        LocalDateTime reportFromTime = fromTime.orElse(LocalDateTime.now());
+        LocalDateTime fromTimeTruncHour = reportFromTime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
 
-        var conditionStep = getDslContext().select(
-                DSL.sum(PAYMENT.AMOUNT).as(amountKey),
-                DSL.sum(DSL.coalesce(PAYMENT.FEE, 0L)).as(feeKey)
-        )
+        SelectConditionStep<Record2<BigDecimal, BigDecimal>> youngPaymentShopAccountingQuery =
+                getPaymentFundsAmountQuery(
+                    partyId, shopId, currencyCode, reportFromTime, fromTimeTruncHour.plusHours(1L)
+            );
+
+        var paymentAggByHourShopAccountingQuery = getAggByHourPaymentFundsAmountQuery(
+                partyId, shopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
+        );
+        var oldPaymentShopAccountingQuery = getPaymentFundsAmountQuery(
+                partyId, shopId, currencyCode, toTimeTruncHour, toTime
+        );
+
+        var fundsResult = getDslContext().select(
+                DSL.sum(DSL.field(AMOUNT_KEY, Long.class)).as(AMOUNT_KEY),
+                DSL.sum(DSL.coalesce(DSL.field(FEE_KEY, Long.class), 0L)).as(FEE_KEY)
+        ).from(
+                youngPaymentShopAccountingQuery
+                        .unionAll(paymentAggByHourShopAccountingQuery)
+                        .unionAll(oldPaymentShopAccountingQuery)
+        ).fetchOne();
+
+        return Optional.ofNullable(fundsResult)
+                .map(result -> new PaymentFundsAmount(getFunds(result.value1()), getFunds(result.value2())))
+                .orElse(new PaymentFundsAmount(0L, 0L));
+    }
+
+    private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getPaymentFundsAmountQuery(String partyId,
+                                                                                            String partyShopId,
+                                                                                            String currencyCode,
+                                                                                            LocalDateTime fromTime,
+                                                                                            LocalDateTime toTime) {
+        return getDslContext()
+                .select(
+                        DSL.sum(PAYMENT.AMOUNT).as(AMOUNT_KEY),
+                        DSL.sum(DSL.coalesce(PAYMENT.FEE, 0L)).as(FEE_KEY)
+                )
                 .from(PAYMENT)
-                .where(fromTime.map(PAYMENT.CREATED_AT::ge).orElse(DSL.trueCondition()))
-                .and(PAYMENT.CREATED_AT.lt(toTime))
+                .where(PAYMENT.STATUS_CREATED_AT.greaterOrEqual(fromTime))
+                .and(PAYMENT.STATUS_CREATED_AT.lessThan(toTime))
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
                 .and(PAYMENT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYMENT.PARTY_ID.eq(partyId))
                 .and(PAYMENT.SHOP_ID.eq(partyShopId));
+    }
 
-        Record2<BigDecimal, BigDecimal> result = conditionStep.fetchOne();
-        Map<String, Long> accountingData = new HashMap<>();
-        if (result == null) {
-            accountingData.put(amountKey, 0L);
-            accountingData.put(feeKey, 0L);
-        } else {
-            accountingData.put(amountKey, result.value1().longValue());
-            accountingData.put(feeKey, result.value2().longValue());
-        }
-        return accountingData;
+    private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getAggByHourPaymentFundsAmountQuery(
+            String partyId,
+            String partyShopId,
+            String currencyCode,
+            LocalDateTime fromTime,
+            LocalDateTime toTime
+    ) {
+        return getDslContext()
+                .select(
+                        DSL.sum(PAYMENT_AGGS_BY_HOUR.AMOUNT).as(AMOUNT_KEY),
+                        DSL.sum(DSL.coalesce(PAYMENT_AGGS_BY_HOUR.FEE, 0L)).as(FEE_KEY)
+                )
+                .from(PAYMENT_AGGS_BY_HOUR)
+                .where(PAYMENT_AGGS_BY_HOUR.CREATED_AT.greaterThan(fromTime))
+                .and(PAYMENT_AGGS_BY_HOUR.CREATED_AT.lessThan(toTime))
+                .and(PAYMENT_AGGS_BY_HOUR.CURRENCY_CODE.eq(currencyCode))
+                .and(PAYMENT_AGGS_BY_HOUR.PARTY_ID.eq(partyId))
+                .and(PAYMENT_AGGS_BY_HOUR.SHOP_ID.eq(partyShopId));
     }
 
     @Override

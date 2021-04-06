@@ -47,7 +47,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     }
 
     @Override
-    public List<PaymentAggsByHourRecord> getPaymentsAggregatesByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
+    public List<PaymentAggsByHourRecord> getPaymentsAggregatesByHour(LocalDateTime dateFrom,
+                                                                     LocalDateTime dateTo) {
         return getDslContext()
                 .selectFrom(PAYMENT_AGGS_BY_HOUR)
                 .where(PAYMENT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
@@ -100,7 +101,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     }
 
     @Override
-    public List<RefundAggsByHourRecord> getRefundsAggregatesByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
+    public List<RefundAggsByHourRecord> getRefundsAggregatesByHour(LocalDateTime dateFrom,
+                                                                   LocalDateTime dateTo) {
         return getDslContext()
                 .selectFrom(REFUND_AGGS_BY_HOUR)
                 .where(REFUND_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
@@ -128,7 +130,8 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     }
 
     @Override
-    public List<PayoutAggsByHourRecord> getPayoutsAggregatesByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
+    public List<PayoutAggsByHourRecord> getPayoutsAggregatesByHour(LocalDateTime dateFrom,
+                                                                   LocalDateTime dateTo) {
         return getDslContext()
                 .selectFrom(PAYOUT_AGGS_BY_HOUR)
                 .where(PAYOUT_AGGS_BY_HOUR.CREATED_AT.greaterOrEqual(dateFrom)
@@ -137,14 +140,15 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     }
 
     @Override
-    public void aggregatePayoutsByHour(LocalDateTime dateFrom, LocalDateTime dateTo) {
+    public void aggregatePayoutsByHour(LocalDateTime dateFrom,
+                                       LocalDateTime dateTo) {
         String sql =
                 "INSERT INTO rpt.payout_aggs_by_hour " +
                         "(created_at, party_id, shop_id, amount, fee, currency_code, type)" +
                         "SELECT date_trunc('hour', ps.event_created_at), pay.party_id, \n" +
                         "       pay.shop_id, sum(pay.amount), sum(pay.fee), pay.currency_code, pay.type \n" +
                         "FROM rpt.payout_state as ps \n" +
-                        "JOIN rpt.payout as pay on pay.id = ps.ext_payout_id \n" +
+                        "JOIN rpt.payout as pay on pay.payout_id = ps.payout_id \n" +
                         "WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
                         "  AND ps.status = {2}" +
                         "  AND party_id IS NOT NULL \n" +

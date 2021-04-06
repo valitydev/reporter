@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.rbkmoney.reporter.util.QuartzJobUtil.buildJobKey;
 import static com.rbkmoney.reporter.util.QuartzJobUtil.buildTriggerKey;
-import static com.rbkmoney.reporter.util.TestDataUtil.*;
+import static com.rbkmoney.reporter.data.CommonTestData.*;
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.*;

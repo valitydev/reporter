@@ -7,6 +7,7 @@ import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AdjustmentDao {
 
@@ -21,4 +22,9 @@ public interface AdjustmentDao {
                                                  LocalDateTime fromTime,
                                                  LocalDateTime toTime);
 
+    Long getFundsAdjustedAmount(String partyId,
+                                String shopId,
+                                String currencyCode,
+                                Optional<LocalDateTime> fromTime,
+                                LocalDateTime toTime);
 }

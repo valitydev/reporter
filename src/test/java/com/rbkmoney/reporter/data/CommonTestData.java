@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.util;
+package com.rbkmoney.reporter.data;
 
 import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import static io.github.benas.randombeans.api.EnhancedRandom.random;
 
-public class TestDataUtil {
+public class CommonTestData {
 
     private static final String DEFAULT_CURRENCY = "RUB";
 
@@ -29,8 +29,10 @@ public class TestDataUtil {
         russianLegalEntity.setRegisteredName(random(String.class));
         russianLegalEntity.setRepresentativePosition(random(String.class));
         russianLegalEntity.setRepresentativeFullName(random(String.class));
-        contract.setContractor(Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
-        contract.setLegalAgreement(new LegalAgreement(TypeUtil.temporalToString(Instant.now()), random(String.class)));
+        contract.setContractor(
+                Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
+        contract.setLegalAgreement(
+                new LegalAgreement(TypeUtil.temporalToString(Instant.now()), random(String.class)));
         party.setShops(Collections.singletonMap(shopId, getTestShop(shopId, contractId)));
         party.setContracts(Collections.singletonMap(contractId, contract));
         return party;
@@ -95,18 +97,26 @@ public class TestDataUtil {
         );
     }
 
-    public static PayoutState createTestPayoutState(Long extPayoutId, LocalDateTime createdAt, PayoutStatus status) {
+    public static PayoutState createTestPayoutState(Long extPayoutId,
+                                                    LocalDateTime createdAt,
+                                                    PayoutStatus status,
+                                                    int i) {
         PayoutState payoutState = random(PayoutState.class);
         payoutState.setId(null);
         payoutState.setExtPayoutId(extPayoutId);
         payoutState.setEventCreatedAt(createdAt);
         payoutState.setStatus(status);
+        payoutState.setPayoutId("payout." + i);
         return payoutState;
     }
 
-    public static Payout createTestPayout(String partyId, String shopId, LocalDateTime createdAt, int i) {
+    public static Payout createTestPayout(String partyId,
+                                          String shopId,
+                                          LocalDateTime createdAt,
+                                          int i) {
         Payout payout = random(Payout.class);
         payout.setId(null);
+        payout.setPayoutId("payout." + i);
         payout.setShopId(shopId + i % 2);
         payout.setPartyId(partyId + i % 2);
         payout.setCreatedAt(createdAt);
@@ -117,7 +127,10 @@ public class TestDataUtil {
         return payout;
     }
 
-    public static Adjustment createTestAdjustment(String partyId, String shopId, LocalDateTime createdAt, int i) {
+    public static Adjustment createTestAdjustment(String partyId,
+                                                  String shopId,
+                                                  LocalDateTime createdAt,
+                                                  int i) {
         Adjustment adjustment = random(Adjustment.class);
         adjustment.setShopId(shopId + i % 2);
         adjustment.setPartyId(partyId + i % 2);
@@ -160,9 +173,17 @@ public class TestDataUtil {
         return payment;
     }
 
-    public static PaymentAggsByHour createTestPaymentAggsByHour(
-            LocalDateTime createdAt, String partyId, String shopId, Long amount, Long fee
-    ) {
+    public static PaymentAggsByHour createTestPaymentAggsByHour(LocalDateTime createdAt,
+                                                                String partyId,
+                                                                String shopId) {
+        return createTestPaymentAggsByHour(createdAt, partyId, shopId, 10000L, 2000L);
+    }
+
+    public static PaymentAggsByHour createTestPaymentAggsByHour(LocalDateTime createdAt,
+                                                                String partyId,
+                                                                String shopId,
+                                                                Long amount,
+                                                                Long fee) {
         PaymentAggsByHour paymentAggsByHour = new PaymentAggsByHour();
         paymentAggsByHour.setCreatedAt(createdAt);
         paymentAggsByHour.setPartyId(partyId);
@@ -176,9 +197,17 @@ public class TestDataUtil {
         return paymentAggsByHour;
     }
 
-    public static RefundAggsByHour createTestRefundAggsByHour(
-            LocalDateTime createdAt, String partyId, String shopId, Long amount, Long fee
-    ) {
+    public static RefundAggsByHour createTestRefundAggsByHour(LocalDateTime createdAt,
+                                                              String partyId,
+                                                              String shopId) {
+        return createTestRefundAggsByHour(createdAt, partyId, shopId, 10000L, 2000L);
+    }
+
+    public static RefundAggsByHour createTestRefundAggsByHour(LocalDateTime createdAt,
+                                                              String partyId,
+                                                              String shopId,
+                                                              Long amount,
+                                                              Long fee) {
         RefundAggsByHour refundAggsByHour = new RefundAggsByHour();
         refundAggsByHour.setCreatedAt(createdAt);
         refundAggsByHour.setPartyId(partyId);
@@ -191,9 +220,17 @@ public class TestDataUtil {
         return refundAggsByHour;
     }
 
-    public static PayoutAggsByHour createTestPayoutAggsByHour(
-            LocalDateTime createdAt, String partyId, String shopId, Long amount, Long fee
-    ) {
+    public static PayoutAggsByHour createTestPayoutAggsByHour(LocalDateTime createdAt,
+                                                              String partyId,
+                                                              String shopId) {
+        return createTestPayoutAggsByHour(createdAt, partyId, shopId, 10000L, 2000L);
+    }
+
+    public static PayoutAggsByHour createTestPayoutAggsByHour(LocalDateTime createdAt,
+                                                              String partyId,
+                                                              String shopId,
+                                                              Long amount,
+                                                              Long fee) {
         PayoutAggsByHour payoutAggsByHour = new PayoutAggsByHour();
         payoutAggsByHour.setCreatedAt(createdAt);
         payoutAggsByHour.setPartyId(partyId);
@@ -205,9 +242,16 @@ public class TestDataUtil {
         return payoutAggsByHour;
     }
 
-    public static AdjustmentAggsByHour createTestAdjAggsByHour(
-            LocalDateTime createdAt, String partyId, String shopId, Long amount
-    ) {
+    public static AdjustmentAggsByHour createTestAdjAggsByHour(LocalDateTime createdAt,
+                                                               String partyId,
+                                                               String shopId) {
+        return createTestAdjAggsByHour(createdAt, partyId, shopId, 10000L);
+    }
+
+    public static AdjustmentAggsByHour createTestAdjAggsByHour(LocalDateTime createdAt,
+                                                               String partyId,
+                                                               String shopId,
+                                                               Long amount) {
         AdjustmentAggsByHour adjustmentAggsByHour = new AdjustmentAggsByHour();
         adjustmentAggsByHour.setCreatedAt(createdAt);
         adjustmentAggsByHour.setPartyId(partyId);

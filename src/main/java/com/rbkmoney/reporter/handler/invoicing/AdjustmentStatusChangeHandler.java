@@ -44,7 +44,7 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
 
-        log.info("Processing adjustment with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
+        log.debug("Processing adjustment with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", status, invoiceId, sequenceId, changeId);
         String paymentId = invoiceChange.getInvoicePaymentChange().getId();
         String adjustmentId = adjustmentChange.getId();

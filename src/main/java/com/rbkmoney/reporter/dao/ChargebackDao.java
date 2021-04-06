@@ -5,6 +5,7 @@ import com.rbkmoney.reporter.domain.tables.records.ChargebackRecord;
 import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface ChargebackDao {
 
@@ -14,5 +15,11 @@ public interface ChargebackDao {
                                                  String shopId,
                                                  LocalDateTime fromTime,
                                                  LocalDateTime toTime);
+
+    Long getFundsReturnedAmount(String partyId,
+                                String shopId,
+                                String currencyCode,
+                                Optional<LocalDateTime> fromTime,
+                                LocalDateTime toTime);
 
 }

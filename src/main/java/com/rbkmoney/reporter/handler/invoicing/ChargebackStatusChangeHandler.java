@@ -40,7 +40,7 @@ public class ChargebackStatusChangeHandler implements InvoicingEventHandler {
         String invoiceId = event.getSourceId();
         long sequenceId = event.getEventId();
 
-        log.info("Processing chargeback with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
+        log.debug("Processing chargeback with status '{}' (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", chargebackStatus, invoiceId, sequenceId, changeId);
         String paymentId = invoiceChange.getInvoicePaymentChange().getId();
         String chargebackId = chargebackChange.getId();

@@ -2,15 +2,13 @@ package com.rbkmoney.reporter.config;
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import com.rbkmoney.easyway.AbstractTestUtils;
-import com.rbkmoney.reporter.dao.impl.AdjustmentDaoImpl;
-import com.rbkmoney.reporter.dao.impl.InvoiceDaoImpl;
-import com.rbkmoney.reporter.dao.impl.PaymentDaoImpl;
-import com.rbkmoney.reporter.dao.impl.RefundDaoImpl;
+import com.rbkmoney.reporter.dao.impl.*;
 import com.rbkmoney.reporter.service.impl.LocalReportCreatorServiceImpl;
 import com.rbkmoney.reporter.service.impl.LocalStatisticServiceImpl;
 import com.rbkmoney.reporter.service.impl.PartyServiceImpl;
 import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
 import com.rbkmoney.reporter.template.LocalPaymentRegistryTemplateImpl;
+import com.rbkmoney.reporter.template.LocalProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +53,14 @@ import java.util.Date;
                 PaymentDaoImpl.class,
                 RefundDaoImpl.class,
                 AdjustmentDaoImpl.class,
+                AggregatesDaoImpl.class,
+                PayoutDaoImpl.class,
+                ChargebackDaoImpl.class,
                 ApplicationConfig.class,
                 LocalStatisticServiceImpl.class,
                 LocalReportCreatorServiceImpl.class,
                 LocalPaymentRegistryTemplateImpl.class,
+                LocalProvisionOfServiceTemplateImpl.class,
         },
         initializers = AbstractLocalTemplateConfig.Initializer.class
 )
@@ -87,7 +89,6 @@ public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
             log.info("The PG server was started!");
         } catch (IOException e) {
             log.error("An error occurred while starting server ", e);
-            e.printStackTrace();
         }
     }
 
@@ -98,14 +99,15 @@ public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
             statement.close();
         } catch (SQLException e) {
             log.error("An error occurred while creating the database " + dbName, e);
-            e.printStackTrace();
         }
     }
 
     private static String prepareDbDir() {
+        String prefix = "pgdata_";
+        String testDirectory = "target" + File.separator;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String currentDate = dateFormat.format(new Date());
-        String dir = "target" + File.separator + "pgdata_" + currentDate;
+        String dir = testDirectory + prefix + currentDate;
         log.info("Postgres source files in {}", dir);
         return dir;
     }

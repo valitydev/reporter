@@ -1,4 +1,4 @@
-package com.rbkmoney.reporter.service;
+package com.rbkmoney.reporter.report;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.merch_stat.*;
@@ -17,9 +17,10 @@ import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.model.StatAdjustment;
+import com.rbkmoney.reporter.service.StatisticService;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
-import com.rbkmoney.reporter.util.BuildUtils;
+import com.rbkmoney.reporter.data.ReportsTestData;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,17 +72,17 @@ public class TemplateTest extends AbstractTemplateConfig {
 
             List<StatPayment> paymentList = new ArrayList<>();
             for (int i = 0; i < 3; ++i) {
-                paymentList.add(BuildUtils.buildStatPayment(i));
+                paymentList.add(ReportsTestData.buildStatPayment(i));
             }
 
             List<StatRefund> refundList = new ArrayList<>();
             for (int i = 0; i < 3; ++i) {
-                refundList.add(BuildUtils.buildStatRefund(i));
+                refundList.add(ReportsTestData.buildStatRefund(i));
             }
 
             List<StatAdjustment> adjustmentList = new ArrayList<>();
             for (int i = 0; i < 3; ++i) {
-                adjustmentList.add(BuildUtils.buildStatAdjustment(i));
+                adjustmentList.add(ReportsTestData.buildStatAdjustment(i));
             }
 
             given(statisticService.getCapturedPaymentsIterator(any(), any(), any(), any()))

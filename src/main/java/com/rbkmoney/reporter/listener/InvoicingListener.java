@@ -26,7 +26,7 @@ public class InvoicingListener {
     @KafkaListener(topics = "${kafka.topics.invoicing.id}",
             containerFactory = "kafkaInvoicingListenerContainerFactory")
     public void listen(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
-        log.info("Got invoicing machineEvent batch with size: {}", messages.size());
+        log.debug("Got invoicing machineEvent batch with size: {}", messages.size());
         try {
             invoicingService.handleEvents(
                     messages.stream()
@@ -44,7 +44,7 @@ public class InvoicingListener {
             throw e;
         }
         ack.acknowledge();
-        log.info("Invoicing batch has been committed, size={}, {}", messages.size(),
+        log.debug("Invoicing batch has been committed, size={}, {}", messages.size(),
                 LogUtil.toSummaryStringWithSinkEventValues(messages));
     }
 
