@@ -3,6 +3,8 @@ package com.rbkmoney.reporter.config;
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import com.rbkmoney.easyway.AbstractTestUtils;
 import com.rbkmoney.reporter.dao.impl.*;
+import com.rbkmoney.reporter.handler.comparing.PaymentRegistryReportComparingHandler;
+import com.rbkmoney.reporter.handler.comparing.ProvisionOfServiceReportComparingHandler;
 import com.rbkmoney.reporter.service.impl.LocalReportCreatorServiceImpl;
 import com.rbkmoney.reporter.service.impl.LocalStatisticServiceImpl;
 import com.rbkmoney.reporter.service.impl.PartyServiceImpl;
@@ -28,7 +30,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -56,11 +57,14 @@ import java.util.Date;
                 AggregatesDaoImpl.class,
                 PayoutDaoImpl.class,
                 ChargebackDaoImpl.class,
+                ReportComparingDataDaoImpl.class,
                 ApplicationConfig.class,
                 LocalStatisticServiceImpl.class,
                 LocalReportCreatorServiceImpl.class,
                 LocalPaymentRegistryTemplateImpl.class,
                 LocalProvisionOfServiceTemplateImpl.class,
+                PaymentRegistryReportComparingHandler.class,
+                ProvisionOfServiceReportComparingHandler.class
         },
         initializers = AbstractLocalTemplateConfig.Initializer.class
 )

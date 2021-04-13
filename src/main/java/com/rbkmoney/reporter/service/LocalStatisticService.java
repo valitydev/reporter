@@ -21,14 +21,18 @@ public interface LocalStatisticService {
 
     InvoiceRecord getInvoice(String invoiceId);
 
-    Cursor<PaymentRecord> getPaymentsCursor(String partyId, String shopId, LocalDateTime fromTime,
+    Cursor<PaymentRecord> getPaymentsCursor(String partyId,
+                                            String shopId,
+                                            LocalDateTime fromTime,
                                             LocalDateTime toTime);
 
     PaymentRecord getCapturedPayment(String partyId, String shopId, String invoiceId, String paymentId);
 
     Cursor<RefundRecord> getRefundsCursor(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
 
-    Cursor<AdjustmentRecord> getAdjustmentCursor(String partyId, String shopId, LocalDateTime fromTime,
+    Cursor<AdjustmentRecord> getAdjustmentCursor(String partyId,
+                                                 String shopId,
+                                                 LocalDateTime fromTime,
                                                  LocalDateTime toTime);
 
 }

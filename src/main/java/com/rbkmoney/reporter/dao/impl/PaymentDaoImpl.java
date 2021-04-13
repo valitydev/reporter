@@ -111,7 +111,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
     }
 
     private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getPaymentFundsAmountQuery(String partyId,
-                                                                                            String partyShopId,
+                                                                                            String shopId,
                                                                                             String currencyCode,
                                                                                             LocalDateTime fromTime,
                                                                                             LocalDateTime toTime) {
@@ -126,12 +126,12 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
                 .and(PAYMENT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYMENT.PARTY_ID.eq(partyId))
-                .and(PAYMENT.SHOP_ID.eq(partyShopId));
+                .and(PAYMENT.SHOP_ID.eq(shopId));
     }
 
     private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getAggByHourPaymentFundsAmountQuery(
             String partyId,
-            String partyShopId,
+            String shopId,
             String currencyCode,
             LocalDateTime fromTime,
             LocalDateTime toTime
@@ -146,7 +146,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT_AGGS_BY_HOUR.CREATED_AT.lessThan(toTime))
                 .and(PAYMENT_AGGS_BY_HOUR.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYMENT_AGGS_BY_HOUR.PARTY_ID.eq(partyId))
-                .and(PAYMENT_AGGS_BY_HOUR.SHOP_ID.eq(partyShopId));
+                .and(PAYMENT_AGGS_BY_HOUR.SHOP_ID.eq(shopId));
     }
 
     @Override
@@ -175,6 +175,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT.PARTY_ID.eq(partyId))
                 .and(PAYMENT.SHOP_ID.eq(shopId))
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
+                .orderBy(PAYMENT.STATUS_CREATED_AT.desc())
                 .fetchLazy();
     }
 

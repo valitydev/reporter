@@ -436,4 +436,16 @@ public final class MapperUtils {
         }
     }
 
+    public static ReportComparingData createReportComparingData(long reportId,
+                                                                ReportType reportType,
+                                                                ComparingStatus status,
+                                                                String failureReason) {
+        ReportComparingData comparingData = new ReportComparingData();
+        comparingData.setReportId(reportId);
+        comparingData.setReportType(reportType);
+        comparingData.setStatus(status);
+        comparingData.setFailureReason(failureReason);
+        return comparingData;
+    }
+
 }

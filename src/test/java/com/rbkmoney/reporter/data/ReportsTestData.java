@@ -21,7 +21,7 @@ public class ReportsTestData {
 
     public static final String DEFAULT_CURRENCY = "RUB";
 
-    public static StatAdjustment buildStatAdjustment(int i, String shopId) {
+    public static StatAdjustment buildStatAdjustment(int i, String shopId, LocalDateTime createdAt) {
         StatAdjustment statAdjustment = new StatAdjustment();
         statAdjustment.setAdjustmentId("id" + i);
         statAdjustment.setPaymentId("paymentId" + i);
@@ -29,13 +29,13 @@ public class ReportsTestData {
         statAdjustment.setAdjustmentAmount(123L + i);
         statAdjustment.setPartyShopId(shopId);
         statAdjustment.setAdjustmentCurrencyCode(DEFAULT_CURRENCY);
-        statAdjustment.setAdjustmentStatusCreatedAt(Instant.parse("2020-10-22T06:12:27Z"));
+        statAdjustment.setAdjustmentStatusCreatedAt(createdAt.toInstant(ZoneOffset.UTC));
         statAdjustment.setAdjustmentReason("You are the reason of my life");
         return statAdjustment;
     }
 
     public static StatAdjustment buildStatAdjustment(int i) {
-        return buildStatAdjustment(i, "shopId" + i);
+        return buildStatAdjustment(i, "shopId" + i, LocalDateTime.now());
     }
 
     public static AdjustmentRecord buildStatAdjustmentRecord(int i,
@@ -59,12 +59,16 @@ public class ReportsTestData {
     }
 
     public static StatRefund buildStatRefund(int i) {
+        return buildStatRefund(i, LocalDateTime.now().minusHours(i));
+    }
+
+    public static StatRefund buildStatRefund(int i, LocalDateTime createdAt) {
         StatRefund refund = new StatRefund();
         refund.setId("id" + i);
         refund.setPaymentId("paymentId" + i);
         refund.setInvoiceId("invoiceId" + i);
         refund.setStatus(InvoicePaymentRefundStatus
-                .succeeded(new InvoicePaymentRefundSucceeded("201" + i + "-03-22T06:12:27Z")));
+                .succeeded(new InvoicePaymentRefundSucceeded(createdAt.toInstant(ZoneOffset.UTC).toString())));
         refund.setAmount(123L + i);
         refund.setShopId("shopId" + i);
         refund.setId("" + i);
@@ -73,8 +77,8 @@ public class ReportsTestData {
         return refund;
     }
 
-    public static StatRefund buildStatRefund(int i, String shopId) {
-        StatRefund refund = buildStatRefund(i);
+    public static StatRefund buildStatRefund(int i, String shopId, LocalDateTime createdAt) {
+        StatRefund refund = buildStatRefund(i, createdAt);
         refund.setShopId(shopId);
         return refund;
     }
@@ -83,7 +87,7 @@ public class ReportsTestData {
                                                  String partyId,
                                                  String shopId,
                                                  long amount,
-                                                 LocalDateTime ceratedAt) {
+                                                 LocalDateTime createdAt) {
         RefundRecord refund = new RefundRecord();
         refund.setPaymentId("paymentId" + i);
         refund.setInvoiceId("invoiceId" + i);
@@ -91,8 +95,8 @@ public class ReportsTestData {
         refund.setPartyId(partyId);
         refund.setShopId(shopId);
         refund.setStatus(RefundStatus.succeeded);
-        refund.setCreatedAt(ceratedAt);
-        refund.setStatusCreatedAt(ceratedAt);
+        refund.setCreatedAt(createdAt);
+        refund.setStatusCreatedAt(createdAt);
         refund.setAmount(amount);
         refund.setCurrencyCode(DEFAULT_CURRENCY);
         refund.setReason("You are the reason of my life");
@@ -100,12 +104,16 @@ public class ReportsTestData {
     }
 
     public static StatPayment buildStatPayment(int i) {
+        return buildStatPayment(i, LocalDateTime.now().minusHours(i));
+    }
+
+    public static StatPayment buildStatPayment(int i, LocalDateTime createdAt) {
         StatPayment payment = new StatPayment();
         payment.setId("id" + i);
-        payment.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
+        payment.setCreatedAt(TypeUtil.temporalToString(createdAt));
         payment.setInvoiceId("invoiceId" + i);
         InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
-        invoicePaymentCaptured.setAt("201" + i + "-03-22T06:12:27Z");
+        invoicePaymentCaptured.setAt(createdAt.toInstant(ZoneOffset.UTC).toString());
         payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
         PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(
                 new BankCard("token", null, "424" + i, "56789" + i))
@@ -119,8 +127,8 @@ public class ReportsTestData {
         return payment;
     }
 
-    public static StatPayment buildStatPayment(int i, String shopId) {
-        StatPayment payment = buildStatPayment(i);
+    public static StatPayment buildStatPayment(int i, String shopId, LocalDateTime createdAt) {
+        StatPayment payment = buildStatPayment(i, createdAt);
         payment.setId("paymentId" + i);
         payment.setShopId(shopId);
         return payment;
@@ -131,20 +139,23 @@ public class ReportsTestData {
         InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
         invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
         payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-        PaymentResourcePayer paymentResourcePayer =
-                new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
+        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(
+                        PaymentTool.bank_card(
+                                new BankCard("token", null, "4249", "567890")
+                        )
+                );
         paymentResourcePayer.setEmail("xyz@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
         return payment;
     }
 
-    public static PaymentRecord buildPaymentRecord(int index, String partyId, String shopId) {
-        LocalDateTime dateTime = Instant.parse("201" + index + "-03-22T06:12:27Z")
-                .atZone(ZoneOffset.UTC)
-                .toLocalDateTime();
+    public static PaymentRecord buildPaymentRecord(int index,
+                                                   String partyId,
+                                                   String shopId,
+                                                   LocalDateTime createdAt) {
         long amount = 123L + index;
         long feeAmount = 2L + index;
-        return buildPaymentRecord(index, partyId, shopId, amount, feeAmount, dateTime);
+        return buildPaymentRecord(index, partyId, shopId, amount, feeAmount, createdAt);
     }
 
     public static PaymentRecord buildPaymentRecord(int index,

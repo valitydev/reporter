@@ -38,6 +38,7 @@
         <db.embedded.password>${db.password}</db.embedded.password>
         <db.embedded.port>15432</db.embedded.port>
         <db.embedded.url>jdbc:postgresql://localhost:${db.embedded.port}/${db.embedded.name}</db.embedded.url>
+        <checkstyle.config.suppressions.path>./src/main/resources/checkstyle/checkstyle-suppressions.xml</checkstyle.config.suppressions.path>
     </properties>
 
     <dependencies>

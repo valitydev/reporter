@@ -40,6 +40,7 @@ import java.util.function.Supplier;
                 RefundDaoImpl.class,
                 AdjustmentDaoImpl.class,
                 AggregatesDaoImpl.class,
+                ReportComparingDataDaoImpl.class,
                 ContractMetaDaoImpl.class,
         },
         initializers = AbstractDaoConfig.Initializer.class

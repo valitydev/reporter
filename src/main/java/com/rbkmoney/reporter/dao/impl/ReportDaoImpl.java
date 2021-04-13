@@ -41,14 +41,17 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
 
     @Override
     public Report getReport(long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(
-                REPORT.ID.eq(reportId));
+        Query query = getDslContext()
+                .selectFrom(REPORT)
+                .where(REPORT.ID.eq(reportId));
         return fetchOne(query, reportRowMapper);
     }
 
     @Override
     public Report getReportDoUpdate(long reportId) throws DaoException {
-        Query query = getDslContext().selectFrom(REPORT).where(REPORT.ID.eq(reportId))
+        Query query = getDslContext()
+                .selectFrom(REPORT)
+                .where(REPORT.ID.eq(reportId))
                 .forUpdate();
         return fetchOne(query, reportRowMapper);
     }
@@ -126,8 +129,11 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
         return fetch(query, reportRowMapper);
     }
 
-    private Condition buildCondition(String partyId, String shopId, List<ReportType> reportTypes,
-                                     LocalDateTime fromTime, LocalDateTime toTime) {
+    private Condition buildCondition(String partyId,
+                                     String shopId,
+                                     List<ReportType> reportTypes,
+                                     LocalDateTime fromTime,
+                                     LocalDateTime toTime) {
         Condition condition = REPORT.PARTY_ID.eq(partyId)
                 .and(ofNullable(shopId).map(REPORT.PARTY_SHOP_ID::eq).orElse(trueCondition()))
                 .and(REPORT.CREATED_AT.ge(fromTime))
@@ -140,8 +146,11 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public List<Report> getReportsByRange(String partyId, String shopId, List<ReportType> reportTypes,
-                                          LocalDateTime fromTime, LocalDateTime toTime) throws DaoException {
+    public List<Report> getReportsByRange(String partyId,
+                                          String shopId,
+                                          List<ReportType> reportTypes,
+                                          LocalDateTime fromTime,
+                                          LocalDateTime toTime) throws DaoException {
         Condition condition = buildCondition(partyId, shopId, reportTypes, fromTime, toTime);
         Query query = getDslContext().selectFrom(REPORT).where(condition);
         return fetch(query, reportRowMapper);
@@ -176,8 +185,13 @@ public class ReportDaoImpl extends AbstractGenericDao implements ReportDao {
     }
 
     @Override
-    public long createReport(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime,
-                             ReportType reportType, String timezone, LocalDateTime createdAt) throws DaoException {
+    public long createReport(String partyId,
+                             String shopId,
+                             LocalDateTime fromTime,
+                             LocalDateTime toTime,
+                             ReportType reportType,
+                             String timezone,
+                             LocalDateTime createdAt) throws DaoException {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         Query query = getDslContext().insertInto(REPORT)

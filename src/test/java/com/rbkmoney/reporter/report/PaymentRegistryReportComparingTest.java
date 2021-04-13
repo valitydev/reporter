@@ -94,8 +94,9 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
         List<StatPayment> statPaymentList = new ArrayList<>();
         List<PaymentRecord> paymentRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            statPaymentList.add(ReportsTestData.buildStatPayment(i, shopId));
-            PaymentRecord paymentRecord = ReportsTestData.buildPaymentRecord(i, partyId, shopId);
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+            statPaymentList.add(ReportsTestData.buildStatPayment(i, shopId, createdAt));
+            PaymentRecord paymentRecord = ReportsTestData.buildPaymentRecord(i, partyId, shopId, createdAt);
             paymentRecordList.add(paymentRecord);
             paymentDao.savePayment(paymentRecord.into(Payment.class));
         }
@@ -103,11 +104,10 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
         List<StatRefund> statRefundList = new ArrayList<>();
         List<RefundRecord> refundRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            statRefundList.add(ReportsTestData.buildStatRefund(i, shopId));
-            LocalDateTime localDateTime = Instant.parse("201" + i + "-03-22T06:12:27Z")
-                    .atZone(ZoneOffset.UTC).toLocalDateTime();
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+            statRefundList.add(ReportsTestData.buildStatRefund(i, shopId, createdAt));
             RefundRecord refundRecord =
-                    ReportsTestData.buildRefundRecord(i, partyId, shopId, 123L + i, localDateTime);
+                    ReportsTestData.buildRefundRecord(i, partyId, shopId, 123L + i, createdAt);
             refundRecordList.add(refundRecord);
             refundDao.saveRefund(refundRecord.into(Refund.class));
         }
@@ -115,11 +115,10 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
         List<StatAdjustment> adjustmentList = new ArrayList<>();
         List<AdjustmentRecord> adjustmentRecordList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
-            adjustmentList.add(ReportsTestData.buildStatAdjustment(i, shopId));
-            LocalDateTime localDateTime =
-                    Instant.parse("2020-10-22T06:12:27Z").atZone(ZoneOffset.UTC).toLocalDateTime();
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+            adjustmentList.add(ReportsTestData.buildStatAdjustment(i, shopId, createdAt));
             AdjustmentRecord adjustmentRecord =
-                    ReportsTestData.buildStatAdjustmentRecord(i, partyId, shopId, 123L + i, localDateTime);
+                    ReportsTestData.buildStatAdjustmentRecord(i, partyId, shopId, 123L + i, createdAt);
             adjustmentRecordList.add(adjustmentRecord);
             adjustmentDao.saveAdjustment(adjustmentRecord.into(Adjustment.class));
         }

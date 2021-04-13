@@ -73,7 +73,7 @@ spring:
   task:
     scheduling:
       pool:
-        size: 10
+        size: 11
 
 kafka:
   bootstrap-servers: localhost:9092
@@ -150,6 +150,11 @@ report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
   includeAdjustments: false
+  local:
+    test:
+      comparing:
+        timeout: 30000
+        enabled: false
 
 storage:
   endpoint: localhost:42827

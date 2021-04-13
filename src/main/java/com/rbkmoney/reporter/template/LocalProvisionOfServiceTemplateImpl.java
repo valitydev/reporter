@@ -13,10 +13,9 @@ import com.rbkmoney.reporter.service.LocalStatisticService;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.util.FormatUtil;
 import com.rbkmoney.reporter.util.TimeUtil;
+import lombok.RequiredArgsConstructor;
 import org.jxls.common.Context;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 @Component
+@RequiredArgsConstructor
 public class LocalProvisionOfServiceTemplateImpl implements ReportTemplate {
 
     public static final String DEFAULT_CURRENCY_CODE = "RUB";
@@ -37,21 +37,8 @@ public class LocalProvisionOfServiceTemplateImpl implements ReportTemplate {
 
     private final ContractMetaDao contractMetaDao;
 
-    private final Resource resource;
-
-    @Autowired
-    public LocalProvisionOfServiceTemplateImpl(
-            LocalStatisticService localStatisticService,
-            PartyService partyService,
-            ContractMetaDao contractMetaDao,
-            @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}")
-                    ClassPathResource resource
-    ) {
-        this.localStatisticService = localStatisticService;
-        this.partyService = partyService;
-        this.contractMetaDao = contractMetaDao;
-        this.resource = resource;
-    }
+    @Value("${report.type.pos.path|classpath:templates/provision_of_service_act.xlsx}")
+    private Resource resource;
 
     @Override
     public boolean isAccept(ReportType reportType) {
