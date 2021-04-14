@@ -450,18 +450,24 @@ public final class MapperUtils {
     }
 
     public static void removeNullSymbols(Object object) {
-        String stringClassName = "String";
         for (Field field : object.getClass().getDeclaredFields()) {
-            if (stringClassName.equalsIgnoreCase(field.getType().getSimpleName())) {
+            removeNullSymbolsFromString(field, object);
+        }
+    }
+
+    private static void removeNullSymbolsFromString(Field field, Object object) {
+        String stringClassName = "String";
+        if (stringClassName.equalsIgnoreCase(field.getType().getSimpleName())) {
+            try {
                 field.setAccessible(true);
-                try {
+                if (field.get(object) != null) {
                     String resultString = field.get(object).toString()
                             .replace("\u0000", "")
                             .replace("\\u0000", "");
                     field.set(object, resultString);
-                } catch (IllegalAccessException ex) {
-                    log.warn("Received exception while removing null characters from strings", ex);
                 }
+            } catch (IllegalAccessException ex) {
+                log.warn("Received exception while removing null characters from strings", ex);
             }
         }
     }
