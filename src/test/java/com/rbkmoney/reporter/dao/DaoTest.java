@@ -236,7 +236,7 @@ public class DaoTest extends AbstractDaoConfig {
         String shopId = random(String.class);
         Invoice invoice = random(Invoice.class);
         invoice.setPartyId(partyId);
-        invoice.setShopId(shopId);
+        invoice.setShopId(shopId + "\u0000" + "x");
         invoice.setStatus(InvoiceStatus.paid);
         invoiceDao.saveInvoice(invoice);
 

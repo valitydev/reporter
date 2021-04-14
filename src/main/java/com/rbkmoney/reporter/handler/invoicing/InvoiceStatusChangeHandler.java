@@ -54,8 +54,7 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
                 return;
             }
         }
-        Invoice invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);
-        Long extInvoiceId = invoiceDao.saveInvoice(invoiceRecord);
+        Long extInvoiceId = processInvoiceData(hgInvoice, event);
 
         InvoiceAdditionalInfo invoiceAdditionalInfo = MapperUtils.createInvoiceAdditionalInfoRecord(
                 hgInvoice, extInvoiceId
@@ -63,6 +62,20 @@ public class InvoiceStatusChangeHandler implements InvoicingEventHandler {
         invoiceDao.saveAdditionalInvoiceInfo(invoiceAdditionalInfo);
         log.info("Processing invoice with status '{}' completed (invoiceId = '{}', sequenceId = '{}', " +
                 "changeId = '{}')", invoiceStatus, invoiceId, sequenceId, changeId);
+    }
+
+    private Long processInvoiceData(com.rbkmoney.damsel.payment_processing.Invoice hgInvoice,
+                                    MachineEvent event) {
+        Invoice invoiceRecord = null;
+        try {
+            invoiceRecord = MapperUtils.createInvoiceRecord(hgInvoice, event);
+            return invoiceDao.saveInvoice(invoiceRecord);
+        } catch (Exception ex) {
+            log.error("Received an error when service processed invoice data (invoiceRecord: {}, " +
+                    "hgInvoice: {}, event: {})", invoiceRecord == null ? "empty" : invoiceRecord,
+                    hgInvoice, event, ex);
+            throw ex;
+        }
     }
 
     @Override

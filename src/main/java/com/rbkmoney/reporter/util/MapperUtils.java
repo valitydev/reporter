@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -446,6 +447,23 @@ public final class MapperUtils {
         comparingData.setStatus(status);
         comparingData.setFailureReason(failureReason);
         return comparingData;
+    }
+
+    public static void removeNullSymbols(Object object) {
+        String stringClassName = "String";
+        for (Field field : object.getClass().getDeclaredFields()) {
+            if (stringClassName.equalsIgnoreCase(field.getType().getSimpleName())) {
+                field.setAccessible(true);
+                try {
+                    String resultString = field.get(object).toString()
+                            .replace("\u0000", "")
+                            .replace("\\u0000", "");
+                    field.set(object, resultString);
+                } catch (IllegalAccessException ex) {
+                    log.warn("Received exception while removing null characters from strings", ex);
+                }
+            }
+        }
     }
 
 }

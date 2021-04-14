@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Invoice.INVOICE;
 import static com.rbkmoney.reporter.domain.tables.InvoiceAdditionalInfo.INVOICE_ADDITIONAL_INFO;
+import static com.rbkmoney.reporter.util.MapperUtils.removeNullSymbols;
 
 @Component
 public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
@@ -30,6 +31,7 @@ public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
 
     @Override
     public Long saveInvoice(Invoice invoice) {
+        removeNullSymbols(invoice);
         return getDslContext()
                 .insertInto(INVOICE)
                 .set(getDslContext().newRecord(INVOICE, invoice))
