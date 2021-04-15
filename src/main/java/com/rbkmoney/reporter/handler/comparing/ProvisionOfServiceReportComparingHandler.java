@@ -6,6 +6,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.LocalStatisticService;
 import com.rbkmoney.reporter.service.StatisticService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.time.ZoneOffset;
 
 import static com.rbkmoney.reporter.template.LocalProvisionOfServiceTemplateImpl.DEFAULT_CURRENCY_CODE;
 
+@Slf4j
 @Component
 public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbstractHandler {
 
@@ -45,6 +47,8 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
         String shopId = report.getPartyShopId();
         LocalDateTime fromTime = report.getFromTime();
         LocalDateTime toTime = report.getToTime();
+        log.info("Start checking ProvisionOfService funds (reportId: {}, partyId: {}, shopId: {}, " +
+                "fromTime: {}, toTime:{})", reportId, partyId, shopId, fromTime, toTime);
 
         ShopAccountingModel magistaModel = statisticService.getShopAccounting(
                 partyId,
@@ -61,6 +65,7 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
                 fromTime,
                 toTime
         );
+        log.info("Received models for report {}: magista - {}, local - {}", reportId, magistaModel, localModel);
 
         if (checkProvisionOfServiceModels(magistaModel, localModel, reportId, Strings.EMPTY)) {
             return true;
@@ -74,6 +79,9 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
         String partyId = report.getPartyId();
         String shopId = report.getPartyShopId();
         LocalDateTime fromTime = report.getFromTime();
+        log.info("Start checking ProvisionOfService balances (reportId: {}, partyId: {}, shopId: {}, " +
+                "fromTime: {})", reportId, partyId, shopId, fromTime);
+
         ShopAccountingModel magistaModel = statisticService.getShopAccounting(
                 partyId,
                 shopId,
@@ -83,6 +91,9 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
 
         ShopAccountingModel localModel =
                 localStatisticService.getShopAccounting(partyId, shopId, DEFAULT_CURRENCY_CODE, fromTime);
+
+        log.info("Received models for report {} (balances): magista - {}, local - {}",
+                reportId, magistaModel, localModel);
 
         if (checkProvisionOfServiceModels(magistaModel, localModel, reportId, "(balances)")) {
             return true;

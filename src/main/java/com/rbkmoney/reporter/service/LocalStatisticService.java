@@ -14,7 +14,10 @@ public interface LocalStatisticService {
 
     ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, LocalDateTime toTime);
 
-    ShopAccountingModel getShopAccounting(String partyId, String shopId, String currencyCode, LocalDateTime fromTime,
+    ShopAccountingModel getShopAccounting(String partyId,
+                                          String shopId,
+                                          String currencyCode,
+                                          LocalDateTime fromTime,
                                           LocalDateTime toTime);
 
     Map<String, String> getPurposes(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);

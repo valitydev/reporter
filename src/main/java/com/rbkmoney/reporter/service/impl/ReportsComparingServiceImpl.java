@@ -31,6 +31,7 @@ public class ReportsComparingServiceImpl implements ReportsComparingService {
             return;
         }
         Report report = currentReport.get();
+        log.info("Received report for comparing: {}", report);
         paymentRegistryReportComparingHandler.compareReport(report);
         if (report.getType() == ReportType.provision_of_service) {
             provisionOfServiceReportComparingHandler.compareReport(report);
