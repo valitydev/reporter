@@ -8,10 +8,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.PaymentAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.model.PaymentFundsAmount;
 import com.zaxxer.hikari.HikariDataSource;
-import org.jooq.Cursor;
-import org.jooq.Record2;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,15 +77,35 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                                                     String currencyCode,
                                                     Optional<LocalDateTime> fromTime,
                                                     LocalDateTime toTime) {
-        LocalDateTime reportFromTime = fromTime.orElse(LocalDateTime.now());
-        LocalDateTime fromTimeTruncHour = reportFromTime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime reportFromTime = fromTime
+                .orElse(
+                        getFirstOparationDateTime(partyId, shopId)
+                                .orElse(toTime)
+                );
+        if (toTime.isEqual(reportFromTime)) {
+            return new PaymentFundsAmount(0L, 0L);
+        }
+        if (reportFromTime.until(toTime, ChronoUnit.HOURS) > 1) {
+            return getPaymentFundsAmountWithAggs(partyId, shopId, currencyCode, reportFromTime, toTime);
+        } else {
+            var fundsResult = getPaymentFundsAmountQuery(
+                    partyId, shopId, currencyCode, reportFromTime, toTime
+            ).fetchOne();
+            return mapFundsResultToPaymentFundsAmount(fundsResult);
+        }
+    }
+
+    private PaymentFundsAmount getPaymentFundsAmountWithAggs(String partyId,
+                                                             String shopId,
+                                                             String currencyCode,
+                                                             LocalDateTime fromTime,
+                                                             LocalDateTime toTime) {
+        LocalDateTime fromTimeTruncHour = fromTime.truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
 
-        SelectConditionStep<Record2<BigDecimal, BigDecimal>> youngPaymentShopAccountingQuery =
-                getPaymentFundsAmountQuery(
-                    partyId, shopId, currencyCode, reportFromTime, fromTimeTruncHour.plusHours(1L)
-            );
-
+        var youngPaymentShopAccountingQuery = getPaymentFundsAmountQuery(
+                partyId, shopId, currencyCode, fromTime, fromTimeTruncHour.plusHours(1L)
+        );
         var paymentAggByHourShopAccountingQuery = getAggByHourPaymentFundsAmountQuery(
                 partyId, shopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
         );
@@ -105,9 +122,26 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                         .unionAll(oldPaymentShopAccountingQuery)
         ).fetchOne();
 
+        return mapFundsResultToPaymentFundsAmount(fundsResult);
+    }
+
+    private static PaymentFundsAmount mapFundsResultToPaymentFundsAmount(
+            Record2<BigDecimal, BigDecimal> fundsResult
+    ) {
         return Optional.ofNullable(fundsResult)
                 .map(result -> new PaymentFundsAmount(getFunds(result.value1()), getFunds(result.value2())))
                 .orElse(new PaymentFundsAmount(0L, 0L));
+    }
+
+    private Optional<LocalDateTime> getFirstOparationDateTime(String partyId, String shopId) {
+        Record1<LocalDateTime> result = getDslContext()
+                .select(DSL.min(PAYMENT.STATUS_CREATED_AT))
+                .from(PAYMENT)
+                .where(PAYMENT.PARTY_ID.eq(partyId))
+                .and(PAYMENT.SHOP_ID.eq(shopId))
+                .fetchOne();
+        return Optional.ofNullable(result)
+                .map(r -> r.value1());
     }
 
     private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getPaymentFundsAmountQuery(String partyId,
@@ -175,7 +209,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT.PARTY_ID.eq(partyId))
                 .and(PAYMENT.SHOP_ID.eq(shopId))
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
-                .orderBy(PAYMENT.STATUS_CREATED_AT.desc())
+                .orderBy(PAYMENT.STATUS_CREATED_AT)
                 .fetchLazy();
     }
 

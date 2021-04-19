@@ -93,8 +93,9 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
         shopId = random(String.class);
         List<StatPayment> statPaymentList = new ArrayList<>();
         List<PaymentRecord> paymentRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        int defaultOperationsCount = 3;
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             statPaymentList.add(ReportsTestData.buildStatPayment(i, shopId, createdAt));
             PaymentRecord paymentRecord = ReportsTestData.buildPaymentRecord(i, partyId, shopId, createdAt);
             paymentRecordList.add(paymentRecord);
@@ -103,8 +104,8 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
 
         List<StatRefund> statRefundList = new ArrayList<>();
         List<RefundRecord> refundRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             statRefundList.add(ReportsTestData.buildStatRefund(i, shopId, createdAt));
             RefundRecord refundRecord =
                     ReportsTestData.buildRefundRecord(i, partyId, shopId, 123L + i, createdAt);
@@ -114,8 +115,8 @@ public class PaymentRegistryReportComparingTest extends AbstractLocalTemplateCon
 
         List<StatAdjustment> adjustmentList = new ArrayList<>();
         List<AdjustmentRecord> adjustmentRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             adjustmentList.add(ReportsTestData.buildStatAdjustment(i, shopId, createdAt));
             AdjustmentRecord adjustmentRecord =
                     ReportsTestData.buildStatAdjustmentRecord(i, partyId, shopId, 123L + i, createdAt);

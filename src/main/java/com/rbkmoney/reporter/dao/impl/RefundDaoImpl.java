@@ -85,7 +85,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .and(REFUND.PARTY_ID.eq(partyId))
                 .and(REFUND.SHOP_ID.eq(shopId))
                 .and(REFUND.STATUS.eq(RefundStatus.succeeded))
-                .orderBy(REFUND.STATUS_CREATED_AT.desc())
+                .orderBy(REFUND.STATUS_CREATED_AT)
                 .fetchLazy();
     }
 
@@ -95,12 +95,34 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                                        String currencyCode,
                                        Optional<LocalDateTime> fromTime,
                                        LocalDateTime toTime) {
-        LocalDateTime reportFromTime = fromTime.orElse(LocalDateTime.now());
-        LocalDateTime fromTimeTruncHour = reportFromTime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime reportFromTime = fromTime
+                .orElse(
+                        getFirstOparationDateTime(partyId, partyShopId)
+                                .orElse(toTime)
+                );
+        if (toTime.isEqual(reportFromTime)) {
+            return 0L;
+        }
+        if (reportFromTime.until(toTime, ChronoUnit.HOURS) > 1) {
+            return getFundsRefundedAmountWithAggs(partyId, partyShopId, currencyCode, reportFromTime, toTime);
+        } else {
+            var fundsRefundedAmountResult = getRefundFundsAmountQuery(
+                    partyId, partyShopId, currencyCode, reportFromTime, toTime
+            ).fetchOne();
+            return getFundsAmountResult(fundsRefundedAmountResult);
+        }
+    }
+
+    private Long getFundsRefundedAmountWithAggs(String partyId,
+                                                String partyShopId,
+                                                String currencyCode,
+                                                LocalDateTime fromTime,
+                                                LocalDateTime toTime) {
+        LocalDateTime fromTimeTruncHour = fromTime.truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
 
         var youngRefundShopAccountingQuery = getRefundFundsAmountQuery(
-                partyId, partyShopId, currencyCode, reportFromTime, fromTimeTruncHour.plusHours(1L)
+                partyId, partyShopId, currencyCode, fromTime, fromTimeTruncHour.plusHours(1L)
         );
         var refundAggByHourShopAccountingQuery = getAggByHourRefundFundsAmountQuery(
                 partyId, partyShopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
@@ -117,6 +139,17 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 )
                 .fetchOne();
         return getFundsAmountResult(fundsRefundedAmountResult);
+    }
+
+    private Optional<LocalDateTime> getFirstOparationDateTime(String partyId, String shopId) {
+        Record1<LocalDateTime> result = getDslContext()
+                .select(DSL.min(REFUND.STATUS_CREATED_AT))
+                .from(REFUND)
+                .where(REFUND.PARTY_ID.eq(partyId))
+                .and(REFUND.SHOP_ID.eq(shopId))
+                .fetchOne();
+        return Optional.ofNullable(result)
+                .map(r -> r.value1());
     }
 
     private SelectConditionStep<Record1<BigDecimal>> getRefundFundsAmountQuery(String partyId,

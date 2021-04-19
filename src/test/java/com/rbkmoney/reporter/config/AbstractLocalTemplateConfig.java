@@ -1,7 +1,5 @@
 package com.rbkmoney.reporter.config;
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres;
-import com.rbkmoney.easyway.AbstractTestUtils;
 import com.rbkmoney.reporter.dao.impl.*;
 import com.rbkmoney.reporter.handler.comparing.PaymentRegistryReportComparingHandler;
 import com.rbkmoney.reporter.handler.comparing.ProvisionOfServiceReportComparingHandler;
@@ -14,29 +12,14 @@ import com.rbkmoney.reporter.template.LocalProvisionOfServiceTemplateImpl;
 import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
 import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
@@ -68,83 +51,6 @@ import java.util.Date;
         },
         initializers = AbstractLocalTemplateConfig.Initializer.class
 )
-@TestPropertySource("classpath:application.yml")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
-public abstract class AbstractLocalTemplateConfig extends AbstractTestUtils {
-
-    private static final int PORT = 15432;
-    private static final String dbName = "reporter";
-    private static final String dbUser = "postgres";
-    private static final String dbPassword = "postgres";
-    private static final String jdbcUrl = "jdbc:postgresql://localhost:" + PORT + "/" + dbName;
-
-    private static EmbeddedPostgres postgres;
-
-    private static void startPgServer() {
-        try {
-            log.info("The PG server is starting...");
-            EmbeddedPostgres.Builder builder = EmbeddedPostgres.builder();
-            String dbDir = prepareDbDir();
-            log.info("Dir for PG files: " + dbDir);
-            builder.setDataDirectory(dbDir);
-            builder.setPort(PORT);
-            postgres = builder.start();
-            log.info("The PG server was started!");
-        } catch (IOException e) {
-            log.error("An error occurred while starting server ", e);
-        }
-    }
-
-    private static void createDatabase() {
-        try (Connection conn = postgres.getPostgresDatabase().getConnection()) {
-            Statement statement = conn.createStatement();
-            statement.execute("CREATE DATABASE " + dbName);
-            statement.close();
-        } catch (SQLException e) {
-            log.error("An error occurred while creating the database " + dbName, e);
-        }
-    }
-
-    private static String prepareDbDir() {
-        String prefix = "pgdata_";
-        String testDirectory = "target" + File.separator;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String currentDate = dateFormat.format(new Date());
-        String dir = testDirectory + prefix + currentDate;
-        log.info("Postgres source files in {}", dir);
-        return dir;
-    }
-
-    @After
-    public void destroy() throws IOException {
-        if (postgres != null) {
-            postgres.close();
-            postgres = null;
-        }
-    }
-
-    private DataSource getDataSource() {
-        return postgres.getDatabase(dbUser, dbName);
-    }
-
-    public static class Initializer extends ConfigFileApplicationContextInitializer {
-
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            super.initialize(configurableApplicationContext);
-            TestPropertyValues.of("spring.datasource.url=" + jdbcUrl,
-                    "spring.datasource.username=" + dbUser,
-                    "spring.datasource.password=" + dbPassword,
-                    "flyway.url=" + jdbcUrl,
-                    "flyway.user=" + dbUser,
-                    "flyway.password=" + dbPassword)
-                    .applyTo(configurableApplicationContext);
-
-            if (postgres == null) {
-                startPgServer();
-                createDatabase();
-            }
-        }
-    }
+public abstract class AbstractLocalTemplateConfig extends AbstractDaoConfig {
 }

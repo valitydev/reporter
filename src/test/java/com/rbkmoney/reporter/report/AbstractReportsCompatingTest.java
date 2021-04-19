@@ -28,11 +28,9 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
     @Autowired
     private ChargebackDao chargebackDao;
 
-    static final String TEST_PARTY_ID = "TestParty";
-
-    static final String TEST_SHOP_ID = "TestShop";
-
-    List<PayoutRecord> preparePayoutRecords(int count,
+    List<PayoutRecord> preparePayoutRecords(String partyId,
+                                            String shopId,
+                                            int count,
                                             long amount,
                                             LocalDateTime startFrom,
                                             long createdAtDelta) {
@@ -40,7 +38,7 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         LocalDateTime createdAt = startFrom.minusMinutes(createdAtDelta);
         for (int i = 0; i < count; ++i) {
             PayoutRecord payoutRecord =
-                    ReportsTestData.buildPayoutRecord(i, TEST_PARTY_ID, TEST_SHOP_ID, amount, createdAt);
+                    ReportsTestData.buildPayoutRecord(i, partyId, shopId, amount, createdAt);
             payoutRecordList.add(payoutRecord);
             payoutDao.savePayout(payoutRecord.into(Payout.class));
             PayoutStateRecord payoutStateRecord = ReportsTestData.buildPayoutStateRecord(i, createdAt);
@@ -50,7 +48,9 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         return payoutRecordList;
     }
 
-    List<AdjustmentRecord> prepareAdjustmentRecords(int count,
+    List<AdjustmentRecord> prepareAdjustmentRecords(String partyId,
+                                                    String shopId,
+                                                    int count,
                                                     long amount,
                                                     LocalDateTime startFrom,
                                                     long createdAtDelta) {
@@ -58,7 +58,7 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         LocalDateTime createdAt = startFrom.minusMinutes(createdAtDelta);
         for (int i = 0; i < count; ++i) {
             AdjustmentRecord adjustmentRecord =
-                    ReportsTestData.buildStatAdjustmentRecord(i, TEST_PARTY_ID, TEST_SHOP_ID, amount, createdAt);
+                    ReportsTestData.buildStatAdjustmentRecord(i, partyId, shopId, amount, createdAt);
             adjustmentRecordList.add(adjustmentRecord);
             adjustmentDao.saveAdjustment(adjustmentRecord.into(Adjustment.class));
             createdAt = createdAt.minusMinutes(createdAtDelta);
@@ -66,7 +66,9 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         return adjustmentRecordList;
     }
 
-    List<RefundRecord> prepareRefundRecords(int count,
+    List<RefundRecord> prepareRefundRecords(String partyId,
+                                            String shopId,
+                                            int count,
                                             long amount,
                                             LocalDateTime startFrom,
                                             long createdAtDelta) {
@@ -74,7 +76,7 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         LocalDateTime createdAt = startFrom.minusMinutes(createdAtDelta);
         for (int i = 0; i < count; ++i) {
             RefundRecord refundRecord =
-                    ReportsTestData.buildRefundRecord(i, TEST_PARTY_ID, TEST_SHOP_ID, amount, createdAt);
+                    ReportsTestData.buildRefundRecord(i, partyId, shopId, amount, createdAt);
             refundRecordList.add(refundRecord);
             refundDao.saveRefund(refundRecord.into(Refund.class));
             createdAt = createdAt.minusMinutes(createdAtDelta);
@@ -82,7 +84,9 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         return refundRecordList;
     }
 
-    List<PaymentRecord> preparePaymentRecords(int count,
+    List<PaymentRecord> preparePaymentRecords(String partyId,
+                                              String shopId,
+                                              int count,
                                               long amount,
                                               long feeAmount,
                                               LocalDateTime startFrom,
@@ -91,7 +95,7 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         LocalDateTime createdAt = startFrom.minusMinutes(createdAtDelta);
         for (int i = count; i > 0; i--) {
             PaymentRecord paymentRecord =
-                    ReportsTestData.buildPaymentRecord(i, TEST_PARTY_ID, TEST_SHOP_ID, amount, feeAmount, createdAt);
+                    ReportsTestData.buildPaymentRecord(i, partyId, shopId, amount, feeAmount, createdAt);
             paymentRecordList.add(paymentRecord);
             paymentDao.savePayment(paymentRecord.into(Payment.class));
             createdAt = createdAt.minusMinutes(createdAtDelta);
@@ -99,7 +103,9 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         return paymentRecordList;
     }
 
-    List<ChargebackRecord> prepareChargebackRecords(int count,
+    List<ChargebackRecord> prepareChargebackRecords(String partyId,
+                                                    String shopId,
+                                                    int count,
                                                     long amount,
                                                     LocalDateTime startFrom,
                                                     long createdAtDelta) {
@@ -107,7 +113,7 @@ public abstract class AbstractReportsCompatingTest extends AbstractLocalTemplate
         LocalDateTime createdAt = startFrom.minusMinutes(createdAtDelta);
         for (int i = 0; i < count; ++i) {
             ChargebackRecord chargebackRecord =
-                    ReportsTestData.buildChargebackRecord(i, TEST_PARTY_ID, TEST_SHOP_ID, amount, createdAt);
+                    ReportsTestData.buildChargebackRecord(i, partyId, shopId, amount, createdAt);
             chargebackRecordList.add(chargebackRecord);
             chargebackDao.saveChargeback(chargebackRecord.into(Chargeback.class));
             createdAt = createdAt.minusMinutes(createdAtDelta);

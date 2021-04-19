@@ -73,7 +73,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .and(ADJUSTMENT.PARTY_ID.eq(partyId))
                 .and(ADJUSTMENT.SHOP_ID.eq(shopId))
                 .and(ADJUSTMENT.STATUS.eq(AdjustmentStatus.captured))
-                .orderBy(ADJUSTMENT.STATUS_CREATED_AT.desc())
+                .orderBy(ADJUSTMENT.STATUS_CREATED_AT)
                 .fetchLazy();
     }
 
@@ -83,12 +83,34 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                                        String currencyCode,
                                        Optional<LocalDateTime> fromTime,
                                        LocalDateTime toTime) {
-        LocalDateTime reportFromTime = fromTime.orElse(LocalDateTime.now());
-        LocalDateTime fromTimeTruncHour = reportFromTime.truncatedTo(ChronoUnit.HOURS);
+        LocalDateTime reportFromTime = fromTime
+                .orElse(
+                        getFirstOperationDateTime(partyId, shopId)
+                                .orElse(toTime)
+                );
+        if (toTime.isEqual(reportFromTime)) {
+            return 0L;
+        }
+        if (reportFromTime.until(toTime, ChronoUnit.HOURS) > 1) {
+            return getFundsAdjustedAmountWithAggs(partyId, shopId, currencyCode, reportFromTime, toTime);
+        } else {
+            var fundsAdjustedAmountResult = getAdjustmentFundsAmountQuery(
+                    partyId, shopId, currencyCode, reportFromTime, toTime
+            ).fetchOne();
+            return getFundsAmountResult(fundsAdjustedAmountResult);
+        }
+    }
+
+    private Long getFundsAdjustedAmountWithAggs(String partyId,
+                                                String shopId,
+                                                String currencyCode,
+                                                LocalDateTime fromTime,
+                                                LocalDateTime toTime) {
+        LocalDateTime fromTimeTruncHour = fromTime.truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
 
         var youngAdjustmentFundsQuery = getAdjustmentFundsAmountQuery(
-                partyId, shopId, currencyCode, reportFromTime, fromTimeTruncHour.plusHours(1L)
+                partyId, shopId, currencyCode, fromTime, fromTimeTruncHour.plusHours(1L)
         );
         var adjustmentAggByHourShopAccountingQuery = getAggByHourAdjustmentFundsAmountQuery(
                 partyId, shopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
@@ -137,6 +159,17 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .and(ADJUSTMENT.CURRENCY_CODE.eq(currencyCode))
                 .and(ADJUSTMENT.PARTY_ID.eq(partyId))
                 .and(ADJUSTMENT.SHOP_ID.eq(shopId));
+    }
+
+    private Optional<LocalDateTime> getFirstOperationDateTime(String partyId, String shopId) {
+        Record1<LocalDateTime> result = getDslContext()
+                .select(DSL.min(ADJUSTMENT.STATUS_CREATED_AT))
+                .from(ADJUSTMENT)
+                .where(ADJUSTMENT.PARTY_ID.eq(partyId))
+                .and(ADJUSTMENT.SHOP_ID.eq(shopId))
+                .fetchOne();
+        return Optional.ofNullable(result)
+                .map(r -> r.value1());
     }
 
 }

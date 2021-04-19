@@ -50,6 +50,7 @@ public class ChargebackDaoImpl extends AbstractDao implements ChargebackDao {
                 .and(CHARGEBACK.PARTY_ID.eq(partyId))
                 .and(CHARGEBACK.SHOP_ID.eq(shopId))
                 .and(CHARGEBACK.STATUS.eq(ChargebackStatus.accepted))
+                .orderBy(CHARGEBACK.EVENT_CREATED_AT)
                 .fetchLazy();
     }
 

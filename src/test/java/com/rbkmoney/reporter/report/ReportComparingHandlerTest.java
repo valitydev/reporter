@@ -19,7 +19,6 @@ import com.rbkmoney.reporter.service.StatisticService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
 
     @Autowired
@@ -67,11 +65,14 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
     private PartyService partyService;
 
     @Test
-    public void paymentRegistryReportComparingHandlerTest() {
-        preparePaymentRegistryReportComparingHandlerTestData();
+    public void paymentRegistryReportComparingHandlerTest() throws InterruptedException {
+        Thread.sleep(5000L);
+        String partyId = random(String.class);
+        String shopId = random(String.class);
+        preparePaymentRegistryReportComparingHandlerTestData(partyId, shopId);
         long id = 3001L;
         paymentRegistryReportComparingHandler.compareReport(
-                createTestReport(id, LocalDateTime.now().minusHours(5L), LocalDateTime.now())
+                createTestReport(id, partyId, shopId, LocalDateTime.now().minusHours(5L), LocalDateTime.now())
         );
         ReportComparingData reportComparingData =
                 reportComparingDataDao.getReportComparingDataByReportId(id);
@@ -81,8 +82,11 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
     }
 
     @Test
-    public void provisionOfServiceReportComparingHandlerTest() {
-        Report testReport = prepareProvisionOfServiceReportComparingHandlerTestData();
+    public void provisionOfServiceReportComparingHandlerTest() throws InterruptedException {
+        Thread.sleep(5000L);
+        String partyId = random(String.class);
+        String shopId = random(String.class);
+        Report testReport = prepareProvisionOfServiceReportComparingHandlerTestData(partyId, shopId);
         long id = testReport.getId();
         provisionOfServiceReportComparingHandler.compareReport(testReport);
         ReportComparingData reportComparingData =
@@ -92,13 +96,12 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
         assertEquals(ComparingStatus.SUCCESS, reportComparingData.getStatus());
     }
 
-    private void preparePaymentRegistryReportComparingHandlerTestData() {
-        String partyId = TEST_PARTY_ID;
-        String shopId = TEST_SHOP_ID;
+    private void preparePaymentRegistryReportComparingHandlerTestData(String partyId, String shopId) {
         List<StatPayment> statPaymentList = new ArrayList<>();
         List<PaymentRecord> paymentRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        int defaultOperationsCount = 3;
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             statPaymentList.add(ReportsTestData.buildStatPayment(i, shopId, createdAt));
 
             PaymentRecord paymentRecord = ReportsTestData.buildPaymentRecord(i, partyId, shopId, createdAt);
@@ -109,8 +112,8 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
 
         List<StatRefund> statRefundList = new ArrayList<>();
         List<RefundRecord> refundRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             statRefundList.add(ReportsTestData.buildStatRefund(i, shopId, createdAt));
 
             RefundRecord refundRecord =
@@ -122,8 +125,8 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
 
         List<StatAdjustment> adjustmentList = new ArrayList<>();
         List<AdjustmentRecord> adjustmentRecordList = new ArrayList<>();
-        for (int i = 0; i < 3; ++i) {
-            LocalDateTime createdAt = LocalDateTime.now().minusHours(i);
+        for (int i = 0; i < defaultOperationsCount; ++i) {
+            LocalDateTime createdAt = LocalDateTime.now().minusHours(defaultOperationsCount + 1 - i);
             adjustmentList.add(ReportsTestData.buildStatAdjustment(i, shopId, createdAt));
 
             AdjustmentRecord adjustmentRecord =
@@ -141,7 +144,7 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
                 .willReturn(adjustmentList.iterator());
     }
 
-    private Report prepareProvisionOfServiceReportComparingHandlerTestData() {
+    private Report prepareProvisionOfServiceReportComparingHandlerTestData(String partyId, String shopId) {
         int defaultCountOfOperations = 20;
         long paymentCreatedAtDelta = 14L;
 
@@ -150,16 +153,16 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
                 createFrom.minusMinutes(paymentCreatedAtDelta * defaultCountOfOperations);
 
         List<PaymentRecord> paymentRecordList = preparePaymentRecords(
-                defaultCountOfOperations, 1000, 50, createFrom, paymentCreatedAtDelta
+                partyId, shopId, defaultCountOfOperations, 1000, 50, createFrom, paymentCreatedAtDelta
         );
-        List<RefundRecord> refundRecordList =
-                prepareRefundRecords(defaultCountOfOperations % 4, 700, createFrom, 540L);
-        List<AdjustmentRecord> adjustmentRecordList =
-                prepareAdjustmentRecords(defaultCountOfOperations % 5, 300, createFrom, 53L);
-        List<PayoutRecord> payoutRecordList =
-                preparePayoutRecords(defaultCountOfOperations % 3, 250, createFrom, 23L);
-        List<ChargebackRecord> chargebackRecordList =
-                prepareChargebackRecords(defaultCountOfOperations % 10, 1000, createFrom, 27L);
+        List<RefundRecord> refundRecordList = prepareRefundRecords(
+                partyId, shopId, defaultCountOfOperations % 4, 700, createFrom, 540L);
+        List<AdjustmentRecord> adjustmentRecordList = prepareAdjustmentRecords(
+                partyId, shopId, defaultCountOfOperations % 5, 300, createFrom, 53L);
+        List<PayoutRecord> payoutRecordList = preparePayoutRecords(
+                partyId, shopId, defaultCountOfOperations % 3, 250, createFrom, 23L);
+        List<ChargebackRecord> chargebackRecordList = prepareChargebackRecords(
+                partyId, shopId, defaultCountOfOperations % 10, 1000, createFrom, 27L);
 
         LocalDateTime dateFrom = firstPaymentOperationDatetime.plusMinutes(5L);
         LocalDateTime dateTo = createFrom.minusMinutes(5L);
@@ -171,7 +174,7 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
         aggregatesDao.aggregateByHour(AggregationType.PAYOUT, aggDateFrom, aggDateTo);
 
         ShopAccountingModel expectedModel =
-                new ShopAccountingModel(TEST_PARTY_ID, TEST_SHOP_ID, ReportsTestData.DEFAULT_CURRENCY);
+                new ShopAccountingModel(partyId, shopId, ReportsTestData.DEFAULT_CURRENCY);
         expectedModel.setFundsAcquired(getPaymentAmountForPeriod(paymentRecordList, dateFrom, dateTo));
         expectedModel.setFeeCharged(getPaymentFeeAmountForPeriod(paymentRecordList, dateFrom, dateTo));
         expectedModel.setFundsRefunded(getRefundAmountForPeriod(refundRecordList, dateFrom, dateTo));
@@ -183,20 +186,24 @@ public class ReportComparingHandlerTest extends AbstractReportsCompatingTest {
                 .willReturn(expectedModel);
 
         ShopAccountingModel balancesExpectedModel =
-                new ShopAccountingModel(TEST_PARTY_ID, TEST_SHOP_ID, ReportsTestData.DEFAULT_CURRENCY);
+                new ShopAccountingModel(partyId, shopId, ReportsTestData.DEFAULT_CURRENCY);
         balancesExpectedModel.setFundsAcquired(1000L);
         balancesExpectedModel.setFeeCharged(50L);
         given(statisticService.getShopAccounting(any(), any(), any(), any()))
                 .willReturn(balancesExpectedModel);
 
-        return createTestReport(random(Long.class), dateFrom, dateTo);
+        return createTestReport(random(Long.class), partyId, shopId, dateFrom, dateTo);
     }
 
-    private Report createTestReport(long id, LocalDateTime fromTime, LocalDateTime toTime) {
+    private Report createTestReport(long id,
+                                    String partyId,
+                                    String shopId,
+                                    LocalDateTime fromTime,
+                                    LocalDateTime toTime) {
         Report report = new Report();
         report.setId(id);
-        report.setPartyId(TEST_PARTY_ID);
-        report.setPartyShopId(TEST_SHOP_ID);
+        report.setPartyId(partyId);
+        report.setPartyShopId(shopId);
         report.setFromTime(fromTime);
         report.setToTime(toTime);
         report.setCreatedAt(LocalDateTime.now());
