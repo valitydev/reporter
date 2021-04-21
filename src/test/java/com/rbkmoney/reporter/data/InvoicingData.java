@@ -283,7 +283,7 @@ public final class InvoicingData {
                 .setPaymentSessionId("123")
                 .setPaymentTool(PaymentTool.digital_wallet(new DigitalWallet()
                         .setId("123")
-                        .setProvider(DigitalWalletProvider.rbkmoney)))
+                        .setProviderDeprecated(LegacyDigitalWalletProvider.rbkmoney)))
         );
         payer.setPaymentResource(paymentResourcePayer);
         hgPayment.setPayer(payer);

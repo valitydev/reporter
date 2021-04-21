@@ -10,6 +10,9 @@ import com.rbkmoney.geck.common.util.TBaseUtil;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import com.rbkmoney.mamsel.DigitalWalletUtil;
+import com.rbkmoney.mamsel.TerminalPaymentUtil;
+import com.rbkmoney.mamsel.TokenProviderUtil;
 import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.enums.BankCardTokenProvider;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
@@ -329,20 +332,23 @@ public final class MapperUtils {
             additionalInfo.setBankCardSystem(bankCard.getPaymentSystem().toString());
             additionalInfo.setBankCardBin(bankCard.getBin());
             additionalInfo.setBankCardMaskedPan(bankCard.getLastDigits());
-            if (bankCard.isSetTokenProvider()) {
+            if (TokenProviderUtil.isSetTokenProvider(bankCard)) {
                 additionalInfo.setBankCardTokenProvider(
-                        TypeUtil.toEnumField(bankCard.getTokenProvider().name(), BankCardTokenProvider.class)
+                        TypeUtil.toEnumField(
+                                TokenProviderUtil.getTokenProviderName(bankCard),
+                                BankCardTokenProvider.class
+                        )
                 );
             }
         } else if (paymentTool.isSetPaymentTerminal()) {
             PaymentTerminal paymentTerminal = paymentTool.getPaymentTerminal();
 
-            additionalInfo.setTerminalProvider(paymentTerminal.getTerminalType().toString());
+            additionalInfo.setTerminalProvider(TerminalPaymentUtil.getTerminalPaymentProviderName(paymentTerminal));
         } else if (paymentTool.isSetDigitalWallet()) {
             DigitalWallet digitalWallet = paymentTool.getDigitalWallet();
 
             additionalInfo.setDigitalWalletId(digitalWallet.getId());
-            additionalInfo.setDigitalWalletProvider(digitalWallet.getProvider().toString());
+            additionalInfo.setDigitalWalletProvider(DigitalWalletUtil.getDigitalWalletName(digitalWallet));
         }
     }
 

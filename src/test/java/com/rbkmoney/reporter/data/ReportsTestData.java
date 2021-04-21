@@ -116,7 +116,7 @@ public class ReportsTestData {
         invoicePaymentCaptured.setAt(createdAt.toInstant(ZoneOffset.UTC).toString());
         payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
         PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(
-                new BankCard("token", null, "424" + i, "56789" + i))
+                new BankCard("token", "424" + i, "56789" + i))
         );
         paymentResourcePayer.setEmail("abc" + i + "@mail.ru");
         payment.setPayer(Payer.payment_resource(paymentResourcePayer));
@@ -141,7 +141,7 @@ public class ReportsTestData {
         payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
         PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(
                         PaymentTool.bank_card(
-                                new BankCard("token", null, "4249", "567890")
+                                new BankCard("token", "4249", "567890")
                         )
                 );
         paymentResourcePayer.setEmail("xyz@mail.ru");

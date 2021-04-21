@@ -99,7 +99,7 @@ public class TemplateTest extends AbstractTemplateConfig {
             invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
             payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
             PaymentResourcePayer paymentResourcePayer =
-                    new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", null, "4249", "567890")));
+                    new PaymentResourcePayer(PaymentTool.bank_card(new BankCard("token", "4249", "567890")));
             paymentResourcePayer.setEmail("xyz@mail.ru");
             payment.setPayer(Payer.payment_resource(paymentResourcePayer));
 
