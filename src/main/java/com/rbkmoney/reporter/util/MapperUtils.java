@@ -11,6 +11,7 @@ import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.tbase.TErrorUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.mamsel.DigitalWalletUtil;
+import com.rbkmoney.mamsel.PaymentSystemUtil;
 import com.rbkmoney.mamsel.TerminalPaymentUtil;
 import com.rbkmoney.mamsel.TokenProviderUtil;
 import com.rbkmoney.reporter.domain.enums.*;
@@ -329,7 +330,7 @@ public final class MapperUtils {
             BankCard bankCard = paymentTool.getBankCard();
 
             additionalInfo.setBankCardToken(bankCard.getToken());
-            additionalInfo.setBankCardSystem(bankCard.getPaymentSystem().toString());
+            additionalInfo.setBankCardSystem(PaymentSystemUtil.getPaymentSystemName(bankCard));
             additionalInfo.setBankCardBin(bankCard.getBin());
             additionalInfo.setBankCardMaskedPan(bankCard.getLastDigits());
             if (TokenProviderUtil.isSetTokenProvider(bankCard)) {
