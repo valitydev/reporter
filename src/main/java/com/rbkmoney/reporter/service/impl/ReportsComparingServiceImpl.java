@@ -1,8 +1,10 @@
 package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.reporter.dao.ReportComparingDataDao;
+import com.rbkmoney.reporter.domain.enums.ComparingStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.reporter.domain.tables.pojos.ReportComparingData;
 import com.rbkmoney.reporter.handler.comparing.ReportComparingHandler;
 import com.rbkmoney.reporter.service.ReportsComparingService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.rbkmoney.reporter.util.MapperUtils.createReportComparingData;
 
 @Slf4j
 @Service
@@ -31,12 +35,22 @@ public class ReportsComparingServiceImpl implements ReportsComparingService {
             return;
         }
         Report report = currentReport.get();
+        saveStartedComparingEvent(report);
         log.info("Received report for comparing: {}", report);
         paymentRegistryReportComparingHandler.compareReport(report);
         if (report.getType() == ReportType.provision_of_service) {
             provisionOfServiceReportComparingHandler.compareReport(report);
         }
         log.info("Comparing report {} was finished", report);
+    }
+
+    private void saveStartedComparingEvent(Report report) {
+        ReportComparingData reportComparingData = createReportComparingData(
+                report.getId(),
+                report.getType(),
+                ComparingStatus.STARTED
+        );
+        reportComparingDataDao.saveReportComparingData(reportComparingData);
     }
 
 }

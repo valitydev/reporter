@@ -122,7 +122,7 @@ public class CommonTestData {
         payout.setCreatedAt(createdAt);
         payout.setAmount(1000L);
         payout.setCurrencyCode("RUB");
-        payout.setFee(500L);
+        payout.setFee(0L);
         payout.setType(PayoutType.bank_card);
         return payout;
     }
@@ -223,21 +223,19 @@ public class CommonTestData {
     public static PayoutAggsByHour createTestPayoutAggsByHour(LocalDateTime createdAt,
                                                               String partyId,
                                                               String shopId) {
-        return createTestPayoutAggsByHour(createdAt, partyId, shopId, 10000L, 2000L);
+        return createTestPayoutAggsByHour(createdAt, partyId, shopId, 10000L);
     }
 
     public static PayoutAggsByHour createTestPayoutAggsByHour(LocalDateTime createdAt,
                                                               String partyId,
                                                               String shopId,
-                                                              Long amount,
-                                                              Long fee) {
+                                                              Long amount) {
         PayoutAggsByHour payoutAggsByHour = new PayoutAggsByHour();
         payoutAggsByHour.setCreatedAt(createdAt);
         payoutAggsByHour.setPartyId(partyId);
         payoutAggsByHour.setShopId(shopId);
         payoutAggsByHour.setAmount(amount);
         payoutAggsByHour.setCurrencyCode(DEFAULT_CURRENCY);
-        payoutAggsByHour.setFee(fee);
         payoutAggsByHour.setType(PayoutType.bank_card);
         return payoutAggsByHour;
     }

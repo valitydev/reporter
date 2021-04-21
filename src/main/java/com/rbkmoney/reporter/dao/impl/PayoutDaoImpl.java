@@ -9,8 +9,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
 import com.rbkmoney.reporter.domain.tables.records.*;
 import com.zaxxer.hikari.HikariDataSource;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -148,10 +147,8 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
         if (reportFromTime.until(toTime, ChronoUnit.HOURS) > 1) {
             return getFundsPayOutAmountWithAggs(partyId, shopId, currencyCode, reportFromTime, toTime);
         } else {
-            var fundsPayOutAmountResult = getPayoutFundsAmountQuery(
-                    partyId, shopId, currencyCode, reportFromTime, toTime
-            ).fetchOne();
-            return getFundsAmountResult(fundsPayOutAmountResult);
+
+            return getPayoutFundsAmount(partyId, shopId, currencyCode, reportFromTime, toTime);
         }
     }
 
@@ -163,24 +160,17 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
         LocalDateTime fromTimeTruncHour = fromTime.truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toTimeTruncHour = toTime.truncatedTo(ChronoUnit.HOURS);
 
-        var youngPayoutShopAccountingQuery = getPayoutFundsAmountQuery(
+        Long oldPayoutFundsAmount = getPayoutFundsAmount(
                 partyId, shopId, currencyCode, fromTime, fromTimeTruncHour.plusHours(1L)
         );
-        var payoutAggByHourShopAccountingQuery = getAggByHourPayoutFundsAmountQuery(
+        var fundsPayOutAmountResult = getAggByHourPayoutFundsAmountQuery(
                 partyId, shopId, currencyCode, fromTimeTruncHour, toTimeTruncHour
-        );
-        var oldPayoutShopAccountingQuery = getPayoutFundsAmountQuery(
+        ).fetchOne();
+        Long youngPayoutFundsAmount = getPayoutFundsAmount(
                 partyId, shopId, currencyCode, toTimeTruncHour, toTime
         );
-        var fundsPayOutAmountResult = getDslContext()
-                .select(DSL.sum(DSL.field(AMOUNT_KEY, Long.class)).as(AMOUNT_KEY))
-                .from(
-                        youngPayoutShopAccountingQuery
-                                .unionAll(payoutAggByHourShopAccountingQuery)
-                                .unionAll(oldPayoutShopAccountingQuery)
-                )
-                .fetchOne();
-        return getFundsAmountResult(fundsPayOutAmountResult);
+
+        return oldPayoutFundsAmount + getFundsAmountResult(fundsPayOutAmountResult) + youngPayoutFundsAmount;
     }
 
     private Optional<LocalDateTime> getFirstOparationDateTime(String partyId, String shopId) {
@@ -209,13 +199,30 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                 .and(PAYOUT_AGGS_BY_HOUR.SHOP_ID.eq(partyShopId));
     }
 
-    private SelectConditionStep<Record1<BigDecimal>> getPayoutFundsAmountQuery(String partyId,
-                                                                               String partyShopId,
-                                                                               String currencyCode,
-                                                                               LocalDateTime fromTime,
-                                                                               LocalDateTime toTime) {
+    private Long getPayoutFundsAmount(String partyId,
+                                      String shopId,
+                                      String currencyCode,
+                                      LocalDateTime fromTime,
+                                      LocalDateTime toTime) {
+        var successPayoutFundsAmount =
+                getSuccessPayoutFundsAmountQuery(partyId, shopId, currencyCode, fromTime, toTime)
+                        .fetchOne();
+        var cancelledPayoutFundsAmount =
+                getCancelledPayoutFundsAmountQuery(partyId, shopId, currencyCode, fromTime, toTime)
+                        .fetchOne();
+        return getFundsAmountResult(successPayoutFundsAmount) - getFundsAmountResult(cancelledPayoutFundsAmount);
+    }
+
+    private SelectConditionStep<Record1<BigDecimal>> getSuccessPayoutFundsAmountQuery(String partyId,
+                                                                                      String shopId,
+                                                                                      String currencyCode,
+                                                                                      LocalDateTime fromTime,
+                                                                                      LocalDateTime toTime) {
         return getDslContext()
-                .select(DSL.sum(PAYOUT.AMOUNT).as(AMOUNT_KEY))
+                .select(
+                        DSL.sum(DSL.ifnull(PAYOUT.AMOUNT, 0L))
+                                .minus(DSL.sum(DSL.ifnull(PAYOUT.FEE, 0L))).as(AMOUNT_KEY)
+                )
                 .from(PAYOUT_STATE)
                 .join(PAYOUT).on(PAYOUT.PAYOUT_ID.eq(PAYOUT_STATE.PAYOUT_ID))
                 .where(PAYOUT_STATE.EVENT_CREATED_AT.greaterOrEqual(fromTime))
@@ -223,7 +230,34 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                 .and(PAYOUT_STATE.STATUS.eq(PayoutStatus.paid))
                 .and(PAYOUT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYOUT.PARTY_ID.eq(partyId))
-                .and(PAYOUT.SHOP_ID.eq(partyShopId));
+                .and(PAYOUT.SHOP_ID.eq(shopId));
+    }
+
+    private SelectConditionStep<Record1<BigDecimal>> getCancelledPayoutFundsAmountQuery(String partyId,
+                                                                                        String shopId,
+                                                                                        String currencyCode,
+                                                                                        LocalDateTime fromTime,
+                                                                                        LocalDateTime toTime) {
+        var ps = PAYOUT_STATE.as("ps");
+        var cancelledPs = PAYOUT_STATE.as("cps");
+
+        return getDslContext()
+                .select(
+                        DSL.sum(DSL.ifnull(PAYOUT.AMOUNT, 0L))
+                                .minus(DSL.sum(DSL.ifnull(PAYOUT.FEE, 0L))).as(AMOUNT_KEY)
+                )
+                .from(PAYOUT)
+                .join(cancelledPs)
+                .on(cancelledPs.EVENT_CREATED_AT.greaterOrEqual(fromTime))
+                .and(cancelledPs.EVENT_CREATED_AT.lessThan(toTime))
+                .and(cancelledPs.PAYOUT_ID.eq(PAYOUT.PAYOUT_ID))
+                .and(cancelledPs.STATUS.eq(PayoutStatus.cancelled))
+                .join(ps)
+                .on(ps.PAYOUT_ID.eq(cancelledPs.PAYOUT_ID))
+                .and(cancelledPs.STATUS.eq(PayoutStatus.paid))
+                .where(PAYOUT.CURRENCY_CODE.eq(currencyCode))
+                .and(PAYOUT.PARTY_ID.eq(partyId))
+                .and(PAYOUT.SHOP_ID.eq(shopId));
     }
 
 }

@@ -202,7 +202,7 @@ public class ReportsTestData {
         record.setContractId("contract-1");
         record.setCreatedAt(createdAt);
         record.setAmount(amount);
-        record.setFee(1L);
+        record.setFee(0L);
         record.setCurrencyCode(DEFAULT_CURRENCY);
         record.setWalletId("wallet.1");
         record.setSummary("Some summary");

@@ -64,6 +64,8 @@ public class ReportComparingDataDaoImpl extends AbstractDao implements ReportCom
                 .where(REPORT.ID.greaterThan(getLastProcessedReport()))
                 .orderBy(REPORT.ID.asc())
                 .limit(1)
+                .forUpdate()
+                .skipLocked()
                 .fetchOne();
         return Optional.ofNullable(record)
                 .map(r -> Optional.of(r.into(Report.class)))

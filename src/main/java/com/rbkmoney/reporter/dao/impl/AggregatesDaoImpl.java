@@ -142,23 +142,49 @@ public class AggregatesDaoImpl extends AbstractDao implements AggregatesDao {
     @Override
     public void aggregatePayoutsByHour(LocalDateTime dateFrom,
                                        LocalDateTime dateTo) {
-        String sql =
+        String sql = "with paid_payouts as (\n" +
+                "    SELECT date_trunc('hour', ps.event_created_at) as created_at, \n" +
+                "           pay.party_id, pay.shop_id, (sum(pay.amount) - sum(pay.fee)) as amount, \n" +
+                "           pay.currency_code, pay.type \n" +
+                "    FROM rpt.payout_state as ps \n" +
+                "    JOIN rpt.payout as pay on pay.payout_id = ps.payout_id  \n" +
+                "    WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
+                "      AND ps.status = {2} \n" +
+                "      AND party_id IS NOT NULL \n" +
+                "      AND shop_id IS NOT NULL \n" +
+                "    GROUP BY date_trunc('hour', ps.event_created_at), \n" +
+                "             pay.party_id, pay.shop_id, pay.currency_code, pay.type \n" +
+                "), \n" +
+                "cancelled_payouts as (\n" +
+                "    SELECT date_trunc('hour', ps.event_created_at) as created_at, \n" +
+                "           pay.party_id, pay.shop_id, -1 * (sum(pay.amount) - sum(pay.fee)) as amount, \n" +
+                "           pay.currency_code, pay.type \n" +
+                "    FROM rpt.payout_state as ps \n" +
+                "    JOIN rpt.payout as pay on pay.payout_id = ps.payout_id  \n" +
+                "    JOIN rpt.payout_state as ps_success " +
+                "      ON ps.payout_id = ps_success.payout_id and ps_success.status = {2} \n" +
+                "    WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
+                "      AND ps.status = {3} \n" +
+                "      AND party_id IS NOT NULL  \n" +
+                "      AND shop_id IS NOT NULL  \n" +
+                "    GROUP BY date_trunc('hour', ps.event_created_at), \n" +
+                "             pay.party_id, pay.shop_id, pay.currency_code, pay.type \n" +
+                ") \n" +
+                "\n" +
                 "INSERT INTO rpt.payout_aggs_by_hour " +
-                        "(created_at, party_id, shop_id, amount, fee, currency_code, type)" +
-                        "SELECT date_trunc('hour', ps.event_created_at), pay.party_id, \n" +
-                        "       pay.shop_id, sum(pay.amount), sum(pay.fee), pay.currency_code, pay.type \n" +
-                        "FROM rpt.payout_state as ps \n" +
-                        "JOIN rpt.payout as pay on pay.payout_id = ps.payout_id \n" +
-                        "WHERE ps.event_created_at >= {0} AND ps.event_created_at < {1} \n" +
-                        "  AND ps.status = {2}" +
-                        "  AND party_id IS NOT NULL \n" +
-                        "  AND shop_id IS NOT NULL \n" +
-                        "GROUP BY date_trunc('hour', ps.event_created_at), pay.party_id, " +
-                        "         pay.shop_id, pay.currency_code, pay.type \n" +
-                        "ON CONFLICT (party_id, shop_id, created_at, type, currency_code) \n" +
-                        "DO UPDATE \n" +
-                        "SET amount = EXCLUDED.amount, fee = EXCLUDED.fee;";
-        getDslContext().execute(sql, dateFrom, dateTo, PayoutStatus.paid);
+                "      (created_at, party_id, shop_id, amount, currency_code, type)" +
+                "SELECT created_at, party_id, shop_id, sum(amount), currency_code, type \n" +
+                "FROM (\n" +
+                "    SELECT * FROM paid_payouts \n" +
+                "        UNION ALL \n" +
+                "    SELECT * FROM cancelled_payouts \n" +
+                ") as total\n" +
+                "GROUP BY created_at, party_id, shop_id, currency_code, type \n" +
+                "ORDER BY 1 \n" +
+                "ON CONFLICT (party_id, shop_id, created_at, type, currency_code) \n" +
+                "DO UPDATE \n" +
+                "SET amount = EXCLUDED.amount; \n";
+        getDslContext().execute(sql, dateFrom, dateTo, PayoutStatus.paid, PayoutStatus.cancelled);
     }
 
     @Override

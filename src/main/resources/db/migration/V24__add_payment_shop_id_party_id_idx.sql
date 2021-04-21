@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS payment_shop_id_party_id_idx_status_created_at_idx on rpt.payment (shop_id, party_id, status_created_at);
