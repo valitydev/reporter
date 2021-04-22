@@ -22,33 +22,33 @@ import java.util.Optional;
 @ConditionalOnProperty(value = "aggregation.enabled", havingValue = "true")
 public class AggregationServiceImpl implements AggregationService {
 
-    private static final long AGGREGATION_STEP = 6L;
+    private static final long AGGREGATION_STEP = 12L;
     private final AggregatesDao aggregatesDao;
 
     @Override
     @Transactional
-    @Scheduled(fixedDelayString = "${aggregation.invoicing.timeout}")
+    @Scheduled(fixedDelayString = "${aggregation.invoicing.payments.timeout}")
     public void aggregatePayments() {
         aggregateData(AggregationType.PAYMENT);
     }
 
     @Override
     @Transactional
-    @Scheduled(fixedDelayString = "${aggregation.invoicing.timeout}")
+    @Scheduled(fixedDelayString = "${aggregation.invoicing.refunds.timeout}")
     public void aggregateRefunds() {
         aggregateData(AggregationType.REFUND);
     }
 
     @Override
     @Transactional
-    @Scheduled(fixedDelayString = "${aggregation.invoicing.timeout}")
+    @Scheduled(fixedDelayString = "${aggregation.invoicing.adjustments.timeout}")
     public void aggregateAdjustments() {
         aggregateData(AggregationType.ADJUSTMENT);
     }
 
     @Override
     @Transactional
-    @Scheduled(fixedDelayString = "${aggregation.invoicing.timeout}")
+    @Scheduled(fixedDelayString = "${aggregation.invoicing.payout.timeout}")
     public void aggregatePayouts() {
         aggregateData(AggregationType.PAYOUT);
     }
@@ -72,16 +72,14 @@ public class AggregationServiceImpl implements AggregationService {
         } else if (untilNow < AGGREGATION_STEP) {
             highBordefOfAggregation = lastAggregationDate.plusHours(untilNow);
         } else {
-            highBordefOfAggregation = lastAggregationDate.plusHours(AGGREGATION_STEP);
+            highBordefOfAggregation = lastAggregationDate.plusHours(AGGREGATION_STEP).truncatedTo(ChronoUnit.HOURS);
         }
         aggregatesDao.aggregateByHour(
                 aggregationType,
-                lastAggregationDate.minusHours(1L).truncatedTo(ChronoUnit.HOURS),
-                highBordefOfAggregation.truncatedTo(ChronoUnit.HOURS)
+                lastAggregationDate.minusHours(2L).truncatedTo(ChronoUnit.HOURS),
+                highBordefOfAggregation
         );
-        aggregatesDao.saveLastAggregationDate(
-                createLastAggregationTime(aggregationType, highBordefOfAggregation.minusHours(1L))
-        );
+        aggregatesDao.saveLastAggregationDate(createLastAggregationTime(aggregationType, highBordefOfAggregation));
         log.debug("'{}' aggregation was finished", methodName);
     }
 
@@ -91,6 +89,7 @@ public class AggregationServiceImpl implements AggregationService {
         lastAggregationTime.setAggregationType(type);
         lastAggregationTime.setAggregationInterval(AggregationInterval.HOUR);
         lastAggregationTime.setLastDataAggregationDate(aggregationDate);
+        lastAggregationTime.setLastActTime(LocalDateTime.now());
         return lastAggregationTime;
     }
 

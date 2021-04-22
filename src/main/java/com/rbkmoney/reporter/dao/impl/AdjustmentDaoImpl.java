@@ -73,6 +73,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .and(ADJUSTMENT.PARTY_ID.eq(partyId))
                 .and(ADJUSTMENT.SHOP_ID.eq(shopId))
                 .and(ADJUSTMENT.STATUS.eq(AdjustmentStatus.captured))
+                .and(ADJUSTMENT.AMOUNT.notEqual(0L))
                 .orderBy(ADJUSTMENT.STATUS_CREATED_AT)
                 .fetchLazy();
     }

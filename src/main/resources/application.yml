@@ -111,9 +111,14 @@ kafka:
 aggregation:
   enabled: false
   invoicing:
-    timeout: 900000
-  balancees:
-    timeout: 900000
+    payments:
+      timeout: 900000
+    refunds:
+      timeout: 900000
+    adjustments:
+      timeout: 900000
+    payout:
+      timeout: 900000
 
 payouter:
   polling:

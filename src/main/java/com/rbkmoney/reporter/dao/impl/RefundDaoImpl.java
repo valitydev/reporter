@@ -158,7 +158,10 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                                                                                LocalDateTime fromTime,
                                                                                LocalDateTime toTime) {
         return getDslContext()
-                .select(DSL.sum(REFUND.AMOUNT).as(AMOUNT_KEY))
+                .select(
+                        DSL.sum(REFUND.AMOUNT)
+                                .minus(DSL.sum(DSL.ifnull(REFUND.FEE, 0L))).as(AMOUNT_KEY)
+                )
                 .from(REFUND)
                 .where(REFUND.STATUS_CREATED_AT.greaterOrEqual(fromTime))
                 .and(REFUND.STATUS_CREATED_AT.lessThan(toTime))
@@ -174,7 +177,10 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                                                                                         LocalDateTime fromTime,
                                                                                         LocalDateTime toTime) {
         return getDslContext()
-                .select(DSL.sum(REFUND_AGGS_BY_HOUR.AMOUNT).as(AMOUNT_KEY))
+                .select(
+                        DSL.sum(REFUND_AGGS_BY_HOUR.AMOUNT)
+                                .minus(DSL.sum(DSL.ifnull(REFUND_AGGS_BY_HOUR.FEE, 0L))).as(AMOUNT_KEY)
+                )
                 .from(REFUND_AGGS_BY_HOUR)
                 .where(REFUND_AGGS_BY_HOUR.CREATED_AT.greaterThan(fromTime))
                 .and(REFUND_AGGS_BY_HOUR.CREATED_AT.lessThan(toTime))

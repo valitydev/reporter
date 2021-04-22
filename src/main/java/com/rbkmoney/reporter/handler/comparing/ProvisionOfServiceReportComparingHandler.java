@@ -108,7 +108,7 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
                                                   String modelType) {
         if (checkEmptyModel(magistaModel, reportId, "Magista " + modelType)
                 || checkEmptyModel(localModel, reportId, "Local " + modelType)
-                || checkModelsEqual(magistaModel, localModel, reportId)) {
+                || checkModelsEqual(magistaModel, localModel, reportId, modelType)) {
             return true;
         }
 
@@ -117,13 +117,14 @@ public class ProvisionOfServiceReportComparingHandler extends ReportComparingAbs
 
     private boolean checkModelsEqual(ShopAccountingModel magistaModel,
                                      ShopAccountingModel localModel,
-                                     long reportId) {
+                                     long reportId,
+                                     String modelType) {
         if (magistaModel.equals(localModel)) {
             return false;
         }
 
-        String failureReason = String.format("Models for report %s are not equal! (magista: %s, local: %s)",
-                reportId, magistaModel, localModel);
+        String failureReason = String.format("Models for report %s %s are not equal! (magista: %s, local: %s)",
+                reportId, modelType, magistaModel, localModel);
         saveErrorComparingInfo(failureReason, reportId, ReportType.provision_of_service);
         return true;
     }
