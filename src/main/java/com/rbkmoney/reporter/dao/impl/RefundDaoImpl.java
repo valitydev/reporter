@@ -85,7 +85,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .and(REFUND.PARTY_ID.eq(partyId))
                 .and(REFUND.SHOP_ID.eq(shopId))
                 .and(REFUND.STATUS.eq(RefundStatus.succeeded))
-                .orderBy(REFUND.STATUS_CREATED_AT)
+                .orderBy(REFUND.STATUS_CREATED_AT, REFUND.CREATED_AT)
                 .fetchLazy();
     }
 

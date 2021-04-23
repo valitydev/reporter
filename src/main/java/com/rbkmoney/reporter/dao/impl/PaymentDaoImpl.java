@@ -209,7 +209,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT.PARTY_ID.eq(partyId))
                 .and(PAYMENT.SHOP_ID.eq(shopId))
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
-                .orderBy(PAYMENT.STATUS_CREATED_AT)
+                .orderBy(PAYMENT.STATUS_CREATED_AT, PAYMENT.CREATED_AT)
                 .fetchLazy();
     }
 
