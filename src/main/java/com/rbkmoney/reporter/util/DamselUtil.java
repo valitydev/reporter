@@ -175,14 +175,6 @@ public class DamselUtil {
         return amountDest - amountSource;
     }
 
-    public static String getCurrencyFromCashFlow(List<FinalCashFlowPosting> finalCashFlow) {
-        return finalCashFlow.stream()
-                .filter(cashtFlow -> cashtFlow.isSetVolume() && cashtFlow.getVolume().isSetCurrency())
-                .map(cashtFlow -> cashtFlow.getVolume().getCurrency().getSymbolicCode())
-                .findFirst()
-                .orElse(null);
-    }
-
     private static long computeAmount(List<FinalCashFlowPosting> finalCashFlow,
                                       Function<FinalCashFlowPosting, FinalCashFlowAccount> func) {
         return finalCashFlow.stream()
@@ -194,6 +186,14 @@ public class DamselUtil {
     private static boolean isMerchantSettlement(CashFlowAccount cashFlowAccount) {
         return cashFlowAccount.isSetMerchant()
                 && cashFlowAccount.getMerchant() == MerchantCashFlowAccount.settlement;
+    }
+
+    public static String getCurrencyFromCashFlow(List<FinalCashFlowPosting> finalCashFlow) {
+        return finalCashFlow.stream()
+                .filter(cashtFlow -> cashtFlow.isSetVolume() && cashtFlow.getVolume().isSetCurrency())
+                .map(cashtFlow -> cashtFlow.getVolume().getCurrency().getSymbolicCode())
+                .findFirst()
+                .orElse(null);
     }
 
 }

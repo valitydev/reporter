@@ -7,9 +7,13 @@ import com.rbkmoney.reporter.domain.tables.pojos.Payout;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutInternationalAccount;
 import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
-import com.rbkmoney.reporter.domain.tables.records.*;
+import com.rbkmoney.reporter.domain.tables.records.PayoutAccountRecord;
+import com.rbkmoney.reporter.domain.tables.records.PayoutInternationalAccountRecord;
+import com.rbkmoney.reporter.domain.tables.records.PayoutRecord;
+import com.rbkmoney.reporter.domain.tables.records.PayoutStateRecord;
 import com.zaxxer.hikari.HikariDataSource;
-import org.jooq.*;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +29,8 @@ import static com.rbkmoney.reporter.domain.tables.PayoutAccount.PAYOUT_ACCOUNT;
 import static com.rbkmoney.reporter.domain.tables.PayoutInternationalAccount.PAYOUT_INTERNATIONAL_ACCOUNT;
 import static com.rbkmoney.reporter.domain.tables.PayoutState.PAYOUT_STATE;
 import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFundsAmountResult;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
@@ -178,7 +184,7 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                 .select(DSL.min(PAYOUT.CREATED_AT))
                 .from(PAYOUT)
                 .where(PAYOUT.PARTY_ID.eq(partyId))
-                .and(PAYOUT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(PAYOUT.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
         return Optional.ofNullable(result)
                 .map(r -> r.value1());
@@ -230,7 +236,7 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                 .and(PAYOUT_STATE.STATUS.eq(PayoutStatus.paid))
                 .and(PAYOUT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYOUT.PARTY_ID.eq(partyId))
-                .and(PAYOUT.SHOP_ID.eq(shopId));
+                .and(ofNullable(shopId).map(PAYOUT.SHOP_ID::eq).orElse(trueCondition()));
     }
 
     private SelectConditionStep<Record1<BigDecimal>> getCancelledPayoutFundsAmountQuery(String partyId,
@@ -257,7 +263,7 @@ public class PayoutDaoImpl extends AbstractDao implements PayoutDao {
                 .and(cancelledPs.STATUS.eq(PayoutStatus.paid))
                 .where(PAYOUT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYOUT.PARTY_ID.eq(partyId))
-                .and(PAYOUT.SHOP_ID.eq(shopId));
+                .and(ofNullable(shopId).map(PAYOUT.SHOP_ID::eq).orElse(trueCondition()));
     }
 
 }

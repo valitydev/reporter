@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.Tables.CHARGEBACK;
 import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFundsAmountResult;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class ChargebackDaoImpl extends AbstractDao implements ChargebackDao {
@@ -48,7 +50,7 @@ public class ChargebackDaoImpl extends AbstractDao implements ChargebackDao {
                 .where(CHARGEBACK.EVENT_CREATED_AT.greaterThan(fromTime))
                 .and(CHARGEBACK.EVENT_CREATED_AT.lessThan(toTime))
                 .and(CHARGEBACK.PARTY_ID.eq(partyId))
-                .and(CHARGEBACK.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(CHARGEBACK.SHOP_ID::eq).orElse(trueCondition()))
                 .and(CHARGEBACK.STATUS.eq(ChargebackStatus.accepted))
                 .orderBy(CHARGEBACK.EVENT_CREATED_AT)
                 .fetchLazy();
@@ -67,7 +69,7 @@ public class ChargebackDaoImpl extends AbstractDao implements ChargebackDao {
                 .and(CHARGEBACK.CREATED_AT.lessThan(toTime))
                 .and(CHARGEBACK.CURRENCY_CODE.eq(currencyCode))
                 .and(CHARGEBACK.PARTY_ID.eq(partyId))
-                .and(CHARGEBACK.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(CHARGEBACK.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
         return getFundsAmountResult(fundsReturnedAmount);
     }

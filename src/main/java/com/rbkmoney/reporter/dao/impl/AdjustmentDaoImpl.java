@@ -24,6 +24,8 @@ import java.util.Optional;
 import static com.rbkmoney.reporter.domain.Tables.ADJUSTMENT_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.domain.tables.Adjustment.ADJUSTMENT;
 import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFundsAmountResult;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
@@ -71,7 +73,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .where(ADJUSTMENT.STATUS_CREATED_AT.greaterThan(fromTime))
                 .and(ADJUSTMENT.STATUS_CREATED_AT.lessThan(toTime))
                 .and(ADJUSTMENT.PARTY_ID.eq(partyId))
-                .and(ADJUSTMENT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(ADJUSTMENT.SHOP_ID::eq).orElse(trueCondition()))
                 .and(ADJUSTMENT.STATUS.eq(AdjustmentStatus.captured))
                 .and(ADJUSTMENT.AMOUNT.notEqual(0L))
                 .orderBy(ADJUSTMENT.STATUS_CREATED_AT, ADJUSTMENT.CREATED_AT)
@@ -159,7 +161,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .and(ADJUSTMENT.STATUS.eq(AdjustmentStatus.captured))
                 .and(ADJUSTMENT.CURRENCY_CODE.eq(currencyCode))
                 .and(ADJUSTMENT.PARTY_ID.eq(partyId))
-                .and(ADJUSTMENT.SHOP_ID.eq(shopId));
+                .and(ofNullable(shopId).map(ADJUSTMENT.SHOP_ID::eq).orElse(trueCondition()));
     }
 
     private Optional<LocalDateTime> getFirstOperationDateTime(String partyId, String shopId) {
@@ -167,7 +169,7 @@ public class AdjustmentDaoImpl extends AbstractDao implements AdjustmentDao {
                 .select(DSL.min(ADJUSTMENT.STATUS_CREATED_AT))
                 .from(ADJUSTMENT)
                 .where(ADJUSTMENT.PARTY_ID.eq(partyId))
-                .and(ADJUSTMENT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(ADJUSTMENT.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
         return Optional.ofNullable(result)
                 .map(r -> r.value1());

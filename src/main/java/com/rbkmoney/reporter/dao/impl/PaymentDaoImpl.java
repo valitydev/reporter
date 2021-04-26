@@ -16,12 +16,16 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.rbkmoney.reporter.domain.tables.Payment.PAYMENT;
 import static com.rbkmoney.reporter.domain.tables.PaymentAdditionalInfo.PAYMENT_ADDITIONAL_INFO;
 import static com.rbkmoney.reporter.domain.tables.PaymentAggsByHour.PAYMENT_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFunds;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
@@ -138,7 +142,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .select(DSL.min(PAYMENT.STATUS_CREATED_AT))
                 .from(PAYMENT)
                 .where(PAYMENT.PARTY_ID.eq(partyId))
-                .and(PAYMENT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(PAYMENT.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
         return Optional.ofNullable(result)
                 .map(r -> r.value1());
@@ -160,7 +164,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
                 .and(PAYMENT.CURRENCY_CODE.eq(currencyCode))
                 .and(PAYMENT.PARTY_ID.eq(partyId))
-                .and(PAYMENT.SHOP_ID.eq(shopId));
+                .and(ofNullable(shopId).map(PAYMENT.SHOP_ID::eq).orElse(trueCondition()));
     }
 
     private SelectConditionStep<Record2<BigDecimal, BigDecimal>> getAggByHourPaymentFundsAmountQuery(
@@ -193,7 +197,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .where(PAYMENT.INVOICE_ID.eq(invoiceId))
                 .and(PAYMENT.PAYMENT_ID.eq(paymentId))
                 .and(PAYMENT.PARTY_ID.eq(partyId))
-                .and(PAYMENT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(PAYMENT.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
     }
 
@@ -207,7 +211,7 @@ public class PaymentDaoImpl extends AbstractDao implements PaymentDao {
                 .where(fromTime.map(PAYMENT.STATUS_CREATED_AT::ge).orElse(DSL.trueCondition()))
                 .and(PAYMENT.STATUS_CREATED_AT.lt(toTime))
                 .and(PAYMENT.PARTY_ID.eq(partyId))
-                .and(PAYMENT.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(PAYMENT.SHOP_ID::eq).orElse(trueCondition()))
                 .and(PAYMENT.STATUS.eq(InvoicePaymentStatus.captured))
                 .orderBy(PAYMENT.STATUS_CREATED_AT, PAYMENT.CREATED_AT)
                 .fetchLazy();

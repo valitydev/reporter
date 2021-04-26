@@ -20,6 +20,8 @@ import java.util.Optional;
 import static com.rbkmoney.reporter.domain.tables.Invoice.INVOICE;
 import static com.rbkmoney.reporter.domain.tables.InvoiceAdditionalInfo.INVOICE_ADDITIONAL_INFO;
 import static com.rbkmoney.reporter.util.MapperUtils.removeNullSymbols;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
@@ -61,7 +63,7 @@ public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
                 .where(fromTime.map(INVOICE.STATUS_CREATED_AT::ge).orElse(DSL.trueCondition()))
                 .and(INVOICE.STATUS_CREATED_AT.lt(toTime))
                 .and(INVOICE.PARTY_ID.eq(partyId))
-                .and(INVOICE.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(INVOICE.SHOP_ID::eq).orElse(trueCondition()))
                 .fetch();
         return records == null || records.isEmpty() ? new ArrayList<>() : records.into(Invoice.class);
     }

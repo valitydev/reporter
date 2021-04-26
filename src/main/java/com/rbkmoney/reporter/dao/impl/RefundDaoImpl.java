@@ -26,6 +26,8 @@ import static com.rbkmoney.reporter.domain.Tables.REFUND_AGGS_BY_HOUR;
 import static com.rbkmoney.reporter.domain.tables.Refund.REFUND;
 import static com.rbkmoney.reporter.domain.tables.RefundAdditionalInfo.REFUND_ADDITIONAL_INFO;
 import static com.rbkmoney.reporter.util.AccountingDaoUtils.getFundsAmountResult;
+import static java.util.Optional.ofNullable;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Component
 public class RefundDaoImpl extends AbstractDao implements RefundDao {
@@ -83,7 +85,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .where(REFUND.STATUS_CREATED_AT.greaterThan(fromTime))
                 .and(REFUND.STATUS_CREATED_AT.lessThan(toTime))
                 .and(REFUND.PARTY_ID.eq(partyId))
-                .and(REFUND.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(REFUND.SHOP_ID::eq).orElse(trueCondition()))
                 .and(REFUND.STATUS.eq(RefundStatus.succeeded))
                 .orderBy(REFUND.STATUS_CREATED_AT, REFUND.CREATED_AT)
                 .fetchLazy();
@@ -146,14 +148,14 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .select(DSL.min(REFUND.STATUS_CREATED_AT))
                 .from(REFUND)
                 .where(REFUND.PARTY_ID.eq(partyId))
-                .and(REFUND.SHOP_ID.eq(shopId))
+                .and(ofNullable(shopId).map(REFUND.SHOP_ID::eq).orElse(trueCondition()))
                 .fetchOne();
         return Optional.ofNullable(result)
                 .map(r -> r.value1());
     }
 
     private SelectConditionStep<Record1<BigDecimal>> getRefundFundsAmountQuery(String partyId,
-                                                                               String partyShopId,
+                                                                               String shopId,
                                                                                String currencyCode,
                                                                                LocalDateTime fromTime,
                                                                                LocalDateTime toTime) {
@@ -168,7 +170,7 @@ public class RefundDaoImpl extends AbstractDao implements RefundDao {
                 .and(REFUND.STATUS.eq(RefundStatus.succeeded))
                 .and(REFUND.CURRENCY_CODE.eq(currencyCode))
                 .and(REFUND.PARTY_ID.eq(partyId))
-                .and(REFUND.SHOP_ID.eq(partyShopId));
+                .and(ofNullable(shopId).map(REFUND.SHOP_ID::eq).orElse(trueCondition()));
     }
 
     private SelectConditionStep<Record1<BigDecimal>> getAggByHourRefundFundsAmountQuery(String partyId,
