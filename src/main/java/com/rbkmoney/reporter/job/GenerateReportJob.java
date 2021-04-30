@@ -11,7 +11,6 @@ import com.rbkmoney.woody.api.flow.error.WRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.YearMonth;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 import static com.rbkmoney.geck.common.util.TypeUtil.toLocalDateTime;
 
 @Slf4j
-@Component
 public class GenerateReportJob implements Job {
 
     public static final String PARTY_ID = "party_id";

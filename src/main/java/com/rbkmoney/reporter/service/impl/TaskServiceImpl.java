@@ -106,8 +106,11 @@ public class TaskServiceImpl implements TaskService, ScheduleReports {
 
     @Override
     @Transactional
-    public void registerProvisionOfServiceJob(String partyId, String contractId, long lastEventId,
-                                              BusinessScheduleRef scheduleRef, Representative signer)
+    public void registerProvisionOfServiceJob(String partyId,
+                                              String contractId,
+                                              long lastEventId,
+                                              BusinessScheduleRef scheduleRef,
+                                              Representative signer)
             throws ScheduleProcessingException, NotFoundException, StorageException {
         log.info("Trying to register provision of service job, partyId='{}'," +
                         " contractId='{}', scheduleId='{}', signer='{}'",
