@@ -1,16 +1,10 @@
 package com.rbkmoney.reporter.config;
 
 import com.rbkmoney.reporter.dao.impl.*;
-import com.rbkmoney.reporter.handler.comparing.PaymentRegistryReportComparingHandler;
-import com.rbkmoney.reporter.handler.comparing.ProvisionOfServiceReportComparingHandler;
 import com.rbkmoney.reporter.service.impl.LocalReportCreatorServiceImpl;
 import com.rbkmoney.reporter.service.impl.LocalStatisticServiceImpl;
 import com.rbkmoney.reporter.service.impl.PartyServiceImpl;
-import com.rbkmoney.reporter.service.impl.ReportCreatorServiceImpl;
 import com.rbkmoney.reporter.template.LocalPaymentRegistryTemplateImpl;
-import com.rbkmoney.reporter.template.LocalProvisionOfServiceTemplateImpl;
-import com.rbkmoney.reporter.template.PaymentRegistryTemplateImpl;
-import com.rbkmoney.reporter.template.ProvisionOfServiceTemplateImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.runner.RunWith;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
@@ -24,10 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
         classes = {
-                ReportCreatorServiceImpl.class,
                 PartyServiceImpl.class,
-                PaymentRegistryTemplateImpl.class,
-                ProvisionOfServiceTemplateImpl.class,
                 DataSourceAutoConfiguration.class,
                 JdbcTemplateAutoConfiguration.class,
                 TransactionAutoConfiguration.class,
@@ -37,17 +28,12 @@ import org.springframework.test.context.junit4.SpringRunner;
                 PaymentDaoImpl.class,
                 RefundDaoImpl.class,
                 AdjustmentDaoImpl.class,
-                AggregatesDaoImpl.class,
                 PayoutDaoImpl.class,
                 ChargebackDaoImpl.class,
-                ReportComparingDataDaoImpl.class,
                 ApplicationConfig.class,
                 LocalStatisticServiceImpl.class,
                 LocalReportCreatorServiceImpl.class,
-                LocalPaymentRegistryTemplateImpl.class,
-                LocalProvisionOfServiceTemplateImpl.class,
-                PaymentRegistryReportComparingHandler.class,
-                ProvisionOfServiceReportComparingHandler.class
+                LocalPaymentRegistryTemplateImpl.class
         },
         initializers = AbstractLocalTemplateConfig.Initializer.class
 )

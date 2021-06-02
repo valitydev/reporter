@@ -10,9 +10,8 @@ import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.exception.FileNotFoundException;
 import com.rbkmoney.reporter.exception.FileStorageException;
 import com.rbkmoney.reporter.service.StorageService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,17 +28,17 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class S3StorageServiceImpl implements StorageService {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final TransferManager transferManager;
     private final AmazonS3 storageClient;
     private final String bucketName;
 
     @Autowired
-    public S3StorageServiceImpl(TransferManager transferManager, @Value("${storage.bucketName}") String bucketName) {
+    public S3StorageServiceImpl(TransferManager transferManager,
+                                @Value("${storage.bucketName}") String bucketName) {
         this.transferManager = transferManager;
         this.storageClient = transferManager.getAmazonS3Client();
         this.bucketName = bucketName;
@@ -57,8 +56,8 @@ public class S3StorageServiceImpl implements StorageService {
     public URL getFileUrl(String fileId, String bucketId, Instant expiresIn)
             throws FileStorageException, FileNotFoundException {
         try {
-            log.info("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'", fileId, bucketId,
-                    expiresIn);
+            log.info("Trying to generate presigned url, fileId='{}', bucketId='{}', expiresIn='{}'",
+                    fileId, bucketId, expiresIn);
             URL url = storageClient.generatePresignedUrl(bucketId, fileId, Date.from(expiresIn));
             if (Objects.isNull(url)) {
                 throw new FileNotFoundException(

@@ -1,19 +1,14 @@
 package com.rbkmoney.reporter.data;
 
-import com.rbkmoney.damsel.merch_stat.*;
-import com.rbkmoney.damsel.merch_stat.InvoicePaymentStatus;
-import com.rbkmoney.damsel.merch_stat.PaymentTool;
-import com.rbkmoney.geck.common.util.TypeUtil;
-import com.rbkmoney.reporter.domain.enums.*;
-import com.rbkmoney.reporter.domain.enums.PayoutStatus;
-import com.rbkmoney.reporter.domain.enums.PayoutType;
-import com.rbkmoney.reporter.domain.tables.pojos.PayoutState;
-import com.rbkmoney.reporter.domain.tables.records.*;
-import com.rbkmoney.reporter.model.StatAdjustment;
+import com.rbkmoney.reporter.domain.enums.AdjustmentStatus;
+import com.rbkmoney.reporter.domain.enums.PaymentFlow;
+import com.rbkmoney.reporter.domain.enums.PaymentPayerType;
+import com.rbkmoney.reporter.domain.enums.RefundStatus;
+import com.rbkmoney.reporter.domain.tables.records.AdjustmentRecord;
+import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
+import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,28 +16,11 @@ public class ReportsTestData {
 
     public static final String DEFAULT_CURRENCY = "RUB";
 
-    public static StatAdjustment buildStatAdjustment(int i, String shopId, LocalDateTime createdAt) {
-        StatAdjustment statAdjustment = new StatAdjustment();
-        statAdjustment.setAdjustmentId("id" + i);
-        statAdjustment.setPaymentId("paymentId" + i);
-        statAdjustment.setInvoiceId("invoiceId" + i);
-        statAdjustment.setAdjustmentAmount(123L + i);
-        statAdjustment.setPartyShopId(shopId);
-        statAdjustment.setAdjustmentCurrencyCode(DEFAULT_CURRENCY);
-        statAdjustment.setAdjustmentStatusCreatedAt(createdAt.toInstant(ZoneOffset.UTC));
-        statAdjustment.setAdjustmentReason("You are the reason of my life");
-        return statAdjustment;
-    }
-
-    public static StatAdjustment buildStatAdjustment(int i) {
-        return buildStatAdjustment(i, "shopId" + i, LocalDateTime.now());
-    }
-
-    public static AdjustmentRecord buildStatAdjustmentRecord(int i,
-                                                             String partyId,
-                                                             String shopId,
-                                                             Long amount,
-                                                             LocalDateTime createdAt) {
+    public static AdjustmentRecord buildAdjustmentRecord(int i,
+                                                         String partyId,
+                                                         String shopId,
+                                                         Long amount,
+                                                         LocalDateTime createdAt) {
         AdjustmentRecord adjustment = new AdjustmentRecord();
         adjustment.setAdjustmentId("id" + i);
         adjustment.setPaymentId("paymentId" + i);
@@ -56,31 +34,6 @@ public class ReportsTestData {
         adjustment.setStatusCreatedAt(createdAt);
         adjustment.setReason("You are the reason of my life");
         return adjustment;
-    }
-
-    public static StatRefund buildStatRefund(int i) {
-        return buildStatRefund(i, LocalDateTime.now().minusHours(i));
-    }
-
-    public static StatRefund buildStatRefund(int i, LocalDateTime createdAt) {
-        StatRefund refund = new StatRefund();
-        refund.setId("id" + i);
-        refund.setPaymentId("paymentId" + i);
-        refund.setInvoiceId("invoiceId" + i);
-        refund.setStatus(InvoicePaymentRefundStatus
-                .succeeded(new InvoicePaymentRefundSucceeded(createdAt.toInstant(ZoneOffset.UTC).toString())));
-        refund.setAmount(123L + i);
-        refund.setShopId("shopId" + i);
-        refund.setId("" + i);
-        refund.setCurrencySymbolicCode(DEFAULT_CURRENCY);
-        refund.setReason("You are the reason of my life");
-        return refund;
-    }
-
-    public static StatRefund buildStatRefund(int i, String shopId, LocalDateTime createdAt) {
-        StatRefund refund = buildStatRefund(i, createdAt);
-        refund.setShopId(shopId);
-        return refund;
     }
 
     public static RefundRecord buildRefundRecord(int i,
@@ -103,52 +56,6 @@ public class ReportsTestData {
         return refund;
     }
 
-    public static StatPayment buildStatPayment(int i) {
-        return buildStatPayment(i, LocalDateTime.now().minusHours(i));
-    }
-
-    public static StatPayment buildStatPayment(int i, LocalDateTime createdAt) {
-        StatPayment payment = new StatPayment();
-        payment.setId("id" + i);
-        payment.setCreatedAt(TypeUtil.temporalToString(createdAt));
-        payment.setInvoiceId("invoiceId" + i);
-        InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
-        invoicePaymentCaptured.setAt(createdAt.toInstant(ZoneOffset.UTC).toString());
-        payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(PaymentTool.bank_card(
-                new BankCard("token", "424" + i, "56789" + i))
-        );
-        paymentResourcePayer.setEmail("abc" + i + "@mail.ru");
-        payment.setPayer(Payer.payment_resource(paymentResourcePayer));
-        payment.setAmount(123L + i);
-        payment.setFee(2L + i);
-        payment.setShopId("shopId" + i);
-        payment.setCurrencySymbolicCode(DEFAULT_CURRENCY);
-        return payment;
-    }
-
-    public static StatPayment buildStatPayment(int i, String shopId, LocalDateTime createdAt) {
-        StatPayment payment = buildStatPayment(i, createdAt);
-        payment.setId("paymentId" + i);
-        payment.setShopId(shopId);
-        return payment;
-    }
-
-    public static StatPayment buildStatPayment() {
-        StatPayment payment = new StatPayment();
-        InvoicePaymentCaptured invoicePaymentCaptured = new InvoicePaymentCaptured();
-        invoicePaymentCaptured.setAt("2018-03-22T06:12:27Z");
-        payment.setStatus(InvoicePaymentStatus.captured(invoicePaymentCaptured));
-        PaymentResourcePayer paymentResourcePayer = new PaymentResourcePayer(
-                        PaymentTool.bank_card(
-                                new BankCard("token", "4249", "567890")
-                        )
-                );
-        paymentResourcePayer.setEmail("xyz@mail.ru");
-        payment.setPayer(Payer.payment_resource(paymentResourcePayer));
-        return payment;
-    }
-
     public static PaymentRecord buildPaymentRecord(int index,
                                                    String partyId,
                                                    String shopId,
@@ -156,6 +63,18 @@ public class ReportsTestData {
         long amount = 123L + index;
         long feeAmount = 2L + index;
         return buildPaymentRecord(index, partyId, shopId, amount, feeAmount, createdAt);
+    }
+
+    public static PaymentRecord buildPaymentRecord(int index) {
+        long amount = 123L + index;
+        long feeAmount = 2L + index;
+        return buildPaymentRecord(index, "party", "shop", amount, feeAmount, LocalDateTime.now());
+    }
+
+    public static PaymentRecord buildPaymentRecord(int index, String partyId, String shopId) {
+        long amount = 123L + index;
+        long feeAmount = 2L + index;
+        return buildPaymentRecord(index, partyId, shopId, amount, feeAmount, LocalDateTime.now());
     }
 
     public static PaymentRecord buildPaymentRecord(int index,
@@ -190,61 +109,4 @@ public class ReportsTestData {
         return purposes;
     }
 
-    public static PayoutRecord buildPayoutRecord(int i,
-                                                 String partyId,
-                                                 String shopId,
-                                                 Long amount,
-                                                 LocalDateTime createdAt) {
-        PayoutRecord record = new PayoutRecord();
-        record.setPartyId(partyId);
-        record.setShopId(shopId);
-        record.setPayoutId("payout." + i);
-        record.setContractId("contract-1");
-        record.setCreatedAt(createdAt);
-        record.setAmount(amount);
-        record.setFee(0L);
-        record.setCurrencyCode(DEFAULT_CURRENCY);
-        record.setWalletId("wallet.1");
-        record.setSummary("Some summary");
-        record.setType(PayoutType.bank_card);
-        return record;
-    }
-
-    public static PayoutStateRecord buildPayoutStateRecord(int i, LocalDateTime createdAt) {
-        PayoutStateRecord record = new PayoutStateRecord();
-        record.setEventId(Long.valueOf(i));
-        record.setEventCreatedAt(createdAt);
-        record.setPayoutId("payout." + i);
-        record.setExtPayoutId(Long.valueOf(i));
-        record.setStatus(PayoutStatus.paid);
-        record.setCancelDetails("null");
-        return record;
-    }
-
-    public static ChargebackRecord buildChargebackRecord(int i,
-                                                         String partyId,
-                                                         String shopId,
-                                                         Long amount,
-                                                         LocalDateTime createdAt) {
-        ChargebackRecord record = new ChargebackRecord();
-        record.setDomainRevision(1L);
-        record.setPartyRevision(1L);
-        record.setInvoiceId("invoice." + i);
-        record.setPaymentId("payment." + i);
-        record.setChargebackId("chargeback." + i);
-        record.setShopId(shopId);
-        record.setPartyId(partyId);
-        record.setExternalId("extId." + i);
-        record.setEventCreatedAt(createdAt);
-        record.setCreatedAt(createdAt);
-        record.setStatus(ChargebackStatus.accepted);
-        record.setLevyAmount(amount);
-        record.setLevyCurrencyCode(DEFAULT_CURRENCY);
-        record.setAmount(amount);
-        record.setCurrencyCode(DEFAULT_CURRENCY);
-        record.setReasonCode("1");
-        record.setReasonCategory(ChargebackCategory.fraud);
-        record.setStage(ChargebackStage.arbitration);
-        return record;
-    }
 }

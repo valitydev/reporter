@@ -1,10 +1,12 @@
 package com.rbkmoney.reporter.util;
 
+import com.rbkmoney.reporter.model.FeeType;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.rbkmoney.reporter.util.FeeType.*;
+import static com.rbkmoney.reporter.model.FeeType.*;
 
 public class FeeTypeMapUtil {
 

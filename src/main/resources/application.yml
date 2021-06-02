@@ -45,35 +45,13 @@ spring:
   flyway:
     schemas: @db.schema@
     table: schema_version
-  quartz:
-    job-store-type: JDBC
-    properties:
-      org.quartz:
-        jobStore:
-          class: org.quartz.impl.jdbcjobstore.JobStoreTX
-          driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-          isClustered: true
-          misfireThreshold: 60000
-          useProperties: true
-        plugin:
-          shutdownHook:
-            class: org.quartz.plugins.management.ShutdownHookPlugin
-            cleanShutdown: false
-        scheduler:
-          instanceId: AUTO
-          instanceName: reporter-scheduler
-        threadPool:
-          makeThreadsDaemons: true
-          threadNamePrefix: Scheduler
-    jdbc:
-      initialize-schema: ALWAYS
   output:
     ansi:
       enabled: ALWAYS
   task:
     scheduling:
       pool:
-        size: 11
+        size: 10
 
 kafka:
   bootstrap-servers: localhost:9092
@@ -94,41 +72,16 @@ kafka:
     max-poll-records: 20
     max-poll-interval-ms: 30000
     session-timeout-ms: 30000
+    disconnect-backoff-ms: 2000
+    retry-backoff-ms: 2000
     party-management:
       concurrency: 5
   topics:
-    party-management:
-      id: mg-events-party
-      enabled: false
-      concurrency: 1
     invoicing:
       id: mg-invoice-100-2
       enabled: false
       concurrency: 1
       throttling-timeout-ms: 50
-      error-throttling-timeout-ms: 1000
-
-aggregation:
-  enabled: false
-  invoicing:
-    payments:
-      timeout: 900000
-    refunds:
-      timeout: 900000
-    adjustments:
-      timeout: 900000
-    payout:
-      timeout: 900000
-
-payouter:
-  polling:
-    url: http://payouter:8022/repo
-    housekeeperTimeout: 15000
-    maxQuerySize: 1000
-    delay: 10000
-    retryDelay: 1000
-    maxPoolSize: 1
-    enabled: false
 
 hellgate:
   invoicing:
@@ -138,10 +91,6 @@ hellgate:
 partyManagement:
   url: http://hellgate:8022/v1/processing/partymgmt
   timeout: 5000
-
-magista:
-  url: http://magista:8022/stat
-  timeout: 60000
 
 signer:
   url: http://signer:8022/signer
@@ -155,11 +104,6 @@ report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
   includeAdjustments: false
-  local:
-    test:
-      comparing:
-        timeout: 30000
-        enabled: false
 
 storage:
   endpoint: localhost:42827

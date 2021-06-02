@@ -32,11 +32,14 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class LocalReportCreatorServiceImpl implements ReportCreatorService<LocalReportCreatorDto> {
 
-    private static final int PACKAGE_SIZE = 100;
     private final LocalStatisticService localStatisticService;
+
     @Value("${report.includeAdjustments}")
     private boolean includeAdjustments;
+
     private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
+
+    private static final int PACKAGE_SIZE = 100;
 
     @Override
     public void createReport(LocalReportCreatorDto reportCreatorDto) throws IOException {

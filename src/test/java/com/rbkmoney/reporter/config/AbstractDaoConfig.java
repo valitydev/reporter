@@ -38,10 +38,7 @@ import java.util.function.Supplier;
                 InvoiceDaoImpl.class,
                 PaymentDaoImpl.class,
                 RefundDaoImpl.class,
-                AdjustmentDaoImpl.class,
-                AggregatesDaoImpl.class,
-                ReportComparingDataDaoImpl.class,
-                ContractMetaDaoImpl.class,
+                AdjustmentDaoImpl.class
         },
         initializers = AbstractDaoConfig.Initializer.class
 )

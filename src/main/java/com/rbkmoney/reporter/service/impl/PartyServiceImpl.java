@@ -11,19 +11,17 @@ import com.rbkmoney.reporter.exception.NotFoundException;
 import com.rbkmoney.reporter.exception.PartyNotFoundException;
 import com.rbkmoney.reporter.exception.ShopNotFoundException;
 import com.rbkmoney.reporter.service.PartyService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PartyServiceImpl implements PartyService {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final UserInfo userInfo = new UserInfo("reporter", UserType.internal_user(new InternalUser()));
 

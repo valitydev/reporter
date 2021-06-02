@@ -29,8 +29,6 @@ import java.util.Map;
 @EnableConfigurationProperties(KafkaSslProperties.class)
 public class KafkaConfig {
 
-    @Value("${retry-policy.maxAttempts}")
-    int maxAttempts;
     @Value("${kafka.consumer.auto-offset-reset}")
     private String autoOffsetReset;
     @Value("${kafka.consumer.enable-auto-commit}")
@@ -49,8 +47,10 @@ public class KafkaConfig {
     private String bootstrapServers;
     @Value("${kafka.topics.invoicing.concurrency}")
     private int invoicingConcurrency;
-    @Value("${kafka.topics.party-management.concurrency}")
-    private int partyConcurrency;
+    @Value("${kafka.consumer.disconnect-backoff-ms}")
+    private int disconnectBackoffMs;
+    @Value("${kafka.consumer.retry-backoff-ms}")
+    private int retryBackoffMs;
 
     @Bean
     public Map<String, Object> consumerConfigs(KafkaSslProperties kafkaSslProperties) {
@@ -65,6 +65,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeoutMs);
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollIntervalMs);
+        props.put(ConsumerConfig.RECONNECT_BACKOFF_MS_CONFIG, disconnectBackoffMs);
+        props.put(ConsumerConfig.RETRY_BACKOFF_MS_CONFIG, retryBackoffMs);
         configureSsl(props, kafkaSslProperties);
         return props;
     }
@@ -87,17 +89,6 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, MachineEvent> consumerFactory(KafkaSslProperties kafkaSslProperties) {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(kafkaSslProperties));
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MachineEvent>>
-            kafkaListenerContainerFactory(
-                    ConsumerFactory<String, MachineEvent> consumerFactory
-    ) {
-        ConcurrentKafkaListenerContainerFactory<String, MachineEvent> factory =
-                createDefaultListenerContainerFactory(consumerFactory);
-        factory.setConcurrency(partyConcurrency);
-        return factory;
     }
 
     @Bean

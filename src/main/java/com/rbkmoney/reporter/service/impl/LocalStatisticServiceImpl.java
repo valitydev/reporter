@@ -1,14 +1,15 @@
 package com.rbkmoney.reporter.service.impl;
 
-import com.rbkmoney.reporter.dao.*;
+import com.rbkmoney.reporter.dao.AdjustmentDao;
+import com.rbkmoney.reporter.dao.InvoiceDao;
+import com.rbkmoney.reporter.dao.PaymentDao;
+import com.rbkmoney.reporter.dao.RefundDao;
 import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.records.AdjustmentRecord;
 import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import com.rbkmoney.reporter.exception.PaymentNotFoundException;
-import com.rbkmoney.reporter.model.PaymentFundsAmount;
-import com.rbkmoney.reporter.model.ShopAccountingModel;
 import com.rbkmoney.reporter.service.LocalStatisticService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Cursor;
@@ -29,49 +30,8 @@ public class LocalStatisticServiceImpl implements LocalStatisticService {
     private final PaymentDao paymentDao;
     private final RefundDao refundDao;
     private final AdjustmentDao adjustmentDao;
-    private final ChargebackDao chargebackDao;
-    private final PayoutDao payoutDao;
 
     private ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-
-    @Override
-    public ShopAccountingModel getShopAccounting(String partyId,
-                                                 String shopId,
-                                                 String currencyCode,
-                                                 LocalDateTime toTime) {
-        return getShopAccounting(partyId, shopId, currencyCode, Optional.empty(), toTime);
-    }
-
-    @Override
-    public ShopAccountingModel getShopAccounting(String partyId,
-                                                 String shopId,
-                                                 String currencyCode,
-                                                 LocalDateTime fromTime,
-                                                 LocalDateTime toTime) {
-        return getShopAccounting(partyId, shopId, currencyCode, Optional.of(fromTime), toTime);
-    }
-
-    private ShopAccountingModel getShopAccounting(String partyId,
-                                                  String shopId,
-                                                  String currencyCode,
-                                                  Optional<LocalDateTime> fromTime,
-                                                  LocalDateTime toTime) {
-        ShopAccountingModel shopAccountingModel = new ShopAccountingModel(partyId, shopId, currencyCode);
-        PaymentFundsAmount paymentFundsAmount =
-                paymentDao.getPaymentFundsAmount(partyId, shopId, currencyCode, fromTime, toTime);
-        shopAccountingModel.setFundsAcquired(paymentFundsAmount.getFundsAcquiredAmount());
-        shopAccountingModel.setFeeCharged(paymentFundsAmount.getFeeChargedAmount());
-        shopAccountingModel.setFundsRefunded(
-                refundDao.getFundsRefundedAmount(partyId, shopId, currencyCode, fromTime, toTime));
-        shopAccountingModel.setFundsPaidOut(
-                payoutDao.getFundsPayOutAmount(partyId, shopId, currencyCode, fromTime, toTime));
-        shopAccountingModel.setFundsAdjusted(
-                adjustmentDao.getFundsAdjustedAmount(partyId, shopId, currencyCode, fromTime, toTime));
-        shopAccountingModel.setFundsReturned(
-                chargebackDao.getFundsReturnedAmount(partyId, shopId, currencyCode, fromTime, toTime));
-        validate(shopAccountingModel);
-        return shopAccountingModel;
-    }
 
     @Override
     public Map<String, String> getPurposes(String partyId,

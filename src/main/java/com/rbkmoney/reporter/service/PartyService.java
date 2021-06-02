@@ -1,6 +1,5 @@
 package com.rbkmoney.reporter.service;
 
-
 import com.rbkmoney.damsel.domain.Contract;
 import com.rbkmoney.damsel.domain.Party;
 import com.rbkmoney.damsel.domain.PaymentInstitutionRef;
@@ -14,9 +13,6 @@ import com.rbkmoney.reporter.exception.ShopNotFoundException;
 
 import java.util.Map;
 
-/**
- * Created by tolkonepiu on 17/07/2017.
- */
 public interface PartyService {
 
     Party getParty(String partyId) throws PartyNotFoundException;

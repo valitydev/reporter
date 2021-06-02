@@ -7,7 +7,6 @@ import com.rbkmoney.reporter.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 
@@ -20,13 +19,11 @@ public class InvoicingListener {
 
     private final EventService invoicingService;
 
-    @Value("${kafka.topics.invoicing.error-throttling-timeout-ms}")
-    private int errorThrottlingTimeout;
-
     @KafkaListener(topics = "${kafka.topics.invoicing.id}",
             containerFactory = "kafkaInvoicingListenerContainerFactory")
     public void listen(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
-        log.debug("Got invoicing machineEvent batch with size: {}", messages.size());
+        int batchSize = messages.size();
+        log.debug("Got invoicing machineEvent batch with size: {}", batchSize);
         try {
             invoicingService.handleEvents(
                     messages.stream()
@@ -38,13 +35,13 @@ public class InvoicingListener {
                             )
                             .collect(Collectors.toList())
             );
-        } catch (Exception e) {
-            log.error("Received error during processing invoice batch: ", e);
-            Thread.sleep(errorThrottlingTimeout);
-            throw e;
+        } catch (Throwable ex) {
+            log.error("Received error during processing invoice batch (size: {}, summary: {})", batchSize,
+                    LogUtil.toSummaryStringWithSinkEventValues(messages), ex);
+            throw ex;
         }
         ack.acknowledge();
-        log.debug("Invoicing batch has been committed, size={}, {}", messages.size(),
+        log.debug("Invoicing batch has been committed, size={}, {}", batchSize,
                 LogUtil.toSummaryStringWithSinkEventValues(messages));
     }
 

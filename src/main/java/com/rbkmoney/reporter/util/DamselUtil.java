@@ -1,88 +1,19 @@
 package com.rbkmoney.reporter.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import com.rbkmoney.damsel.base.InvalidRequest;
 import com.rbkmoney.damsel.domain.*;
-import com.rbkmoney.damsel.payout_processing.PayoutSummaryItem;
-import com.rbkmoney.damsel.reports.*;
-import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.geck.serializer.kit.json.JsonHandler;
 import com.rbkmoney.geck.serializer.kit.tbase.TBaseProcessor;
+import com.rbkmoney.reporter.model.FeeType;
 import org.apache.thrift.TBase;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DamselUtil {
-
-    public static Report toDamselReport(com.rbkmoney.reporter.domain.tables.pojos.Report report,
-                                        List<com.rbkmoney.reporter.domain.tables.pojos.FileMeta> files)
-            throws IllegalArgumentException {
-        Report damselReport = new Report();
-        damselReport.setReportId(report.getId());
-        damselReport.setStatus(ReportStatus.valueOf(report.getStatus().getLiteral()));
-        ReportTimeRange timeRange = new ReportTimeRange(
-                TypeUtil.temporalToString(report.getFromTime()),
-                TypeUtil.temporalToString(report.getToTime())
-        );
-        damselReport.setTimeRange(timeRange);
-        damselReport.setReportType(ReportType.valueOf(report.getType().name()));
-        damselReport.setCreatedAt(TypeUtil.temporalToString(report.getCreatedAt()));
-
-        damselReport.setFiles(files.stream()
-                .map(DamselUtil::toDamselFile)
-                .collect(Collectors.toList()));
-
-        return damselReport;
-    }
-
-    public static FileMeta toDamselFile(com.rbkmoney.reporter.domain.tables.pojos.FileMeta file) {
-        FileMeta fileMeta = new FileMeta();
-        fileMeta.setFileId(file.getFileId());
-        fileMeta.setFilename(file.getFilename());
-        Signature signature = new Signature();
-        signature.setMd5(file.getMd5());
-        signature.setSha256(file.getSha256());
-        fileMeta.setSignature(signature);
-        return fileMeta;
-    }
-
-    public static InvalidRequest buildInvalidRequest(Throwable throwable) {
-        return buildInvalidRequest(throwable.getMessage());
-    }
-
-    public static InvalidRequest buildInvalidRequest(String... messages) {
-        return new InvalidRequest(Arrays.asList(messages));
-    }
-
-    public static String toPayoutSummaryStatString(
-            List<com.rbkmoney.damsel.payout_processing.PayoutSummaryItem> payoutSummaryItems
-    ) {
-        try {
-            return new ObjectMapper().writeValueAsString(convertJsonFromPayoutSummary(payoutSummaryItems));
-        } catch (IOException ex) {
-            throw new RuntimeJsonMappingException(ex.getMessage());
-        }
-    }
-
-    private static List<JsonNode> convertJsonFromPayoutSummary(List<PayoutSummaryItem> payoutSummaryItems) {
-        return payoutSummaryItems.stream()
-                .map(
-                        payoutSummaryItem -> {
-                            try {
-                                return new TBaseProcessor().process(payoutSummaryItem, new JsonHandler());
-                            } catch (IOException ex) {
-                                throw new RuntimeJsonMappingException(ex.getMessage());
-                            }
-                        }
-                ).collect(Collectors.toList());
-    }
 
     public static String toJsonString(TBase base) {
         return toJson(base).toString();

@@ -49,14 +49,14 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
     public void reportsNewProtoHandlerTest() throws TException {
         String partyId = "partyId";
         String shopId = "shopId";
-        String reportType = "provision_of_service";
+        ReportType reportType = ReportType.payment_registry;
         List<String> shopIds = Collections.singletonList(shopId);
         Random random = new Random();
 
         when(partyService.getShop(anyString(), anyString())).thenReturn(new Shop());
 
         when(reportNewProtoService
-                .createReport(eq(partyId), eq(shopId), any(), any(), eq(ReportType.valueOf(reportType))))
+                .createReport(eq(partyId), eq(shopId), any(), any(), eq(reportType)))
                 .thenReturn(random.nextLong());
 
         LocalDateTime currMoment = LocalDateTime.now();
@@ -72,7 +72,7 @@ public class ReportHandlersTest extends AbstractHandlerConfig {
                                 .setShopId(shopId)
                                 .setTimeRange(timeRange);
 
-                        handler.createReport(reportRequest, reportType);
+                        handler.createReport(reportRequest, reportType.getLiteral());
                     } catch (TException e) {
                         throw new RuntimeException();
                     }

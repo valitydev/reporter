@@ -8,8 +8,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.rbkmoney.damsel.domain_config.RepositoryClientSrv;
-import com.rbkmoney.damsel.merch_stat.MerchantStatisticsSrv;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.damsel.signer.SignerSrv;
@@ -26,17 +24,6 @@ import java.util.concurrent.ThreadFactory;
 
 @Configuration
 public class ApplicationConfig {
-
-    @Bean
-    public RepositoryClientSrv.Iface dominantClient(
-            @Value("${domainConfig.url}") Resource resource,
-            @Value("${domainConfig.timeout}") int timeout
-    ) throws IOException {
-        return new THSpawnClientBuilder()
-                .withAddress(resource.getURI())
-                .withNetworkTimeout(timeout)
-                .build(RepositoryClientSrv.Iface.class);
-    }
 
     @Bean
     public PartyManagementSrv.Iface partyManagementClient(
@@ -58,17 +45,6 @@ public class ApplicationConfig {
                 .withNetworkTimeout(timeout)
                 .withAddress(resource.getURI())
                 .build(SignerSrv.Iface.class);
-    }
-
-    @Bean
-    public MerchantStatisticsSrv.Iface merchantStatisticsClient(
-            @Value("${magista.url}") Resource resource,
-            @Value("${magista.timeout}") int timeout
-    ) throws IOException {
-        return new THSpawnClientBuilder()
-                .withAddress(resource.getURI())
-                .withNetworkTimeout(timeout)
-                .build(MerchantStatisticsSrv.Iface.class);
     }
 
     @Bean

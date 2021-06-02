@@ -2,7 +2,6 @@ package com.rbkmoney.reporter.config;
 
 import com.rbkmoney.easyway.*;
 import com.rbkmoney.reporter.config.properties.KafkaSslProperties;
-import com.rbkmoney.reporter.listener.PartyManagementListener;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
 import org.junit.runner.Description;
@@ -27,8 +26,6 @@ import java.util.function.Supplier;
                 KafkaSslProperties.class,
                 KafkaConfig.class,
                 KafkaConsumerBeanEnableConfig.class,
-                PartyManagementListener.class,
-
         },
         initializers = AbstractKafkaConfig.Initializer.class
 )
@@ -36,6 +33,10 @@ import java.util.function.Supplier;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Slf4j
 public abstract class AbstractKafkaConfig extends AbstractTestUtils {
+
+    public static final int DEFAULT_MAX_POLL_RECORDS = 5;
+
+    public static final long DEFAULT_KAFKA_SYNC_TIMEOUT = 5000L;
 
     private static TestContainers testContainers =
             TestContainersBuilder.builderWithTestContainers(getTestContainersParametersSupplier())
@@ -72,8 +73,8 @@ public abstract class AbstractKafkaConfig extends AbstractTestUtils {
 
     private static Consumer<EnvironmentProperties> getEnvironmentPropertiesConsumer() {
         return environmentProperties -> {
-            environmentProperties.put("kafka.topics.party-management.enabled", "true");
             environmentProperties.put("kafka.topics.invoicing.enabled", "true");
+            environmentProperties.put("kafka.consumer.max-poll-records", String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         };
     }
 
