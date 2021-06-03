@@ -334,7 +334,7 @@ public final class MapperUtils {
             additionalInfo.setBankCardSystem(PaymentSystemUtil.getPaymentSystemName(bankCard));
             additionalInfo.setBankCardBin(bankCard.getBin());
             additionalInfo.setBankCardMaskedPan(bankCard.getLastDigits());
-            additionalInfo.setBankCardTokenProvider(TokenProviderUtil.getTokenProviderName(bankCard));
+            additionalInfo.setBankCardTokenProviderRef(TokenProviderUtil.getTokenProviderName(bankCard));
         } else if (paymentTool.isSetPaymentTerminal()) {
             PaymentTerminal paymentTerminal = paymentTool.getPaymentTerminal();
 

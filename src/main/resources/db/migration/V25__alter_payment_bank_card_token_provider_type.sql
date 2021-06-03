@@ -1,1 +1,0 @@
-ALTER TABLE rpt.payment_additional_info ALTER COLUMN bank_card_token_provider TYPE CHARACTER VARYING;

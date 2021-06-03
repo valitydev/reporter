@@ -1,0 +1,1 @@
+ALTER TABLE rpt.payment_additional_info ADD COLUMN IF NOT EXISTS bank_card_token_provider_ref CHARACTER VARYING;
