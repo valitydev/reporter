@@ -1,9 +1,14 @@
 package com.rbkmoney.reporter.config;
 
+import com.rbkmoney.damsel.payment_processing.EventPayload;
 import com.rbkmoney.kafka.common.exception.handler.SeekToCurrentWithSleepBatchErrorHandler;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.reporter.config.properties.KafkaSslProperties;
 import com.rbkmoney.reporter.serde.SinkEventDeserializer;
+import com.rbkmoney.sink.common.parser.impl.MachineEventParser;
+import com.rbkmoney.sink.common.parser.impl.PaymentEventPayloadMachineEventParser;
+import com.rbkmoney.sink.common.serialization.BinaryDeserializer;
+import com.rbkmoney.sink.common.serialization.impl.PaymentEventPayloadDeserializer;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SslConfigs;
@@ -13,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -27,6 +33,7 @@ import java.util.Map;
 
 @Configuration
 @EnableConfigurationProperties(KafkaSslProperties.class)
+@EnableKafka
 public class KafkaConfig {
 
     @Value("${kafka.consumer.auto-offset-reset}")
@@ -51,6 +58,17 @@ public class KafkaConfig {
     private int disconnectBackoffMs;
     @Value("${kafka.consumer.retry-backoff-ms}")
     private int retryBackoffMs;
+
+    @Bean
+    public BinaryDeserializer<EventPayload> paymentEventPayloadDeserializer() {
+        return new PaymentEventPayloadDeserializer();
+    }
+
+    @Bean
+    public MachineEventParser<EventPayload> paymentMachineEventParser(
+            BinaryDeserializer<EventPayload> paymentEventPayloadDeserializer) {
+        return new PaymentEventPayloadMachineEventParser(paymentEventPayloadDeserializer);
+    }
 
     @Bean
     public Map<String, Object> consumerConfigs(KafkaSslProperties kafkaSslProperties) {
@@ -109,7 +127,6 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
-        factory.getContainerProperties().setAckOnError(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setBatchErrorHandler(kafkaErrorHandler());
         return factory;

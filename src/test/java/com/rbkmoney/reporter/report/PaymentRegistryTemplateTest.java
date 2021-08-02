@@ -3,7 +3,7 @@ package com.rbkmoney.reporter.report;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
 import com.rbkmoney.geck.common.util.TypeUtil;
-import com.rbkmoney.reporter.config.AbstractLocalTemplateConfig;
+import com.rbkmoney.reporter.config.PostgresqlSpringBootITest;
 import com.rbkmoney.reporter.dao.AdjustmentDao;
 import com.rbkmoney.reporter.dao.InvoiceDao;
 import com.rbkmoney.reporter.dao.PaymentDao;
@@ -26,8 +26,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.thrift.TException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,14 +39,17 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static io.github.benas.randombeans.api.EnhancedRandom.random;
-import static org.junit.Assert.assertEquals;
+import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-public class PaymentRegistryTemplateTest extends AbstractLocalTemplateConfig {
+@PostgresqlSpringBootITest
+public class PaymentRegistryTemplateTest {
 
     @Autowired
     private PaymentDao paymentDao;
@@ -71,7 +74,7 @@ public class PaymentRegistryTemplateTest extends AbstractLocalTemplateConfig {
     private long expectedSum;
     private long expectedRefundSum;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
         invoiceRecord.setProduct("rbk.money");

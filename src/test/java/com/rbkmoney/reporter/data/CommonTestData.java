@@ -4,15 +4,15 @@ import com.rbkmoney.damsel.base.*;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain_config.VersionedObject;
 import com.rbkmoney.geck.common.util.TypeUtil;
-import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.enums.InvoicePaymentStatus;
+import com.rbkmoney.reporter.domain.enums.*;
 import com.rbkmoney.reporter.domain.tables.pojos.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static io.github.benas.randombeans.api.EnhancedRandom.random;
+import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
 
 public class CommonTestData {
 

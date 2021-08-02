@@ -2,12 +2,12 @@ package com.rbkmoney.reporter.util;
 
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.reporter.data.InvoicingData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class DamselUtilTest {
 

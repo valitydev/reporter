@@ -1,8 +1,8 @@
 package com.rbkmoney.reporter.data;
 
 import com.rbkmoney.damsel.base.Content;
-import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.domain.InvoicePaymentAdjustmentPending;
+import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.payment_processing.*;
 import com.rbkmoney.geck.common.util.TypeUtil;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;

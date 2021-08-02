@@ -1,11 +1,11 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.reporter.config.AbstractStorageServiceConfig;
+import com.rbkmoney.reporter.config.CephPostgresqlSpringBootITest;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,16 +16,19 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class StorageServiceTest extends AbstractStorageServiceConfig {
+@CephPostgresqlSpringBootITest
+public class StorageServiceTest {
 
     @Autowired
     private StorageService storageService;
 
+    @MockBean
+    private ScheduleReports scheduleReports;
+
     @Test
-    @Ignore("disable test with ceph usage, if needed check it locally")
     public void saveFileTest() throws IOException {
         Path expectedFile = Files.createTempFile("reporter_", "_expected_file");
         Path actualFile = Files.createTempFile("reporter_", "_actual_file");

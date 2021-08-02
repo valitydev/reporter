@@ -1,48 +1,52 @@
 package com.rbkmoney.reporter.kafka;
 
-import com.rbkmoney.kafka.common.serialization.ThriftSerializer;
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
-import com.rbkmoney.reporter.config.AbstractKafkaConfig;
-import com.rbkmoney.reporter.service.EventService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.Test;
+import com.rbkmoney.reporter.config.KafkaPostgresqlSpringBootITest;
+import com.rbkmoney.reporter.model.KafkaEvent;
+import com.rbkmoney.reporter.service.impl.InvoicingService;
+import com.rbkmoney.testcontainers.annotations.kafka.config.KafkaProducer;
+import org.apache.thrift.TBase;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Properties;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
-@Slf4j
-public class KafkaListenerTest extends AbstractKafkaConfig {
-    
+@KafkaPostgresqlSpringBootITest
+public class KafkaListenerTest {
+
     @Value("${kafka.topics.invoicing.id}")
     public String invoicingTopic;
-    
-    @Value("${kafka.bootstrap-servers}")
-    private String bootstrapServers;
-    
+
     @MockBean
-    private EventService eventService;
+    private InvoicingService invoicingService;
+
+    @Autowired
+    private KafkaProducer<TBase<?, ?>> testThriftKafkaProducer;
+
+    @Captor
+    private ArgumentCaptor<List<KafkaEvent>> arg;
 
     @Test
     public void listenInvoicingChanges() throws Exception {
-        int ceventsCount = 5;
-        for (int i = 0; i < ceventsCount; i++) {
-            writeToTopic(invoicingTopic, createSinkEvent());
+        int eventsCount = 5;
+        for (int i = 0; i < eventsCount; i++) {
+            testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
-
-        verify(eventService, timeout(DEFAULT_KAFKA_SYNC_TIMEOUT).times(ceventsCount))
-                .handleEvents(anyList());
+        verify(invoicingService, timeout(10000).times(1))
+                .handleEvents(arg.capture());
+        assertThat(arg.getValue().size())
+                .isEqualTo(eventsCount);
     }
 
     private SinkEvent createSinkEvent() {
@@ -61,25 +65,5 @@ public class KafkaListenerTest extends AbstractKafkaConfig {
         message.setSourceId("sda");
         message.setData(data);
         return message;
-    }
-
-    private void writeToTopic(String topic, SinkEvent sinkEvent) {
-        Producer<String, SinkEvent> producer = createProducer();
-        ProducerRecord<String, SinkEvent> producerRecord = new ProducerRecord<>(topic, null, sinkEvent);
-        try {
-            producer.send(producerRecord).get();
-        } catch (Exception e) {
-            log.error("KafkaAbstractTest initialize e: ", e);
-        }
-        producer.close();
-    }
-
-    private Producer<String, SinkEvent> createProducer() {
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ProducerConfig.CLIENT_ID_CONFIG, "client_id");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new ThriftSerializer<SinkEvent>().getClass());
-        return new KafkaProducer<>(props);
     }
 }

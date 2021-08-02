@@ -6,7 +6,7 @@ import com.rbkmoney.reporter.ReportRequest;
 import com.rbkmoney.reporter.ReportTimeRange;
 import com.rbkmoney.reporter.StatReportRequest;
 import com.rbkmoney.reporter.StatReportResponse;
-import com.rbkmoney.reporter.config.AbstractHandlerConfig;
+import com.rbkmoney.reporter.config.SpringExtensionTest;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
@@ -14,7 +14,7 @@ import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.service.PartyService;
 import com.rbkmoney.reporter.service.ReportNewProtoService;
 import org.apache.thrift.TException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,16 +25,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import static io.github.benas.randombeans.api.EnhancedRandom.randomListOf;
-import static org.junit.Assert.*;
+import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.randomListOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(
-        classes = ReportsNewProtoHandler.class,
-        initializers = AbstractHandlerConfig.Initializer.class
-)
-public class ReportHandlersTest extends AbstractHandlerConfig {
+@SpringExtensionTest
+@ContextConfiguration(classes = ReportsNewProtoHandler.class)
+public class ReportHandlersTest {
 
     @MockBean
     private PartyService partyService;

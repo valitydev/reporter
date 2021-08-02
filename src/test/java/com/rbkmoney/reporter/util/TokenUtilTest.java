@@ -3,11 +3,11 @@ package com.rbkmoney.reporter.util;
 import com.rbkmoney.reporter.ReportRequest;
 import com.rbkmoney.reporter.ReportTimeRange;
 import com.rbkmoney.reporter.StatReportRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TokenUtilTest {
 

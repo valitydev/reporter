@@ -1,59 +1,32 @@
 package com.rbkmoney.reporter.dao;
 
-import com.rbkmoney.reporter.config.AbstractDaoConfig;
-import com.rbkmoney.reporter.domain.enums.*;
-import com.rbkmoney.reporter.domain.tables.pojos.*;
-import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
-import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
-import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
+import com.rbkmoney.reporter.config.PostgresqlSpringBootITest;
+import com.rbkmoney.reporter.domain.enums.ReportStatus;
+import com.rbkmoney.reporter.domain.enums.ReportType;
+import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
+import com.rbkmoney.reporter.domain.tables.pojos.Report;
 import com.rbkmoney.reporter.exception.DaoException;
 import org.awaitility.Awaitility;
-import org.jooq.Cursor;
-import org.jooq.Result;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
-import static io.github.benas.randombeans.api.EnhancedRandom.random;
+import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class DaoTest extends AbstractDaoConfig {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+@PostgresqlSpringBootITest
+public class ReportDaoTest {
 
     @Autowired
     private ReportDao reportDao;
-
-    @Autowired
-    private PayoutDao payoutDao;
-
-    @Autowired
-    private InvoiceDao invoiceDao;
-
-    @Autowired
-    private PaymentDao paymentDao;
-
-    @Autowired
-    private RefundDao refundDao;
-
-    @Before
-    public void setUp() {
-        jdbcTemplate.execute("truncate rpt.report cascade");
-        jdbcTemplate.execute("truncate rpt.file_meta cascade");
-        jdbcTemplate.execute("truncate rpt.contract_meta cascade");
-    }
 
     @Test
     public void insertAndGetReportTest() throws DaoException {
@@ -167,115 +140,7 @@ public class DaoTest extends AbstractDaoConfig {
     }
 
     @Test
-    public void payoutGetTest() {
-        Payout payout = random(Payout.class);
-        payoutDao.savePayout(payout);
-        Payout resultPayout = payoutDao.getPayout(payout.getPayoutId());
-        assertEquals(payout, resultPayout);
-
-        Long extPayoutId = resultPayout.getId();
-        PayoutAccount payoutAccount = random(PayoutAccount.class);
-        payoutAccount.setExtPayoutId(extPayoutId);
-        payoutDao.savePayoutAccountInfo(payoutAccount);
-        PayoutAccount resultPayoutAccount = payoutDao.getPayoutAccount(extPayoutId);
-        assertEquals(payoutAccount, resultPayoutAccount);
-
-        PayoutInternationalAccount payoutInternationalAccount = random(PayoutInternationalAccount.class);
-        payoutInternationalAccount.setExtPayoutId(extPayoutId);
-        payoutDao.savePayoutInternationalAccountInfo(payoutInternationalAccount);
-        PayoutInternationalAccount internationalAccount = payoutDao.getPayoutInternationalAccount(extPayoutId);
-        assertEquals(payoutInternationalAccount, internationalAccount);
-
-        PayoutState payoutState = random(PayoutState.class);
-        payoutState.setExtPayoutId(extPayoutId);
-        payoutDao.savePayoutState(payoutState);
-        PayoutState resultPayoutState = payoutDao.getPayoutState(extPayoutId);
-        assertEquals(payoutState, resultPayoutState);
-    }
-
-    @Test
-    public void saveAndGetInvoiceTest() {
-        String partyId = random(String.class);
-        String shopId = random(String.class);
-        Invoice invoice = random(Invoice.class);
-        invoice.setPartyId(partyId);
-        invoice.setShopId(shopId + "\u0000" + "x");
-        invoice.setStatus(InvoiceStatus.paid);
-        invoiceDao.saveInvoice(invoice);
-
-        InvoiceRecord invoiceRecordOne = invoiceDao.getInvoice(invoice.getInvoiceId());
-        assertEquals(invoice, invoiceRecordOne.into(Invoice.class));
-    }
-
-    @Test
-    public void saveAndGetPaymentTest() {
-        String partyId = random(String.class);
-        String shopId = random(String.class);
-
-        int paymentsCount = 100;
-        List<Payment> sourcePayments = new ArrayList<>();
-        for (int i = 0; i < paymentsCount; i++) {
-            Payment payment = random(Payment.class);
-            payment.setShopId(shopId);
-            payment.setPartyId(partyId);
-            payment.setCreatedAt(LocalDateTime.now());
-            payment.setStatusCreatedAt(LocalDateTime.now());
-            payment.setStatus(InvoicePaymentStatus.captured);
-            sourcePayments.add(payment);
-            paymentDao.savePayment(payment);
-        }
-        Payment firstPayment = sourcePayments.get(0);
-        PaymentRecord payment =
-                paymentDao.getPayment(partyId, shopId, firstPayment.getInvoiceId(), firstPayment.getPaymentId());
-        assertEquals(firstPayment, payment.into(Payment.class));
-
-        Cursor<PaymentRecord> paymentsCursor =
-                paymentDao.getPaymentsCursor(partyId, shopId, Optional.empty(), LocalDateTime.now());
-        List<Payment> resultPayments = new ArrayList<>();
-        while (paymentsCursor.hasNext()) {
-            Result<PaymentRecord> paymentRecords = paymentsCursor.fetchNext(10);
-            resultPayments.addAll(paymentRecords.into(Payment.class));
-        }
-        assertEquals(paymentsCount, resultPayments.size());
-    }
-
-    @Test
-    public void saveAndGetRefundTest() {
-        String partyId = random(String.class);
-        String shopId = random(String.class);
-
-        int refundsCount = 100;
-        List<Refund> sourceRefunds = new ArrayList<>();
-        for (int i = 0; i < refundsCount; i++) {
-            Refund refund = random(Refund.class);
-            refund.setShopId(shopId);
-            refund.setPartyId(partyId);
-            refund.setCreatedAt(LocalDateTime.now());
-            refund.setStatusCreatedAt(LocalDateTime.now());
-            refund.setStatus(RefundStatus.succeeded);
-            sourceRefunds.add(refund);
-            refundDao.saveRefund(refund);
-        }
-
-        Cursor<RefundRecord> refundsCursor = refundDao.getRefundsCursor(
-                partyId,
-                shopId,
-                LocalDateTime.now().minus(10L, ChronoUnit.HOURS),
-                LocalDateTime.now()
-        );
-        List<Refund> resultRefunds = new ArrayList<>();
-        int iterationsCount = 0;
-        while (refundsCursor.hasNext()) {
-            Result<RefundRecord> refundRecords = refundsCursor.fetchNext(10);
-            resultRefunds.addAll(refundRecords.into(Refund.class));
-            iterationsCount++;
-        }
-        assertEquals(10, iterationsCount);
-        assertEquals(refundsCount, resultRefunds.size());
-    }
-
-    @Test
-    @Ignore("disable db lock test, the test lasts more than 2 minutes")
+    @Disabled("disable db lock test, the test lasts more than 2 minutes")
     public void severalInstancesReportServiceTest() throws ExecutionException, InterruptedException {
         Awaitility.setDefaultPollInterval(10, TimeUnit.MILLISECONDS);
         Awaitility.setDefaultPollDelay(Duration.ZERO);

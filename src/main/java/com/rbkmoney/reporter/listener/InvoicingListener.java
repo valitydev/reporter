@@ -9,17 +9,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class InvoicingListener {
 
     private final EventService invoicingService;
 
-    @KafkaListener(topics = "${kafka.topics.invoicing.id}",
+    @KafkaListener(
+            autoStartup = "${kafka.topics.invoicing.enabled}",
+            topics = "${kafka.topics.invoicing.id}",
             containerFactory = "kafkaInvoicingListenerContainerFactory")
     public void listen(List<ConsumerRecord<String, SinkEvent>> messages, Acknowledgment ack) throws Exception {
         int batchSize = messages.size();
@@ -44,5 +48,4 @@ public class InvoicingListener {
         log.debug("Invoicing batch has been committed, size={}, {}", batchSize,
                 LogUtil.toSummaryStringWithSinkEventValues(messages));
     }
-
 }

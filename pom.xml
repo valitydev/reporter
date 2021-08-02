@@ -7,11 +7,11 @@
     <parent>
         <groupId>com.rbkmoney</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.13</version>
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -21,23 +21,13 @@
         <server.port>8022</server.port>
         <management.port>8023</management.port>
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
-        <dockerfile.base.service.tag>c0612d6052ac049496b72a23a04acb142035f249</dockerfile.base.service.tag>
-        <dockerfile.build.tag>c0d0900ec19c907d866f8360031a836049985110</dockerfile.build.tag>
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
-        <!---->
         <db.name>reporter</db.name>
         <db.schema>rpt</db.schema>
         <db.user>postgres</db.user>
         <db.password>postgres</db.password>
         <db.port>5432</db.port>
         <db.url>jdbc:postgresql://localhost:${db.port}/${db.name}</db.url>
-        <!---->
-        <db.embedded.name>${db.name}</db.embedded.name>
-        <db.embedded.schema>${db.schema}</db.embedded.schema>
-        <db.embedded.user>${db.user}</db.embedded.user>
-        <db.embedded.password>${db.password}</db.embedded.password>
-        <db.embedded.port>15432</db.embedded.port>
-        <db.embedded.url>jdbc:postgresql://localhost:${db.embedded.port}/${db.embedded.name}</db.embedded.url>
         <checkstyle.config.suppressions.path>./src/main/resources/checkstyle/checkstyle-suppressions.xml</checkstyle.config.suppressions.path>
     </properties>
 
@@ -180,11 +170,6 @@
             <artifactId>poi</artifactId>
             <version>4.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.19</version>
-        </dependency>
 
         <!--Thrirdparty libs-->
         <dependency>
@@ -205,15 +190,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.benas</groupId>
-            <artifactId>random-beans</artifactId>
-            <version>3.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.rbkmoney</groupId>
-            <artifactId>easyway</artifactId>
-            <version>0.5.0</version>
+            <artifactId>testcontainers-annotations</artifactId>
+            <version>1.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -225,24 +204,6 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-proxy</artifactId>
             <version>3.1.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.opentable.components</groupId>
-            <artifactId>otj-pg-embedded</artifactId>
-            <version>0.12.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>1.15.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
-            <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -319,26 +280,21 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <configuration>
-                    <url>${db.embedded.url}</url>
-                    <user>${db.embedded.user}</user>
-                    <password>${db.embedded.password}</password>
+                    <url>${db.url}</url>
+                    <user>${db.user}</user>
+                    <password>${db.password}</password>
                     <schemas>
-                        <schema>${db.embedded.schema}</schema>
+                        <schema>${db.schema}</schema>
                     </schemas>
+                    <locations>
+                        <location>filesystem:${project.basedir}/src/main/resources/db/migration</location>
+                    </locations>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgresql.version}</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
                         <id>migrate</id>
-                        <phase>initialize</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>clean</goal>
                             <goal>migrate</goal>
                         </goals>
                     </execution>
@@ -350,9 +306,9 @@
                 <configuration>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
-                        <url>${db.embedded.url}</url>
-                        <user>${db.embedded.user}</user>
-                        <password>${db.embedded.password}</password>
+                        <url>${db.url}</url>
+                        <user>${db.user}</user>
+                        <password>${db.password}</password>
                     </jdbc>
                     <generator>
                         <generate>
@@ -386,20 +342,18 @@
             <plugin>
                 <groupId>com.rbkmoney.maven.plugins</groupId>
                 <artifactId>pg-embedded-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.7</version>
                 <configuration>
-                    <dbName>${db.embedded.name}</dbName>
+                    <port>${db.port}</port>
+                    <dbName>${db.name}</dbName>
                     <schemas>
-                        <schema>${db.embedded.schema}</schema>
+                        <schema>${db.schema}</schema>
                     </schemas>
-                    <userName>${db.embedded.user}</userName>
-                    <password>${db.embedded.password}</password>
-                    <port>${db.embedded.port}</port>
                 </configuration>
                 <executions>
                     <execution>
                         <id>PG_server_start</id>
-                        <phase>validate</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>start</goal>
                         </goals>

@@ -1,7 +1,6 @@
 info:
   version: @project.version@
   stage: dev
-  single-instance-mode: false
 
 server:
   port: '@server.port@'
@@ -113,3 +112,13 @@ storage:
 
 retry-policy:
   maxAttempts: 5
+
+testcontainers:
+  postgresql:
+    tag: '11.4'
+  kafka:
+    tag: '6.2.0'
+  ceph:
+    tag: 'v3.0.5-stable-3.0-luminous-centos-7'
+    accessKey: 'test'
+    secretKey: 'test'

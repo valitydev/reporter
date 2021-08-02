@@ -2,16 +2,15 @@ package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.msgpack.Value;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
-import com.rbkmoney.reporter.config.AbstractIntegrationConfig;
+import com.rbkmoney.reporter.config.CephPostgresqlSpringBootITest;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -25,13 +24,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.rbkmoney.reporter.data.CommonTestData.getTestParty;
-import static io.github.benas.randombeans.api.EnhancedRandom.random;
-import static org.junit.Assert.*;
+import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@Slf4j
-public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
+@CephPostgresqlSpringBootITest
+public class GenerateReportIntegrationTest {
 
     @Autowired
     private ReportService reportService;
@@ -84,5 +84,4 @@ public class GenerateReportIntegrationTest extends AbstractIntegrationConfig {
             }
         }
     }
-
 }
