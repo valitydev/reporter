@@ -1,7 +1,9 @@
 package com.rbkmoney.reporter.service;
 
-import com.rbkmoney.reporter.config.CephPostgresqlSpringBootITest;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
+import com.rbkmoney.testcontainers.annotations.DefaultSpringBootTest;
+import com.rbkmoney.testcontainers.annotations.ceph.CephTestcontainerSingleton;
+import com.rbkmoney.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,9 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@CephPostgresqlSpringBootITest
+@PostgresqlTestcontainerSingleton
+@CephTestcontainerSingleton
+@DefaultSpringBootTest
 public class StorageServiceTest {
 
     @Autowired

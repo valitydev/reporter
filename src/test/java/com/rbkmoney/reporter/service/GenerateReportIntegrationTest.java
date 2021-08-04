@@ -2,12 +2,14 @@ package com.rbkmoney.reporter.service;
 
 import com.rbkmoney.damsel.msgpack.Value;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
-import com.rbkmoney.reporter.config.CephPostgresqlSpringBootITest;
 import com.rbkmoney.reporter.dao.ReportDao;
 import com.rbkmoney.reporter.domain.enums.ReportStatus;
 import com.rbkmoney.reporter.domain.enums.ReportType;
 import com.rbkmoney.reporter.domain.tables.pojos.FileMeta;
 import com.rbkmoney.reporter.domain.tables.pojos.Report;
+import com.rbkmoney.testcontainers.annotations.DefaultSpringBootTest;
+import com.rbkmoney.testcontainers.annotations.ceph.CephTestcontainerSingleton;
+import com.rbkmoney.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@CephPostgresqlSpringBootITest
+@PostgresqlTestcontainer
+@CephTestcontainerSingleton
+@DefaultSpringBootTest
 public class GenerateReportIntegrationTest {
 
     @Autowired

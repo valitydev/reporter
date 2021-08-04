@@ -1,23 +1,28 @@
 package com.rbkmoney.reporter.service.invoicing;
 
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
-import com.rbkmoney.reporter.config.SpringExtensionTest;
 import com.rbkmoney.reporter.config.properties.FaultyEventsProperties;
 import com.rbkmoney.reporter.model.KafkaEvent;
 import com.rbkmoney.reporter.service.FaultyEventsService;
 import com.rbkmoney.reporter.service.impl.InvoicingFaultyEventsServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringExtensionTest
+@ExtendWith(SpringExtension.class)
+@TestPropertySource("classpath:application.yml")
+@DirtiesContext
 @EnableConfigurationProperties(FaultyEventsProperties.class)
 @ContextConfiguration(
         classes = {

@@ -2,10 +2,13 @@ package com.rbkmoney.reporter.kafka;
 
 import com.rbkmoney.machinegun.eventsink.MachineEvent;
 import com.rbkmoney.machinegun.eventsink.SinkEvent;
-import com.rbkmoney.reporter.config.KafkaPostgresqlSpringBootITest;
+import com.rbkmoney.reporter.config.testconfiguration.MockedUnimportantServicesConfig;
 import com.rbkmoney.reporter.model.KafkaEvent;
 import com.rbkmoney.reporter.service.impl.InvoicingService;
+import com.rbkmoney.testcontainers.annotations.KafkaSpringBootTest;
+import com.rbkmoney.testcontainers.annotations.kafka.KafkaTestcontainer;
 import com.rbkmoney.testcontainers.annotations.kafka.config.KafkaProducer;
+import com.rbkmoney.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.thrift.TBase;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -13,6 +16,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +26,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-@KafkaPostgresqlSpringBootITest
+@PostgresqlTestcontainerSingleton
+@KafkaTestcontainer(
+        properties = {
+                "kafka.topics.invoicing.enabled=true",
+                "kafka.consumer.max-poll-records=5"},
+        topicsKeys = "kafka.topics.invoicing.id")
+@KafkaSpringBootTest
+@Import(MockedUnimportantServicesConfig.class)
 public class KafkaListenerTest {
 
     @Value("${kafka.topics.invoicing.id}")
