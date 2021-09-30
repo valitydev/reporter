@@ -15,10 +15,7 @@ public interface InvoiceDao {
 
     InvoiceRecord getInvoice(String invoiceId);
 
-    List<Invoice> getInvoices(String partyId,
-                              String shopId,
-                              Optional<LocalDateTime> fromTime,
-                              LocalDateTime toTime);
+    String getInvoicePurpose(String invoiceId);
 
     List<Invoice> getInvoicesByState(LocalDateTime dateFrom, LocalDateTime dateTo, List<InvoiceStatus> statuses);
 

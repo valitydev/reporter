@@ -7,11 +7,10 @@ import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import org.jooq.Cursor;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 public interface LocalStatisticService {
 
-    Map<String, String> getPurposes(String partyId, String shopId, LocalDateTime fromTime, LocalDateTime toTime);
+    String getPurpose(String invoiceId);
 
     InvoiceRecord getInvoice(String invoiceId);
 

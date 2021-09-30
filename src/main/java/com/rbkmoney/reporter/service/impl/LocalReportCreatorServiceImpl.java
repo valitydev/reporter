@@ -2,7 +2,6 @@ package com.rbkmoney.reporter.service.impl;
 
 import com.rbkmoney.reporter.domain.enums.PaymentPayerType;
 import com.rbkmoney.reporter.domain.tables.records.AdjustmentRecord;
-import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
 import com.rbkmoney.reporter.domain.tables.records.PaymentRecord;
 import com.rbkmoney.reporter.domain.tables.records.RefundRecord;
 import com.rbkmoney.reporter.model.LocalReportCreatorDto;
@@ -195,11 +194,8 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         totalRefundAmnt.addAndGet(refund.getAmount());
         row.createCell(5).setCellValue(payerEmail);
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(refund.getShopId()));
-        String purpose = reportCreatorDto.getPurposes().get(refund.getInvoiceId());
-        if (purpose == null) {
-            InvoiceRecord invoice = localStatisticService.getInvoice(refund.getInvoiceId());
-            purpose = invoice.getProduct();
-        }
+
+        String purpose = localStatisticService.getPurpose(refund.getInvoiceId());
         row.createCell(7).setCellValue(purpose);
         row.createCell(8).setCellValue(refund.getRefundId());
         row.createCell(9).setCellValue(refund.getReason());
@@ -361,11 +357,8 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         totalPayoutAmnt.addAndGet(payment.getAmount() - payment.getFee());
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
-        String purpose = reportCreatorDto.getPurposes().get(payment.getInvoiceId());
-        if (purpose == null) {
-            InvoiceRecord invoice = localStatisticService.getInvoice(payment.getInvoiceId());
-            purpose = invoice.getProduct();
-        }
+
+        String purpose = localStatisticService.getPurpose(payment.getInvoiceId());
         row.createCell(7).setCellValue(purpose);
         row.createCell(8).setCellValue(FormatUtil.formatCurrency(payment.getFee()));
         row.createCell(9).setCellValue(payment.getCurrencyCode());

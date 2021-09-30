@@ -25,6 +25,5 @@ public class LocalReportCreatorDto {
     private Report report;
     private OutputStream outputStream;
     private Map<String, String> shopUrls;
-    private Map<String, String> purposes;
 
 }

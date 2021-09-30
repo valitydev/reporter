@@ -101,12 +101,4 @@ public class ReportsTestData {
         return payment;
     }
 
-    public static Map<String, String> buildPurposes(int count) {
-        Map<String, String> purposes = new HashMap<>();
-        for (int i = 0; i < count; i++) {
-            purposes.put("invoiceId" + i, "product" + i);
-        }
-        return purposes;
-    }
-
 }

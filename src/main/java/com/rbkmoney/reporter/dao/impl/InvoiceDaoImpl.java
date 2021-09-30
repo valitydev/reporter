@@ -7,8 +7,8 @@ import com.rbkmoney.reporter.domain.tables.pojos.Invoice;
 import com.rbkmoney.reporter.domain.tables.pojos.InvoiceAdditionalInfo;
 import com.rbkmoney.reporter.domain.tables.records.InvoiceRecord;
 import com.zaxxer.hikari.HikariDataSource;
+import org.jooq.Record1;
 import org.jooq.Result;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,18 +54,13 @@ public class InvoiceDaoImpl extends AbstractDao implements InvoiceDao {
     }
 
     @Override
-    public List<Invoice> getInvoices(String partyId,
-                                     String shopId,
-                                     Optional<LocalDateTime> fromTime,
-                                     LocalDateTime toTime) {
-        Result<InvoiceRecord> records = getDslContext()
-                .selectFrom(INVOICE)
-                .where(fromTime.map(INVOICE.STATUS_CREATED_AT::ge).orElse(DSL.trueCondition()))
-                .and(INVOICE.STATUS_CREATED_AT.lt(toTime))
-                .and(INVOICE.PARTY_ID.eq(partyId))
-                .and(ofNullable(shopId).map(INVOICE.SHOP_ID::eq).orElse(trueCondition()))
-                .fetch();
-        return records == null || records.isEmpty() ? new ArrayList<>() : records.into(Invoice.class);
+    public String getInvoicePurpose(String invoiceId) {
+        final Record1<String> purpose = getDslContext()
+                .select(INVOICE.PRODUCT)
+                .from(INVOICE)
+                .where(INVOICE.INVOICE_ID.eq(invoiceId))
+                .fetchOne();
+        return purpose == null ? null : purpose.value1();
     }
 
     @Override

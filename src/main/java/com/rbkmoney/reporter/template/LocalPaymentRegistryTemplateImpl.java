@@ -50,9 +50,6 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
                 TimeUtil.toLocalizedDate(fromTime.toInstant(ZoneOffset.UTC), reportZoneId);
         String formattedToTime =
                 TimeUtil.toLocalizedDate(toTime.minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
-
-        Map<String, String> purposes =
-                localStatisticService.getPurposes(partyId, shopId, fromTime, toTime);
         Map<String, String> shopUrls = partyService.getShopUrls(partyId);
 
         try (
@@ -72,7 +69,6 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
                     .report(report)
                     .outputStream(outputStream)
                     .shopUrls(shopUrls)
-                    .purposes(purposes)
                     .build();
 
             localReportCreatorService.createReport(reportCreatorDto);

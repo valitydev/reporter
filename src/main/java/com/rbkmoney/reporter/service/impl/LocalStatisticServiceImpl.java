@@ -34,19 +34,8 @@ public class LocalStatisticServiceImpl implements LocalStatisticService {
     private ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 
     @Override
-    public Map<String, String> getPurposes(String partyId,
-                                           String shopId,
-                                           LocalDateTime fromTime,
-                                           LocalDateTime toTime) {
-        Map<String, String> purposes = new HashMap<>();
-        List<Invoice> invoices = invoiceDao.getInvoices(
-                partyId,
-                shopId,
-                Optional.ofNullable(fromTime),
-                toTime
-        );
-        invoices.forEach(invoice -> purposes.put(invoice.getInvoiceId(), invoice.getProduct()));
-        return purposes;
+    public String getPurpose(String invoiceId) {
+        return invoiceDao.getInvoicePurpose(invoiceId);
     }
 
     @Override

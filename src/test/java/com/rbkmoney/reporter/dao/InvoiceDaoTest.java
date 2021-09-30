@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @PostgresqlSpringBootITest
 public class InvoiceDaoTest {
@@ -27,5 +28,16 @@ public class InvoiceDaoTest {
         invoiceDao.saveInvoice(invoice);
         InvoiceRecord invoiceRecordOne = invoiceDao.getInvoice(invoice.getInvoiceId());
         assertEquals(invoice, invoiceRecordOne.into(Invoice.class));
+    }
+
+    @Test
+    public void getPurposeTest() {
+        Invoice invoice = random(Invoice.class);
+        String product = "TestProduct";
+        invoice.setProduct(product);
+        invoiceDao.saveInvoice(invoice);
+        String invoicePurpose = invoiceDao.getInvoicePurpose(invoice.getInvoiceId());
+        assertNotNull(invoicePurpose);
+        assertEquals(product, invoicePurpose);
     }
 }

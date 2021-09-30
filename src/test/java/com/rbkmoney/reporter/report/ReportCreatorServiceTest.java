@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -115,11 +114,6 @@ public class ReportCreatorServiceTest {
         report.setPartyShopId(shopId);
 
         Map<String, String> shopUrls = new HashMap<>();
-        Map<String, String> purposes = new HashMap<>();
-        IntStream.range(1, 10).forEach(i -> {
-            shopUrls.put("shopId" + i, "http://2ch.ru");
-            purposes.put("invoiceId" + i, "Keksik");
-        });
 
         Path tempFile = Files.createTempFile("check_limit", ".xlsx");
         try {
@@ -131,8 +125,7 @@ public class ReportCreatorServiceTest {
                     adjustmentCursor,
                     report,
                     Files.newOutputStream(tempFile),
-                    shopUrls,
-                    purposes
+                    shopUrls
             );
 
             LocalReportCreatorServiceImpl reportCreatorServiceImpl =
