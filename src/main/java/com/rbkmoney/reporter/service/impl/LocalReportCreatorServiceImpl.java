@@ -38,7 +38,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
 
-    private static final int PACKAGE_SIZE = 100;
+    private static final int PACKAGE_SIZE = 25;
 
     @Override
     public void createReport(LocalReportCreatorDto reportCreatorDto) throws IOException {
