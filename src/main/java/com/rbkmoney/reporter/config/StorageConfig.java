@@ -24,6 +24,9 @@ public class StorageConfig {
     @Value("${storage.signingRegion}")
     private String signingRegion;
 
+    @Value("${storage.signerOverride}")
+    private String signerOverride;
+
     @Value("${storage.accessKey:}")
     private String accessKey;
 
@@ -66,7 +69,7 @@ public class StorageConfig {
     public ClientConfiguration clientConfiguration() {
         return new ClientConfiguration()
                 .withProtocol(protocol)
-                .withSignerOverride("S3SignerType")
+                .withSignerOverride(signerOverride)
                 .withMaxErrorRetry(maxErrorRetry);
     }
 
