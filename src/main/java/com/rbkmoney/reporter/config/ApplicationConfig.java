@@ -10,7 +10,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.rbkmoney.damsel.payment_processing.InvoicingSrv;
 import com.rbkmoney.damsel.payment_processing.PartyManagementSrv;
-import com.rbkmoney.damsel.signer.SignerSrv;
 import com.rbkmoney.woody.thrift.impl.http.THSpawnClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,17 +33,6 @@ public class ApplicationConfig {
                 .withAddress(resource.getURI())
                 .withNetworkTimeout(timeout)
                 .build(PartyManagementSrv.Iface.class);
-    }
-
-    @Bean
-    public SignerSrv.Iface signerClient(
-            @Value("${signer.url}") Resource resource,
-            @Value("${signer.timeout}") int timeout
-    ) throws IOException {
-        return new THSpawnClientBuilder()
-                .withNetworkTimeout(timeout)
-                .withAddress(resource.getURI())
-                .build(SignerSrv.Iface.class);
     }
 
     @Bean
