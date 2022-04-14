@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -32,8 +33,8 @@ public class ReportDaoTest {
     public void insertAndGetReportTest() throws DaoException {
         String partyId = random(String.class);
         String shopId = random(String.class);
-        LocalDateTime fromTime = LocalDateTime.now().minusDays(1);
-        LocalDateTime toTime = LocalDateTime.now().plusDays(1);
+        LocalDateTime fromTime = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.MICROS);
+        LocalDateTime toTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.MICROS);
         ReportType reportType = random(ReportType.class);
         String timezone = random(TimeZone.class).getID();
         LocalDateTime createdAt = LocalDateTime.now();
