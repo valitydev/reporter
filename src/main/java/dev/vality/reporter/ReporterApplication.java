@@ -1,0 +1,20 @@
+package dev.vality.reporter;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+/**
+ * Created by tolkonepiu on 10/07/2017.
+ */
+
+@EnableScheduling
+@ServletComponentScan
+@SpringBootApplication(scanBasePackages = {"dev.vality.reporter"})
+public class ReporterApplication {
+
+    public static void main(String... args) {
+        SpringApplication.run(ReporterApplication.class, args);
+    }
+}
