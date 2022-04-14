@@ -36,7 +36,7 @@ public class PaymentDaoTest {
             payment.setShopId(shopId);
             payment.setPartyId(partyId);
             payment.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
-            payment.setStatusCreatedAt(LocalDateTime.now());
+            payment.setStatusCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
             payment.setStatus(InvoicePaymentStatus.captured);
             sourcePayments.add(payment);
             paymentDao.savePayment(payment);
