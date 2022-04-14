@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public class PaymentDaoTest {
             Payment payment = random(Payment.class);
             payment.setShopId(shopId);
             payment.setPartyId(partyId);
-            payment.setCreatedAt(LocalDateTime.now());
+            payment.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
             payment.setStatusCreatedAt(LocalDateTime.now());
             payment.setStatus(InvoicePaymentStatus.captured);
             sourcePayments.add(payment);
