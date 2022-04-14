@@ -37,7 +37,7 @@ public class ReportDaoTest {
         LocalDateTime toTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.MICROS);
         ReportType reportType = random(ReportType.class);
         String timezone = random(TimeZone.class).getID();
-        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime createdAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
 
         long reportId = reportDao.createReport(partyId, shopId, fromTime, toTime, reportType, timezone, createdAt);
 
