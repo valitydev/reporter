@@ -13,7 +13,7 @@ COPY --chown=vality:vality @artifactId@-@version@.jar /opt/@artifactId@/@artifac
 USER vality:vality
 
 CMD ["java", "-jar","/opt/@artifactId@/@artifactId@.jar"]
-# hadolint disable=DL1000
+# hadolint ignore=DL1000
 EXPOSE @exposed.ports@
 
 WORKDIR /opt/@artifactId@
