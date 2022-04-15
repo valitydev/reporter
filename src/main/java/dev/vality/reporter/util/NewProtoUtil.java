@@ -3,11 +3,13 @@ package dev.vality.reporter.util;
 import dev.vality.damsel.base.InvalidRequest;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class NewProtoUtil {
 
     public static Report toNewProtoReport(dev.vality.reporter.domain.tables.pojos.Report report,
@@ -44,6 +46,7 @@ public class NewProtoUtil {
     }
 
     public static InvalidRequest buildInvalidRequest(Throwable throwable) {
+        log.debug("Invalid request: ", throwable);
         return buildInvalidRequest(throwable.getMessage());
     }
 
