@@ -6,8 +6,6 @@ server:
   port: '@server.port@'
 
 management:
-  security:
-    flag: false
   server:
     port: '@management.port@'
   metrics:

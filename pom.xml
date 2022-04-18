@@ -34,19 +34,11 @@
     <dependencies>
         <dependency>
             <groupId>dev.vality</groupId>
-            <artifactId>custom-actuator-endpoints</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.vality</groupId>
             <artifactId>shared-resources</artifactId>
         </dependency>
         <dependency>
             <groupId>dev.vality.geck</groupId>
             <artifactId>filter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.vality</groupId>
-            <artifactId>custom-metrics-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
@@ -162,6 +154,14 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <!--Thrirdparty libs-->
