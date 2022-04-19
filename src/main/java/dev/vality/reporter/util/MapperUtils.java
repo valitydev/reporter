@@ -10,10 +10,6 @@ import dev.vality.geck.common.util.TBaseUtil;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.geck.serializer.kit.tbase.TErrorUtil;
 import dev.vality.machinegun.eventsink.MachineEvent;
-import dev.vality.mamsel.DigitalWalletUtil;
-import dev.vality.mamsel.PaymentSystemUtil;
-import dev.vality.mamsel.TerminalPaymentUtil;
-import dev.vality.mamsel.TokenProviderUtil;
 import dev.vality.reporter.domain.enums.*;
 import dev.vality.reporter.domain.enums.BankCardTokenProvider;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
@@ -331,19 +327,23 @@ public final class MapperUtils {
             BankCard bankCard = paymentTool.getBankCard();
 
             additionalInfo.setBankCardToken(bankCard.getToken());
-            additionalInfo.setBankCardSystem(PaymentSystemUtil.getPaymentSystemName(bankCard));
+            additionalInfo.setBankCardSystem(Optional.ofNullable(bankCard.getPaymentSystem())
+                    .map(PaymentSystemRef::getId).orElse(null));
             additionalInfo.setBankCardBin(bankCard.getBin());
             additionalInfo.setBankCardMaskedPan(bankCard.getLastDigits());
-            additionalInfo.setBankCardTokenProviderRef(TokenProviderUtil.getTokenProviderName(bankCard));
+            additionalInfo.setBankCardTokenProviderRef(Optional.ofNullable(bankCard.getPaymentSystem())
+                    .map(PaymentSystemRef::getId).orElse(null));
         } else if (paymentTool.isSetPaymentTerminal()) {
             PaymentTerminal paymentTerminal = paymentTool.getPaymentTerminal();
 
-            additionalInfo.setTerminalProvider(TerminalPaymentUtil.getTerminalPaymentProviderName(paymentTerminal));
+            additionalInfo.setTerminalProvider(Optional.ofNullable(paymentTerminal.getPaymentService())
+                    .map(PaymentServiceRef::getId).orElse(null));
         } else if (paymentTool.isSetDigitalWallet()) {
             DigitalWallet digitalWallet = paymentTool.getDigitalWallet();
 
             additionalInfo.setDigitalWalletId(digitalWallet.getId());
-            additionalInfo.setDigitalWalletProvider(DigitalWalletUtil.getDigitalWalletName(digitalWallet));
+            additionalInfo.setDigitalWalletProvider(Optional.ofNullable(digitalWallet.getPaymentService())
+                    .map(PaymentServiceRef::getId).orElse(null));
         }
     }
 

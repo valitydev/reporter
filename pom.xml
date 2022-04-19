@@ -46,10 +46,6 @@
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
-            <artifactId>mamsel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.vality</groupId>
             <artifactId>machinegun-proto</artifactId>
             <version>1.31-b43d6fd</version>
         </dependency>
