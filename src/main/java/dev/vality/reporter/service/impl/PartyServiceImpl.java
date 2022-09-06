@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class PartyServiceImpl implements PartyService {
 
-    private final UserInfo userInfo = new UserInfo("reporter", UserType.internal_user(new InternalUser()));
-
     private final PartyManagementSrv.Iface partyManagementClient;
 
     @Autowired
@@ -46,7 +44,7 @@ public class PartyServiceImpl implements PartyService {
     public Party getParty(String partyId, PartyRevisionParam partyRevisionParam) throws PartyNotFoundException {
         log.info("Trying to get party, partyId='{}', partyRevisionParam='{}'", partyId, partyRevisionParam);
         try {
-            Party party = partyManagementClient.checkout(userInfo, partyId, partyRevisionParam);
+            Party party = partyManagementClient.checkout(partyId, partyRevisionParam);
             log.info("Party has been found, partyId='{}', partyRevisionParam='{}'", partyId, partyRevisionParam);
             return party;
         } catch (PartyNotFound ex) {
@@ -108,7 +106,7 @@ public class PartyServiceImpl implements PartyService {
     public long getPartyRevision(String partyId) {
         try {
             log.info("Trying to get revision, partyId='{}'", partyId);
-            long revision = partyManagementClient.getRevision(userInfo, partyId);
+            long revision = partyManagementClient.getRevision(partyId);
             log.info("Revision has been found, partyId='{}', revision='{}'", partyId, revision);
             return revision;
         } catch (PartyNotFound ex) {
@@ -215,7 +213,7 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public Value getMetaData(String partyId, String namespace) throws NotFoundException {
         try {
-            return partyManagementClient.getMetaData(userInfo, partyId, namespace);
+            return partyManagementClient.getMetaData(partyId, namespace);
         } catch (PartyMetaNamespaceNotFound ex) {
             return null;
         } catch (PartyNotFound ex) {
