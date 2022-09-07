@@ -53,9 +53,9 @@ public class GenerateReportIntegrationTest {
         Instant fromTime = LocalDateTime.now().minusHours(10L).toInstant(ZoneOffset.UTC);
         Instant toTime = Instant.now();
 
-        given(partyManagementClient.checkout(any(), any(), any()))
+        given(partyManagementClient.checkout(any(), any()))
                 .willReturn(getTestParty(partyId, shopId, random(String.class)));
-        given(partyManagementClient.getMetaData(any(), any(), any()))
+        given(partyManagementClient.getMetaData(any(), any()))
                 .willReturn(Value.b(true));
 
         ReportType reportType = ReportType.payment_registry;

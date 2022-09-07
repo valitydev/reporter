@@ -195,9 +195,9 @@ public class PaymentRegistryTemplateTest {
         party.setShops(Collections.singletonMap(report.getPartyShopId(), shop));
         party.setContracts(Collections.singletonMap(contractId, contract));
 
-        given(partyManagementClient.checkout(any(), any(), any()))
+        given(partyManagementClient.checkout(any(), any()))
                 .willReturn(party);
-        given(partyManagementClient.getRevision(any(), any()))
+        given(partyManagementClient.getRevision(any()))
                 .willReturn(1L);
     }
 }

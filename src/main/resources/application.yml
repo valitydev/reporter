@@ -46,28 +46,22 @@ spring:
     scheduling:
       pool:
         size: 10
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: ReporterListener
+      client-id: reporter
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-records: 20
+      properties:
+        max.poll.interval.ms: 60000
+        session.timeout.ms: 60000
+        reconnect.backoff.ms: 2000
+        retry.backoff.ms: 2000
 
 kafka:
-  bootstrap-servers: localhost:9092
-  client-id: reporter
-  ssl:
-    enabled: false
-    trust-store-location: "test"
-    trust-store-password: "test"
-    key-store-location: "test"
-    key-store-password: "test"
-    key-password: "test"
-    key-store-type: PKCS12
-    trust-store-type: PKCS12
   consumer:
-    group-id: "ReporterListener"
-    enable-auto-commit: false
-    auto-offset-reset: earliest
-    max-poll-records: 20
-    max-poll-interval-ms: 30000
-    session-timeout-ms: 30000
-    disconnect-backoff-ms: 2000
-    retry-backoff-ms: 2000
     party-management:
       concurrency: 5
   topics:
