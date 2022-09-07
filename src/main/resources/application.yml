@@ -54,8 +54,6 @@ spring:
       enable-auto-commit: false
       auto-offset-reset: earliest
       max-poll-records: 20
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: dev.vality.reporter.serde.SinkEventDeserializer
       properties:
         max.poll.interval.ms: 60000
         session.timeout.ms: 60000
