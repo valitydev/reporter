@@ -18,6 +18,7 @@
     <description>Reporter service</description>
 
     <properties>
+        <damsel.version>1.597-bfedcb9</damsel.version>
         <server.port>8022</server.port>
         <management.port>8023</management.port>
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
@@ -43,6 +44,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>damsel</artifactId>
+            <version>${damsel.version}</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
