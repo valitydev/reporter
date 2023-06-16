@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-slim
+FROM openjdk:17.0.2-jdk-slim
 
 RUN apt-get update \
       && apt-get install -y \
