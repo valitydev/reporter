@@ -201,11 +201,14 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(9).setCellValue(refund.getReason());
         row.createCell(10).setCellValue(refund.getCurrencyCode());
         row.createCell(11).setCellValue(refund.getExternalId());
+        row.createCell(12).setCellValue(refund.getStatus().getLiteral());
+        row.createCell(13).setCellValue(refund.getShopId());
+        row.createCell(14).setCellValue(reportCreatorDto.getShopNames().get(refund.getShopId()));
     }
 
     private void createRefundsColumnsDescriptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
         Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 12; ++i) {
+        for (int i = 0; i < 15; ++i) {
             Cell cell = rowSecondRefunds.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -223,6 +226,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
         rowSecondRefunds.getCell(10).setCellValue("Валюта");
         rowSecondRefunds.getCell(11).setCellValue("Id мерчанта");
+        rowSecondRefunds.getCell(12).setCellValue("Статус возврата");
+        rowSecondRefunds.getCell(13).setCellValue("Shop Id");
+        rowSecondRefunds.getCell(14).setCellValue("Название магазина");
     }
 
     private void createRefundsHeadRow(LocalReportCreatorDto reportCreatorDto,
@@ -230,7 +236,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                       Sheet sh,
                                       AtomicInteger rownum) {
         Row rowFirstRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 11; ++i) {
+        for (int i = 0; i < 14; ++i) {
             rowFirstRefunds.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
@@ -245,7 +251,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                                        Sheet sh,
                                                        AtomicInteger rownum) {
         Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 9; ++i) {
             Cell cell = rowSecondRefunds.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -257,6 +263,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondRefunds.getCell(3).setCellValue("Сумма");
         rowSecondRefunds.getCell(4).setCellValue("Валюта");
         rowSecondRefunds.getCell(5).setCellValue("Причина корректировки");
+        rowSecondRefunds.getCell(6).setCellValue("Статус корректировки");
+        rowSecondRefunds.getCell(7).setCellValue("Shop Id");
+        rowSecondRefunds.getCell(8).setCellValue("Название магазина");
     }
 
     private void createAdjustmentsHeadRow(LocalReportCreatorDto reportCreatorDto,
@@ -264,7 +273,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                           Sheet sh,
                                           AtomicInteger rownum) {
         Row rowFirstAdjustments = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 9; ++i) {
             rowFirstAdjustments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
@@ -291,6 +300,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         totalAdjustmentAmnt.addAndGet(adjustment.getAmount());
         row.createCell(4).setCellValue(adjustment.getCurrencyCode());
         row.createCell(5).setCellValue(adjustment.getReason());
+        row.createCell(6).setCellValue(adjustment.getStatus().getLiteral());
+        row.createCell(7).setCellValue(adjustment.getShopId());
+        row.createCell(8).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
     }
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,
@@ -363,11 +375,14 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(8).setCellValue(FormatUtil.formatCurrency(payment.getFee()));
         row.createCell(9).setCellValue(payment.getCurrencyCode());
         row.createCell(10).setCellValue(payment.getExternalId());
+        row.createCell(11).setCellValue(payment.getStatus().getLiteral());
+        row.createCell(12).setCellValue(payment.getShopId());
+        row.createCell(13).setCellValue(reportCreatorDto.getShopNames().get(payment.getShopId()));
     }
 
     private void createPaymentsColumnsDesciptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
         Row rowSecondPayments = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 11; ++i) {
+        for (int i = 0; i < 14; ++i) {
             Cell cell = rowSecondPayments.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -384,6 +399,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondPayments.getCell(8).setCellValue("Комиссия");
         rowSecondPayments.getCell(9).setCellValue("Валюта");
         rowSecondPayments.getCell(10).setCellValue("Id мерчанта");
+        rowSecondPayments.getCell(11).setCellValue("Статус платежа");
+        rowSecondPayments.getCell(12).setCellValue("Shop Id");
+        rowSecondPayments.getCell(13).setCellValue("Название магазина");
     }
 
     private void createPaymentsHeadRow(LocalReportCreatorDto reportCreatorDto,
@@ -392,7 +410,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                        AtomicInteger rownum) {
         Row rowFirstPayments = sh.createRow(rownum.getAndIncrement());
 
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 13; ++i) {
             rowFirstPayments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));

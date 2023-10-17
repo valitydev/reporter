@@ -9,6 +9,7 @@ import dev.vality.reporter.dao.InvoiceDao;
 import dev.vality.reporter.dao.PaymentDao;
 import dev.vality.reporter.dao.RefundDao;
 import dev.vality.reporter.data.ReportsTestData;
+import dev.vality.reporter.domain.enums.RefundStatus;
 import dev.vality.reporter.domain.tables.pojos.Adjustment;
 import dev.vality.reporter.domain.tables.pojos.Payment;
 import dev.vality.reporter.domain.tables.pojos.Refund;
@@ -153,6 +154,12 @@ public class PaymentRegistryTemplateTest {
             Row paymentsFirstRow = sheet.getRow(2);
             Assertions.assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
             assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
+            assertEquals(shopId, paymentsFirstRow.getCell(12).getStringCellValue());
+            assertEquals("Test shop", paymentsFirstRow.getCell(13).getStringCellValue());
+            assertEquals(dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured.getLiteral(),
+                    paymentsFirstRow.getCell(11).getStringCellValue());
+            assertEquals("http://0ch.ru/b", paymentsFirstRow.getCell(6).getStringCellValue());
+
 
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
             assertEquals(FormatUtil.formatCurrency(expectedSum), paymentsTotalSum.getStringCellValue());
@@ -165,6 +172,10 @@ public class PaymentRegistryTemplateTest {
             assertEquals("0", refundsFirstRow.getCell(8).getStringCellValue());
             assertEquals("You are the reason of my life", refundsFirstRow.getCell(9).getStringCellValue());
             assertEquals("RUB", refundsFirstRow.getCell(10).getStringCellValue());
+            assertEquals(shopId, refundsFirstRow.getCell(13).getStringCellValue());
+            assertEquals("Test shop", refundsFirstRow.getCell(14).getStringCellValue());
+            assertEquals("http://0ch.ru/b", refundsFirstRow.getCell(6).getStringCellValue());
+            assertEquals(RefundStatus.succeeded.getLiteral(), refundsFirstRow.getCell(12).getStringCellValue());
 
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
             assertEquals(FormatUtil.formatCurrency(expectedRefundSum), refundsTotalSum.getStringCellValue());
@@ -179,9 +190,10 @@ public class PaymentRegistryTemplateTest {
                                            String legalSignedAt,
                                            String legalAgreementId) throws TException {
         Shop shop = new Shop();
-        shop.setId(report.getPartyId());
+        shop.setId(report.getPartyShopId());
         shop.setContractId(contractId);
         shop.setLocation(ShopLocation.url("http://0ch.ru/b"));
+        shop.setDetails(new ShopDetails().setName("Test shop"));
         RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
         russianLegalEntity.setRegisteredName(registeredName);
         russianLegalEntity.setRepresentativePosition(random(String.class));

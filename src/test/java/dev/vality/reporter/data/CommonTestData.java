@@ -5,8 +5,19 @@ import dev.vality.damsel.domain.*;
 import dev.vality.damsel.domain_config.VersionedObject;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
-import dev.vality.reporter.domain.enums.*;
-import dev.vality.reporter.domain.tables.pojos.*;
+import dev.vality.reporter.domain.enums.PayoutStatus;
+import dev.vality.reporter.domain.enums.RefundStatus;
+import dev.vality.reporter.domain.enums.PayoutType;
+import dev.vality.reporter.domain.enums.AdjustmentStatus;
+import dev.vality.reporter.domain.tables.pojos.PayoutState;
+import dev.vality.reporter.domain.tables.pojos.Payout;
+import dev.vality.reporter.domain.tables.pojos.Adjustment;
+import dev.vality.reporter.domain.tables.pojos.Refund;
+import dev.vality.reporter.domain.tables.pojos.Payment;
+import dev.vality.reporter.domain.tables.pojos.PaymentAggsByHour;
+import dev.vality.reporter.domain.tables.pojos.RefundAggsByHour;
+import dev.vality.reporter.domain.tables.pojos.PayoutAggsByHour;
+import dev.vality.reporter.domain.tables.pojos.AdjustmentAggsByHour;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -43,6 +54,7 @@ public class CommonTestData {
         shop.setId(shopId);
         shop.setContractId(contractId);
         shop.setLocation(ShopLocation.url("http://2ch.hk/"));
+        shop.setDetails(new ShopDetails().setName("Test shop"));
         return shop;
     }
 

@@ -211,6 +211,19 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
+    public Map<String, String> getShopNames(String partyId) throws PartyNotFoundException {
+        Party party = getParty(partyId);
+        return party.getShops().values().stream()
+                .collect(Collectors.toMap(Shop::getId, shop -> {
+                    if (shop.isSetDetails() && shop.getDetails().isSetName()) {
+                        return shop.getDetails().getName();
+                    } else {
+                        return null;
+                    }
+                }));
+    }
+
+    @Override
     public Value getMetaData(String partyId, String namespace) throws NotFoundException {
         try {
             return partyManagementClient.getMetaData(partyId, namespace);
