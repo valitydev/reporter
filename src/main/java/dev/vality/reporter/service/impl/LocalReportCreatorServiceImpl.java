@@ -39,6 +39,12 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
     private int limit = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
 
     private static final int PACKAGE_SIZE = 25;
+    private static final int PAYMENTS_HEAD_ROW = 13;
+    private static final int ADJUSTMENT_HEAD_ROW = 9;
+    private static final int REFUNDS_HEAD_ROW = 14;
+    private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 14;
+    private static final int ADJUSTMENT_COLUMNS_DESCRIPTION_ROW = 9;
+    private static final int REFUNDS_COLUMNS_DESCRIPTION_ROW = 15;
 
     @Override
     public void createReport(LocalReportCreatorDto reportCreatorDto) throws IOException {
@@ -208,7 +214,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private void createRefundsColumnsDescriptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
         Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 15; ++i) {
+        for (int i = 0; i < REFUNDS_COLUMNS_DESCRIPTION_ROW; ++i) {
             Cell cell = rowSecondRefunds.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -236,7 +242,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                       Sheet sh,
                                       AtomicInteger rownum) {
         Row rowFirstRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 14; ++i) {
+        for (int i = 0; i < REFUNDS_HEAD_ROW; ++i) {
             rowFirstRefunds.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
@@ -251,7 +257,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                                        Sheet sh,
                                                        AtomicInteger rownum) {
         Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 9; ++i) {
+        for (int i = 0; i < ADJUSTMENT_COLUMNS_DESCRIPTION_ROW; ++i) {
             Cell cell = rowSecondRefunds.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -273,7 +279,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                           Sheet sh,
                                           AtomicInteger rownum) {
         Row rowFirstAdjustments = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 9; ++i) {
+        for (int i = 0; i < ADJUSTMENT_HEAD_ROW; ++i) {
             rowFirstAdjustments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
@@ -382,7 +388,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private void createPaymentsColumnsDesciptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
         Row rowSecondPayments = sh.createRow(rownum.getAndIncrement());
-        for (int i = 0; i < 14; ++i) {
+        for (int i = 0; i < PAYMENTS_COLUMNS_DESCRIPTION_ROW; ++i) {
             Cell cell = rowSecondPayments.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
@@ -410,7 +416,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                        AtomicInteger rownum) {
         Row rowFirstPayments = sh.createRow(rownum.getAndIncrement());
 
-        for (int i = 0; i < 13; ++i) {
+        for (int i = 0; i < PAYMENTS_HEAD_ROW; ++i) {
             rowFirstPayments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
