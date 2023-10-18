@@ -114,6 +114,7 @@ public class ReportCreatorServiceTest {
         report.setPartyShopId(shopId);
 
         Map<String, String> shopUrls = new HashMap<>();
+        Map<String, String> shopNames = new HashMap<>();
 
         Path tempFile = Files.createTempFile("check_limit", ".xlsx");
         try {
@@ -125,7 +126,8 @@ public class ReportCreatorServiceTest {
                     adjustmentCursor,
                     report,
                     Files.newOutputStream(tempFile),
-                    shopUrls
+                    shopUrls,
+                    shopNames
             );
 
             LocalReportCreatorServiceImpl reportCreatorServiceImpl =

@@ -51,6 +51,7 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
         String formattedToTime =
                 TimeUtil.toLocalizedDate(toTime.minusNanos(1).toInstant(ZoneOffset.UTC), reportZoneId);
         Map<String, String> shopUrls = partyService.getShopUrls(partyId);
+        Map<String, String> shopNames = partyService.getShopNames(partyId);
 
         try (
                 Cursor<PaymentRecord> paymentsCursor =
@@ -69,6 +70,7 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
                     .report(report)
                     .outputStream(outputStream)
                     .shopUrls(shopUrls)
+                    .shopNames(shopNames)
                     .build();
 
             localReportCreatorService.createReport(reportCreatorDto);
