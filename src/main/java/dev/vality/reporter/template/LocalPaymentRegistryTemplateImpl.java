@@ -11,6 +11,7 @@ import dev.vality.reporter.service.PartyService;
 import dev.vality.reporter.service.ReportCreatorService;
 import dev.vality.reporter.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.Cursor;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
@@ -41,6 +43,7 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
     @Override
     public void processReportTemplate(Report report, OutputStream outputStream) throws
             IOException {
+        log.info("Start process report template {}", report.getId());
         String partyId = report.getPartyId();
         String shopId = report.getPartyShopId();
         LocalDateTime fromTime = report.getFromTime();
@@ -74,6 +77,7 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
                     .build();
 
             localReportCreatorService.createReport(reportCreatorDto);
+            log.info("Report template {} were processed", report.getId());
         }
     }
 }
