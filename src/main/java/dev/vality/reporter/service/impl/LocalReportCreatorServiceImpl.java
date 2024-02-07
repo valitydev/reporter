@@ -11,6 +11,7 @@ import dev.vality.reporter.util.FormatUtil;
 import dev.vality.reporter.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -26,6 +27,7 @@ import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Setter
 @Service
 @RequiredArgsConstructor
@@ -48,7 +50,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     @Override
     public void createReport(LocalReportCreatorDto reportCreatorDto) throws IOException {
+        log.info("Start create report {}", reportCreatorDto.getReport().getId());
         try (SXSSFWorkbook wb = new SXSSFWorkbook(100)) {
+            wb.setCompressTempFiles(true);
             Sheet sh = createSheet(wb);
             AtomicInteger rownum = new AtomicInteger(0);
 
@@ -64,6 +68,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             wb.write(reportCreatorDto.getOutputStream());
             reportCreatorDto.getOutputStream().close();
             wb.dispose();
+            log.info("Report {} were created", reportCreatorDto.getReport().getId());
         }
     }
 
