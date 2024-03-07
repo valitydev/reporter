@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -191,8 +192,11 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 refund.getInvoiceId(),
                 refund.getPaymentId()
         );
-        row.createCell(0).setCellValue(TimeUtil.toLocalizedDateTime(refund.getStatusCreatedAt(), reportZoneId));
-        row.createCell(1).setCellValue(TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt(), reportZoneId));
+        row.createCell(0).setCellValue(
+                TimeUtil.toLocalizedDateTime(refund.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
+        row.createCell(1).setCellValue(
+                TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC),
+                reportZoneId));
         row.createCell(2).setCellValue(refund.getInvoiceId() + "." + refund.getPaymentId());
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(refund.getAmount()));
         String paymentTool = null;
@@ -306,7 +310,8 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         Row row = sh.createRow(rownum.getAndIncrement());
         row.createCell(0).setCellValue(adjustment.getAdjustmentId());
         row.createCell(1).setCellValue(adjustment.getInvoiceId() + "." + adjustment.getPaymentId());
-        row.createCell(2).setCellValue(TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt(), reportZoneId));
+        row.createCell(2).setCellValue(
+                TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount()));
         totalAdjustmentAmnt.addAndGet(adjustment.getAmount());
         row.createCell(4).setCellValue(adjustment.getCurrencyCode());
@@ -371,7 +376,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         Row row = sh.createRow(rownum.getAndIncrement());
         row.createCell(0).setCellValue(payment.getInvoiceId() + "." + payment.getPaymentId());
         row.createCell(1).setCellValue(
-                TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt(), reportZoneId));
+                TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(2).setCellValue(payment.getTool().getName());
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount()));
         row.createCell(4).setCellValue(
