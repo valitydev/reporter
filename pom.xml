@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>machinegun-proto</artifactId>
-            <version>1.38-347c5c4</version>
+            <version>1.42-f32e92d</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
