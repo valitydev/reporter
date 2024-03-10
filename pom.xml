@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -248,7 +248,7 @@
                     <dependency>
                         <groupId>org.apache.maven.shared</groupId>
                         <artifactId>maven-filtering</artifactId>
-                        <version>1.3</version>
+                        <version>3.3.2</version>
                     </dependency>
                 </dependencies>
                 <configuration>
