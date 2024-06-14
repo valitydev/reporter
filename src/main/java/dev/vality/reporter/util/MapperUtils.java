@@ -176,7 +176,10 @@ public final class MapperUtils {
         payment.setPaymentId(hgInnerPayment.getId());
         payment.setExternalId(hgInnerPayment.getExternalId());
         payment.setCreatedAt(TypeUtil.stringToLocalDateTime(hgInnerPayment.getCreatedAt()));
-        if (hgInnerPayment.getStatus().isSetPending() && kafkaEventStatus != null) {
+        if (!hgInnerPayment.getStatus().isSetCaptured()
+                && !hgInnerPayment.getStatus().isSetCancelled()
+                && !hgInnerPayment.getStatus().isSetFailed()
+                && kafkaEventStatus != null) {
             payment.setStatus(TBaseUtil.unionFieldToEnum(kafkaEventStatus, InvoicePaymentStatus.class));
         } else {
             payment.setStatus(TBaseUtil.unionFieldToEnum(hgInnerPayment.getStatus(), InvoicePaymentStatus.class));
