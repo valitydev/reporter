@@ -62,7 +62,7 @@ public class PaymentStatusChangeHandler implements InvoicingEventHandler {
             }
         }
 
-        Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);
+        Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment, status);
         Long extPaymentId = paymentDao.savePayment(paymentRecord);
         PaymentAdditionalInfo paymentAdditionalInfoRecord = MapperUtils.createPaymentAdditionalInfoRecord(
                 event, payment, invoicePaymentStatusChanged, extPaymentId, changeId
