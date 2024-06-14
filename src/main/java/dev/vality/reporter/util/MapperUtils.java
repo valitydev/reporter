@@ -167,8 +167,8 @@ public final class MapperUtils {
 
     public static Payment createPaymentRecord(MachineEvent event,
                                               dev.vality.damsel.payment_processing.Invoice hgInvoice,
-                                              InvoicePayment invoicePayment,
-                                              dev.vality.damsel.domain.InvoicePaymentStatus kafkaEventStatus) {
+                                              InvoicePayment invoicePayment) {
+        var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
 
         Payment payment = new Payment();
@@ -176,17 +176,9 @@ public final class MapperUtils {
         payment.setPaymentId(hgInnerPayment.getId());
         payment.setExternalId(hgInnerPayment.getExternalId());
         payment.setCreatedAt(TypeUtil.stringToLocalDateTime(hgInnerPayment.getCreatedAt()));
-        if (!hgInnerPayment.getStatus().isSetCaptured()
-                && !hgInnerPayment.getStatus().isSetCancelled()
-                && !hgInnerPayment.getStatus().isSetFailed()
-                && kafkaEventStatus != null) {
-            payment.setStatus(TBaseUtil.unionFieldToEnum(kafkaEventStatus, InvoicePaymentStatus.class));
-        } else {
-            payment.setStatus(TBaseUtil.unionFieldToEnum(hgInnerPayment.getStatus(), InvoicePaymentStatus.class));
-        }
+        payment.setStatus(TBaseUtil.unionFieldToEnum(hgInnerPayment.getStatus(), InvoicePaymentStatus.class));
         payment.setStatusCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
-        var hgInnerInvoice = hgInvoice.getInvoice();
         payment.setPartyId(hgInnerInvoice.getOwnerId());
         payment.setShopId(hgInnerInvoice.getShopId());
         payment.setFlow(TBaseUtil.unionFieldToEnum(hgInnerPayment.getFlow(), PaymentFlow.class));
