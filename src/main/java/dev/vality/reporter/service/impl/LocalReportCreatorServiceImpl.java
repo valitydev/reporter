@@ -45,7 +45,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
     private static final int PAYMENTS_HEAD_ROW = 13;
     private static final int ADJUSTMENT_HEAD_ROW = 9;
     private static final int REFUNDS_HEAD_ROW = 14;
-    private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 14;
+    private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 15;
     private static final int ADJUSTMENT_COLUMNS_DESCRIPTION_ROW = 9;
     private static final int REFUNDS_COLUMNS_DESCRIPTION_ROW = 15;
 
@@ -78,7 +78,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                                      Sheet sh,
                                      AtomicInteger rownum) {
         createPaymentsHeadRow(reportCreatorDto, wb, sh, rownum);
-        createPaymentsColumnsDesciptionRow(wb, sh, rownum);
+        createPaymentsColumnsDescriptionRow(wb, sh, rownum);
 
         AtomicLong totalAmnt = new AtomicLong();
         AtomicLong totalPayoutAmnt = new AtomicLong();
@@ -87,6 +87,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         while (paymentsCursor.hasNext()) {
             Result<PaymentRecord> paymentRecords = paymentsCursor.fetchNext(PACKAGE_SIZE);
             for (PaymentRecord paymentRecord : paymentRecords) {
+
                 createPaymentRow(reportCreatorDto, sh, totalAmnt, totalPayoutAmnt, rownum, paymentRecord);
                 sh = checkAndReset(wb, sh, rownum);
             }
@@ -386,17 +387,18 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
 
-        String purpose = localStatisticService.getPurpose(payment.getInvoiceId());
-        row.createCell(7).setCellValue(purpose);
+        var invoice = localStatisticService.getInvoice(payment.getInvoiceId());
+        row.createCell(7).setCellValue(invoice.getProduct());
         row.createCell(8).setCellValue(FormatUtil.formatCurrency(payment.getFee()));
         row.createCell(9).setCellValue(payment.getCurrencyCode());
         row.createCell(10).setCellValue(payment.getExternalId());
-        row.createCell(11).setCellValue(payment.getStatus().getLiteral());
-        row.createCell(12).setCellValue(payment.getShopId());
-        row.createCell(13).setCellValue(reportCreatorDto.getShopNames().get(payment.getShopId()));
+        row.createCell(11).setCellValue(invoice.getExternalId());
+        row.createCell(12).setCellValue(payment.getStatus().getLiteral());
+        row.createCell(13).setCellValue(payment.getShopId());
+        row.createCell(14).setCellValue(reportCreatorDto.getShopNames().get(payment.getShopId()));
     }
 
-    private void createPaymentsColumnsDesciptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
+    private void createPaymentsColumnsDescriptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
         Row rowSecondPayments = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < PAYMENTS_COLUMNS_DESCRIPTION_ROW; ++i) {
             Cell cell = rowSecondPayments.createCell(i);
@@ -414,10 +416,11 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
         rowSecondPayments.getCell(8).setCellValue("Комиссия");
         rowSecondPayments.getCell(9).setCellValue("Валюта");
-        rowSecondPayments.getCell(10).setCellValue("Id мерчанта");
-        rowSecondPayments.getCell(11).setCellValue("Статус платежа");
-        rowSecondPayments.getCell(12).setCellValue("Shop Id");
-        rowSecondPayments.getCell(13).setCellValue("Название магазина");
+        rowSecondPayments.getCell(10).setCellValue("Id мерчанта (from payment)");
+        rowSecondPayments.getCell(11).setCellValue("Id мерчанта (from invoice)");
+        rowSecondPayments.getCell(12).setCellValue("Статус платежа");
+        rowSecondPayments.getCell(13).setCellValue("Shop Id");
+        rowSecondPayments.getCell(14).setCellValue("Название магазина");
     }
 
     private void createPaymentsHeadRow(LocalReportCreatorDto reportCreatorDto,
