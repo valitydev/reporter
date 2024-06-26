@@ -27,7 +27,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.thrift.TException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured;
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,7 +79,8 @@ public class PaymentRegistryTemplateTest {
     @BeforeEach
     public void setUp() {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
-        invoiceRecord.setProduct("rbk.money");
+        invoiceRecord.setProduct("vality.dev");
+        invoiceRecord.setExternalId("invoice_external_id");
         Mockito.when(invoiceDao.getInvoice(any())).thenReturn(invoiceRecord);
         partyId = random(String.class);
         shopId = random(String.class);
@@ -152,13 +153,15 @@ public class PaymentRegistryTemplateTest {
                     paymentsHeaderCell.getStringCellValue());
 
             Row paymentsFirstRow = sheet.getRow(2);
-            Assertions.assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
-            assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
-            assertEquals(shopId, paymentsFirstRow.getCell(12).getStringCellValue());
-            assertEquals("Test shop", paymentsFirstRow.getCell(13).getStringCellValue());
-            assertEquals(dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured.getLiteral(),
-                    paymentsFirstRow.getCell(11).getStringCellValue());
             assertEquals("http://0ch.ru/b", paymentsFirstRow.getCell(6).getStringCellValue());
+            assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
+            assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
+            assertEquals("payment_external_id", paymentsFirstRow.getCell(10).getStringCellValue());
+            assertEquals("invoice_external_id", paymentsFirstRow.getCell(11).getStringCellValue());
+            assertEquals(captured.getLiteral(), paymentsFirstRow.getCell(12).getStringCellValue());
+            assertEquals(shopId, paymentsFirstRow.getCell(13).getStringCellValue());
+            assertEquals("Test shop", paymentsFirstRow.getCell(14).getStringCellValue());
+
 
 
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
