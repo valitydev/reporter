@@ -157,10 +157,9 @@ public class PaymentRegistryTemplateTest {
             assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
             assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
             assertEquals("payment_external_id", paymentsFirstRow.getCell(10).getStringCellValue());
-            assertEquals("invoice_external_id", paymentsFirstRow.getCell(11).getStringCellValue());
-            assertEquals(captured.getLiteral(), paymentsFirstRow.getCell(12).getStringCellValue());
-            assertEquals(shopId, paymentsFirstRow.getCell(13).getStringCellValue());
-            assertEquals("Test shop", paymentsFirstRow.getCell(14).getStringCellValue());
+            assertEquals(captured.getLiteral(), paymentsFirstRow.getCell(11).getStringCellValue());
+            assertEquals(shopId, paymentsFirstRow.getCell(12).getStringCellValue());
+            assertEquals("Test shop", paymentsFirstRow.getCell(13).getStringCellValue());
 
 
 

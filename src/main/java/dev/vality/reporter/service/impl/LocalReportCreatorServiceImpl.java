@@ -21,6 +21,7 @@ import org.jooq.Cursor;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -45,7 +46,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
     private static final int PAYMENTS_HEAD_ROW = 13;
     private static final int ADJUSTMENT_HEAD_ROW = 9;
     private static final int REFUNDS_HEAD_ROW = 14;
-    private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 15;
+    private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 14;
     private static final int ADJUSTMENT_COLUMNS_DESCRIPTION_ROW = 9;
     private static final int REFUNDS_COLUMNS_DESCRIPTION_ROW = 15;
 
@@ -197,7 +198,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 TimeUtil.toLocalizedDateTime(refund.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(1).setCellValue(
                 TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC),
-                reportZoneId));
+                        reportZoneId));
         row.createCell(2).setCellValue(refund.getInvoiceId() + "." + refund.getPaymentId());
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(refund.getAmount()));
         String paymentTool = null;
@@ -391,11 +392,14 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(7).setCellValue(invoice.getProduct());
         row.createCell(8).setCellValue(FormatUtil.formatCurrency(payment.getFee()));
         row.createCell(9).setCellValue(payment.getCurrencyCode());
-        row.createCell(10).setCellValue(payment.getExternalId());
-        row.createCell(11).setCellValue(invoice.getExternalId());
-        row.createCell(12).setCellValue(payment.getStatus().getLiteral());
-        row.createCell(13).setCellValue(payment.getShopId());
-        row.createCell(14).setCellValue(reportCreatorDto.getShopNames().get(payment.getShopId()));
+        if (StringUtils.hasText(payment.getExternalId())) {
+            row.createCell(10).setCellValue(payment.getExternalId());
+        } else {
+            row.createCell(10).setCellValue(invoice.getExternalId());
+        }
+        row.createCell(11).setCellValue(payment.getStatus().getLiteral());
+        row.createCell(12).setCellValue(payment.getShopId());
+        row.createCell(13).setCellValue(reportCreatorDto.getShopNames().get(payment.getShopId()));
     }
 
     private void createPaymentsColumnsDescriptionRow(Workbook wb, Sheet sh, AtomicInteger rownum) {
@@ -416,11 +420,10 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
         rowSecondPayments.getCell(8).setCellValue("Комиссия");
         rowSecondPayments.getCell(9).setCellValue("Валюта");
-        rowSecondPayments.getCell(10).setCellValue("Id мерчанта (from payment)");
-        rowSecondPayments.getCell(11).setCellValue("Id мерчанта (from invoice)");
-        rowSecondPayments.getCell(12).setCellValue("Статус платежа");
-        rowSecondPayments.getCell(13).setCellValue("Shop Id");
-        rowSecondPayments.getCell(14).setCellValue("Название магазина");
+        rowSecondPayments.getCell(10).setCellValue("Id мерчанта");
+        rowSecondPayments.getCell(11).setCellValue("Статус платежа");
+        rowSecondPayments.getCell(12).setCellValue("Shop Id");
+        rowSecondPayments.getCell(13).setCellValue("Название магазина");
     }
 
     private void createPaymentsHeadRow(LocalReportCreatorDto reportCreatorDto,
