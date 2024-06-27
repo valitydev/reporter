@@ -9,8 +9,6 @@ import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ReportsTestData {
 
@@ -98,6 +96,7 @@ public class ReportsTestData {
         payment.setAmount(amount);
         payment.setFee(feeAmount);
         payment.setCurrencyCode(DEFAULT_CURRENCY);
+        payment.setExternalId("payment_external_id");
         return payment;
     }
 
