@@ -36,8 +36,7 @@ public class LocalPaymentRegistryTemplateImpl implements ReportTemplate {
     @Override
     public boolean isAccept(ReportType reportType) {
         return reportType == ReportType.payment_registry
-                || reportType == ReportType.provision_of_service
-                || reportType == ReportType.payment_registry_by_payout;
+                || reportType == ReportType.provision_of_service;
     }
 
     @Override
