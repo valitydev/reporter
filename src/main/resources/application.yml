@@ -1,13 +1,13 @@
 info:
-  version: '@project.version@'
+  version: ${project.version}
   stage: dev
 
 server:
-  port: '@server.port@'
+  port: ${server.port}
 
 management:
   server:
-    port: '@management.port@'
+    port: ${management.port}
   metrics:
     export:
       prometheus:

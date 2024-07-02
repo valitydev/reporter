@@ -82,19 +82,18 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         createPaymentsColumnsDescriptionRow(wb, sh, rownum);
 
         AtomicLong totalAmnt = new AtomicLong();
-        AtomicLong totalPayoutAmnt = new AtomicLong();
 
         Cursor<PaymentRecord> paymentsCursor = reportCreatorDto.getPaymentsCursor();
         while (paymentsCursor.hasNext()) {
             Result<PaymentRecord> paymentRecords = paymentsCursor.fetchNext(PACKAGE_SIZE);
             for (PaymentRecord paymentRecord : paymentRecords) {
 
-                createPaymentRow(reportCreatorDto, sh, totalAmnt, totalPayoutAmnt, rownum, paymentRecord);
+                createPaymentRow(reportCreatorDto, sh, totalAmnt, rownum, paymentRecord);
                 sh = checkAndReset(wb, sh, rownum);
             }
         }
         sh = checkAndReset(wb, sh, rownum);
-        createTotalAmountRow(wb, sh, totalAmnt, totalPayoutAmnt, rownum);
+        createTotalAmountRow(wb, sh, totalAmnt, rownum);
         return checkAndReset(wb, sh, rownum);
     }
 
@@ -343,7 +342,6 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
     private void createTotalAmountRow(Workbook wb,
                                       Sheet sh,
                                       AtomicLong totalAmnt,
-                                      AtomicLong totalPayoutAmnt,
                                       AtomicInteger rownum) {
         Row rowTotalPaymentAmount = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < 5; ++i) {
@@ -356,22 +354,11 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         cellTotalPaymentAmount.setCellValue("Сумма");
         CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
         rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAmnt.longValue()));
-        rowTotalPaymentAmount.getCell(4).setCellValue(FormatUtil.formatCurrency(totalPayoutAmnt.longValue()));
-    }
-
-    private CellStyle createBorderStyle(SXSSFWorkbook wb) {
-        CellStyle borderStyle = wb.createCellStyle();
-        borderStyle.setBorderBottom(BorderStyle.MEDIUM);
-        borderStyle.setBorderTop(BorderStyle.MEDIUM);
-        borderStyle.setBorderRight(BorderStyle.MEDIUM);
-        borderStyle.setBorderLeft(BorderStyle.MEDIUM);
-        return borderStyle;
     }
 
     private void createPaymentRow(LocalReportCreatorDto reportCreatorDto,
                                   Sheet sh,
                                   AtomicLong totalAmnt,
-                                  AtomicLong totalPayoutAmnt,
                                   AtomicInteger rownum,
                                   PaymentRecord payment) {
         ZoneId reportZoneId = ZoneId.of(reportCreatorDto.getReport().getTimezone());
@@ -384,7 +371,6 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(4).setCellValue(
                 FormatUtil.formatCurrency(payment.getAmount() - payment.getFee()));
         totalAmnt.addAndGet(payment.getAmount());
-        totalPayoutAmnt.addAndGet(payment.getAmount() - payment.getFee());
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
 
