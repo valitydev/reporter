@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-slim
+FROM ghcr.io/valitydev/temurin-jemalloc:sha-06735f3
 
 RUN apt-get update \
       && apt-get install -y \
