@@ -1,14 +1,10 @@
-name: Maven Deploy Artifact
+name: Deploy Docker Image
 
 on:
   push:
     branches:
       - 'master'
       - 'main'
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-deploy:
