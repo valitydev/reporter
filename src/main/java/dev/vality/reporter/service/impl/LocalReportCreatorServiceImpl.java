@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -368,15 +369,16 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(2).setCellValue(payment.getTool().getName());
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount()));
+        long fee = Objects.nonNull(payment.getFee()) ? payment.getFee() : 0L;
         row.createCell(4).setCellValue(
-                FormatUtil.formatCurrency(payment.getAmount() - payment.getFee()));
+                FormatUtil.formatCurrency(payment.getAmount() - fee));
         totalAmnt.addAndGet(payment.getAmount());
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
 
         var invoice = localStatisticService.getInvoice(payment.getInvoiceId());
         row.createCell(7).setCellValue(invoice.getProduct());
-        row.createCell(8).setCellValue(FormatUtil.formatCurrency(payment.getFee()));
+        row.createCell(8).setCellValue(FormatUtil.formatCurrency(fee));
         row.createCell(9).setCellValue(payment.getCurrencyCode());
         if (StringUtils.hasText(payment.getExternalId())) {
             row.createCell(10).setCellValue(payment.getExternalId());
