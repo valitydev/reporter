@@ -1,5 +1,6 @@
 package dev.vality.reporter.report;
 
+import dev.vality.damsel.domain_config.RepositoryClientSrv;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
 import dev.vality.reporter.dao.AdjustmentDao;
@@ -16,6 +17,7 @@ import dev.vality.reporter.domain.tables.records.InvoiceRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
 import dev.vality.reporter.model.LocalReportCreatorDto;
+import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.service.LocalStatisticService;
 import dev.vality.reporter.service.impl.LocalReportCreatorServiceImpl;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -52,11 +54,16 @@ public class ReportCreatorServiceTest {
     @Autowired
     private LocalStatisticService statisticService;
 
+    @Autowired
+    private DominantService dominantService;
+
     @MockBean
     private InvoiceDao invoiceDao;
 
     @MockBean
     private PartyManagementSrv.Iface partyManagementClient;
+    @MockBean
+    private RepositoryClientSrv.Iface dominantClient;
 
     private String partyId;
     private String shopId;
@@ -131,7 +138,7 @@ public class ReportCreatorServiceTest {
             );
 
             LocalReportCreatorServiceImpl reportCreatorServiceImpl =
-                    new LocalReportCreatorServiceImpl(statisticService);
+                    new LocalReportCreatorServiceImpl(dominantService, statisticService);
             reportCreatorServiceImpl.setLimit(10);
             reportCreatorServiceImpl.createReport(reportCreatorDto);
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));
