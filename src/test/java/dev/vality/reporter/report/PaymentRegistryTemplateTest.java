@@ -154,7 +154,7 @@ public class PaymentRegistryTemplateTest {
 
             Row paymentsFirstRow = sheet.getRow(2);
             assertEquals("http://0ch.ru/b", paymentsFirstRow.getCell(6).getStringCellValue());
-            assertEquals(FormatUtil.formatCurrency(2L), paymentsFirstRow.getCell(8).getStringCellValue());
+            assertEquals(FormatUtil.formatCurrency(2L, (short) 2), paymentsFirstRow.getCell(8).getStringCellValue());
             assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
             assertEquals("payment_external_id", paymentsFirstRow.getCell(10).getStringCellValue());
             assertEquals(captured.getLiteral(), paymentsFirstRow.getCell(11).getStringCellValue());
@@ -164,7 +164,7 @@ public class PaymentRegistryTemplateTest {
 
 
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
-            assertEquals(FormatUtil.formatCurrency(expectedSum), paymentsTotalSum.getStringCellValue());
+            assertEquals(FormatUtil.formatCurrency(expectedSum, (short) 2), paymentsTotalSum.getStringCellValue());
 
             Cell refundsHeaderCell = sheet.getRow(8).getCell(0);
             assertEquals(String.format("Возвраты за период с %s по %s", from, to),
@@ -180,7 +180,7 @@ public class PaymentRegistryTemplateTest {
             assertEquals(RefundStatus.succeeded.getLiteral(), refundsFirstRow.getCell(12).getStringCellValue());
 
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
-            assertEquals(FormatUtil.formatCurrency(expectedRefundSum), refundsTotalSum.getStringCellValue());
+            assertEquals(FormatUtil.formatCurrency(expectedRefundSum, (short) 2), refundsTotalSum.getStringCellValue());
         } finally {
             Files.deleteIfExists(tempFile);
         }

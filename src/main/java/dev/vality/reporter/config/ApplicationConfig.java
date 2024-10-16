@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import dev.vality.damsel.domain_config.RepositoryClientSrv;
 import dev.vality.damsel.payment_processing.InvoicingSrv;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
 import dev.vality.woody.thrift.impl.http.THSpawnClientBuilder;
@@ -45,6 +46,16 @@ public class ApplicationConfig {
                 .withAddress(resource.getURI())
                 .withNetworkTimeout(timeout)
                 .build(InvoicingSrv.Iface.class);
+    }
+
+    @Bean
+    public RepositoryClientSrv.Iface dominantClient(
+            @Value("${dominant.url}") Resource resource,
+            @Value("${dominant.networkTimeout}") int networkTimeout) throws IOException {
+        return new THSpawnClientBuilder()
+                .withNetworkTimeout(networkTimeout)
+                .withAddress(resource.getURI())
+                .build(RepositoryClientSrv.Iface.class);
     }
 
     @Bean

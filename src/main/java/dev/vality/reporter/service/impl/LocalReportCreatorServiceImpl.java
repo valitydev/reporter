@@ -4,7 +4,9 @@ import dev.vality.reporter.domain.enums.PaymentPayerType;
 import dev.vality.reporter.domain.tables.records.AdjustmentRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
+import dev.vality.reporter.model.Cash;
 import dev.vality.reporter.model.LocalReportCreatorDto;
+import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.service.LocalStatisticService;
 import dev.vality.reporter.service.ReportCreatorService;
 import dev.vality.reporter.util.FormatUtil;
@@ -36,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class LocalReportCreatorServiceImpl implements ReportCreatorService<LocalReportCreatorDto> {
 
+    private final DominantService dominantService;
     private final LocalStatisticService localStatisticService;
 
     @Value("${report.includeAdjustments}")
@@ -82,7 +85,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         createPaymentsHeadRow(reportCreatorDto, wb, sh, rownum);
         createPaymentsColumnsDescriptionRow(wb, sh, rownum);
 
-        AtomicLong totalAmnt = new AtomicLong();
+        Cash totalAmnt = new Cash();
 
         Cursor<PaymentRecord> paymentsCursor = reportCreatorDto.getPaymentsCursor();
         while (paymentsCursor.hasNext()) {
@@ -107,7 +110,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         createRefundsColumnsDescriptionRow(wb, sh, rownum);
         sh = checkAndReset(wb, sh, rownum);
 
-        AtomicLong totalRefundAmnt = new AtomicLong();
+        Cash totalRefundAmnt = new Cash();
         Cursor<RefundRecord> refundsCursor = reportCreatorDto.getRefundsCursor();
         while (refundsCursor.hasNext()) {
             Result<RefundRecord> refundRecords = refundsCursor.fetchNext(PACKAGE_SIZE);
@@ -131,7 +134,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         createAdjustmentColumnsDescriptionRow(wb, sh, rownum);
         sh = checkAndReset(wb, sh, rownum);
 
-        AtomicLong totalAdjustmentAmnt = new AtomicLong();
+        Cash totalAdjustmentAmnt = new Cash();
         Cursor<AdjustmentRecord> adjustmentsCursor = reportCreatorDto.getAdjustmentsCursor();
         while (adjustmentsCursor.hasNext()) {
             Result<AdjustmentRecord> adjustmentRecords = adjustmentsCursor.fetchNext(PACKAGE_SIZE);
@@ -166,7 +169,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         return sh;
     }
 
-    private void createTotalRefundAmountRow(Workbook wb, Sheet sh, AtomicLong totalRefundAmnt, AtomicInteger rownum) {
+    private void createTotalRefundAmountRow(Workbook wb, Sheet sh, Cash totalRefundAmnt, AtomicInteger rownum) {
         Row rowTotalRefundAmount = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < 4; ++i) {
             Cell cell = rowTotalRefundAmount.createCell(i);
@@ -177,12 +180,14 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         Cell cellTotalRefundAmount = rowTotalRefundAmount.getCell(0);
         cellTotalRefundAmount.setCellValue("Сумма");
         CellUtil.setAlignment(cellTotalRefundAmount, HorizontalAlignment.CENTER);
-        rowTotalRefundAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalRefundAmnt.longValue()));
+        rowTotalRefundAmount.getCell(3).setCellValue(
+                FormatUtil.formatCurrency(totalRefundAmnt.getAmount().get(),
+                        totalRefundAmnt.getCurrency().getExponent()));
     }
 
     private void createRefundRow(LocalReportCreatorDto reportCreatorDto,
                                  Sheet sh,
-                                 AtomicLong totalRefundAmnt,
+                                 Cash totalRefundAmnt,
                                  AtomicInteger rownum,
                                  RefundRecord refund) {
         ZoneId reportZoneId = ZoneId.of(reportCreatorDto.getReport().getTimezone());
@@ -200,7 +205,8 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC),
                         reportZoneId));
         row.createCell(2).setCellValue(refund.getInvoiceId() + "." + refund.getPaymentId());
-        row.createCell(3).setCellValue(FormatUtil.formatCurrency(refund.getAmount()));
+        var currency = dominantService.getCurrency(refund.getCurrencyCode());
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(refund.getAmount(), currency.getExponent()));
         String paymentTool = null;
         String payerEmail = null;
         if (payment.getPayerType() == PaymentPayerType.payment_resource) {
@@ -208,7 +214,8 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             payerEmail = payment.getEmail();
         }
         row.createCell(4).setCellValue(paymentTool);
-        totalRefundAmnt.addAndGet(refund.getAmount());
+        totalRefundAmnt.setCurrency(currency);
+        totalRefundAmnt.getAmount().addAndGet(refund.getAmount());
         row.createCell(5).setCellValue(payerEmail);
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(refund.getShopId()));
 
@@ -304,7 +311,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private void createAdjustmentRow(LocalReportCreatorDto reportCreatorDto,
                                      Sheet sh,
-                                     AtomicLong totalAdjustmentAmnt,
+                                     Cash totalAdjustmentAmnt,
                                      AtomicInteger rownum,
                                      AdjustmentRecord adjustment) {
         ZoneId reportZoneId = ZoneId.of(reportCreatorDto.getReport().getTimezone());
@@ -314,8 +321,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(1).setCellValue(adjustment.getInvoiceId() + "." + adjustment.getPaymentId());
         row.createCell(2).setCellValue(
                 TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
-        row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount()));
-        totalAdjustmentAmnt.addAndGet(adjustment.getAmount());
+        var currency = dominantService.getCurrency(adjustment.getCurrencyCode());
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
+        totalAdjustmentAmnt.getAmount().addAndGet(adjustment.getAmount());
         row.createCell(4).setCellValue(adjustment.getCurrencyCode());
         row.createCell(5).setCellValue(adjustment.getReason());
         row.createCell(6).setCellValue(adjustment.getStatus().getLiteral());
@@ -325,7 +333,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,
                                                 Sheet sh,
-                                                AtomicLong totalAdjustmentAmnt,
+                                                Cash totalAdjustmentAmnt,
                                                 AtomicInteger rownum) {
         Row rowTotalPaymentAmount = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < 6; ++i) {
@@ -337,12 +345,14 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
         cellTotalPaymentAmount.setCellValue("Сумма");
         CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
-        rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAdjustmentAmnt.longValue()));
+        rowTotalPaymentAmount.getCell(3).setCellValue(
+                FormatUtil.formatCurrency(totalAdjustmentAmnt.getAmount().longValue(),
+                        totalAdjustmentAmnt.getCurrency().getExponent()));
     }
 
     private void createTotalAmountRow(Workbook wb,
                                       Sheet sh,
-                                      AtomicLong totalAmnt,
+                                      Cash totalAmnt,
                                       AtomicInteger rownum) {
         Row rowTotalPaymentAmount = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < 5; ++i) {
@@ -354,12 +364,13 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         Cell cellTotalPaymentAmount = rowTotalPaymentAmount.getCell(0);
         cellTotalPaymentAmount.setCellValue("Сумма");
         CellUtil.setAlignment(cellTotalPaymentAmount, HorizontalAlignment.CENTER);
-        rowTotalPaymentAmount.getCell(3).setCellValue(FormatUtil.formatCurrency(totalAmnt.longValue()));
+        rowTotalPaymentAmount.getCell(3).setCellValue(
+                FormatUtil.formatCurrency(totalAmnt.getAmount().get(), totalAmnt.getCurrency().getExponent()));
     }
 
     private void createPaymentRow(LocalReportCreatorDto reportCreatorDto,
                                   Sheet sh,
-                                  AtomicLong totalAmnt,
+                                  Cash totalAmnt,
                                   AtomicInteger rownum,
                                   PaymentRecord payment) {
         ZoneId reportZoneId = ZoneId.of(reportCreatorDto.getReport().getTimezone());
@@ -368,17 +379,19 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(1).setCellValue(
                 TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(2).setCellValue(payment.getTool().getName());
-        row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount()));
+        var currency = dominantService.getCurrency(payment.getCurrencyCode());
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount(), currency.getExponent()));
         long fee = Objects.nonNull(payment.getFee()) ? payment.getFee() : 0L;
         row.createCell(4).setCellValue(
-                FormatUtil.formatCurrency(payment.getAmount() - fee));
-        totalAmnt.addAndGet(payment.getAmount());
+                FormatUtil.formatCurrency(payment.getAmount() - fee, currency.getExponent()));
+        totalAmnt.setCurrency(currency);
+        totalAmnt.getAmount().addAndGet(payment.getAmount());
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
 
         var invoice = localStatisticService.getInvoice(payment.getInvoiceId());
         row.createCell(7).setCellValue(invoice.getProduct());
-        row.createCell(8).setCellValue(FormatUtil.formatCurrency(fee));
+        row.createCell(8).setCellValue(FormatUtil.formatCurrency(fee, currency.getExponent()));
         row.createCell(9).setCellValue(payment.getCurrencyCode());
         if (StringUtils.hasText(payment.getExternalId())) {
             row.createCell(10).setCellValue(payment.getExternalId());
