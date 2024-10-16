@@ -51,7 +51,7 @@ public class ApplicationConfig {
     @Bean
     public RepositoryClientSrv.Iface dominantClient(
             @Value("${dominant.url}") Resource resource,
-            @Value("${dominant.networkTimeout}") int networkTimeout) throws IOException {
+            @Value("${dominant.timeout}") int networkTimeout) throws IOException {
         return new THSpawnClientBuilder()
                 .withNetworkTimeout(networkTimeout)
                 .withAddress(resource.getURI())
