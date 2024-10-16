@@ -12,5 +12,6 @@ public class Cash {
 
     public Cash() {
         amount = new AtomicLong();
+        currency = new Currency();
     }
 }

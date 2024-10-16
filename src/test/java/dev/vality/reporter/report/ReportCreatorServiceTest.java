@@ -1,6 +1,11 @@
 package dev.vality.reporter.report;
 
+import dev.vality.damsel.domain.Currency;
+import dev.vality.damsel.domain.CurrencyObject;
+import dev.vality.damsel.domain.CurrencyRef;
+import dev.vality.damsel.domain.DomainObject;
 import dev.vality.damsel.domain_config.RepositoryClientSrv;
+import dev.vality.damsel.domain_config.VersionedObject;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
 import dev.vality.reporter.dao.AdjustmentDao;
@@ -20,6 +25,7 @@ import dev.vality.reporter.model.LocalReportCreatorDto;
 import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.service.LocalStatisticService;
 import dev.vality.reporter.service.impl.LocalReportCreatorServiceImpl;
+import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Cursor;
@@ -73,6 +79,7 @@ public class ReportCreatorServiceTest {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
         invoiceRecord.setProduct("rbk.money");
         Mockito.when(invoiceDao.getInvoice(any())).thenReturn(invoiceRecord);
+        mockDominant();
         partyId = random(String.class);
         shopId = random(String.class);
         int defaultOperationsCount = 100;
@@ -148,5 +155,21 @@ public class ReportCreatorServiceTest {
         } finally {
             Files.deleteIfExists(tempFile);
         }
+    }
+
+    @SneakyThrows
+    private void mockDominant() {
+        CurrencyObject currencyObject = new CurrencyObject();
+        currencyObject.setRef(new CurrencyRef("RUB"))
+                .setData(new Currency().setSymbolicCode("RUB")
+                        .setExponent((short) 2)
+                        .setName("Rubles")
+                        .setNumericCode((short) 643));
+        var domainObject = new DomainObject();
+        domainObject.setCurrency(currencyObject);
+        VersionedObject versionedObject = new VersionedObject();
+        versionedObject.setObject(domainObject);
+        Mockito.when(dominantClient.checkoutObject(any(), any())).thenReturn(versionedObject);
+
     }
 }

@@ -1,6 +1,8 @@
 package dev.vality.reporter.report;
 
 import dev.vality.damsel.domain.*;
+import dev.vality.damsel.domain_config.RepositoryClientSrv;
+import dev.vality.damsel.domain_config.VersionedObject;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
@@ -18,9 +20,11 @@ import dev.vality.reporter.domain.tables.records.AdjustmentRecord;
 import dev.vality.reporter.domain.tables.records.InvoiceRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
+import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.template.LocalPaymentRegistryTemplateImpl;
 import dev.vality.reporter.util.FormatUtil;
 import dev.vality.reporter.util.TimeUtil;
+import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -54,6 +58,9 @@ import static org.mockito.BDDMockito.given;
 public class PaymentRegistryTemplateTest {
 
     @Autowired
+    private DominantService dominantService;
+
+    @Autowired
     private PaymentDao paymentDao;
 
     @Autowired
@@ -70,6 +77,8 @@ public class PaymentRegistryTemplateTest {
 
     @MockBean
     private PartyManagementSrv.Iface partyManagementClient;
+    @MockBean
+    private RepositoryClientSrv.Iface dominantClient;
 
     private String partyId;
     private String shopId;
@@ -77,14 +86,14 @@ public class PaymentRegistryTemplateTest {
     private long expectedRefundSum;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws TException {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
         invoiceRecord.setProduct("vality.dev");
         invoiceRecord.setExternalId("invoice_external_id");
         Mockito.when(invoiceDao.getInvoice(any())).thenReturn(invoiceRecord);
+        mockDominant();
         partyId = random(String.class);
         shopId = random(String.class);
-
         int defaultOperationsCount = 3;
 
         List<PaymentRecord> paymentRecordList = new ArrayList<>();
@@ -213,5 +222,21 @@ public class PaymentRegistryTemplateTest {
                 .willReturn(party);
         given(partyManagementClient.getRevision(any()))
                 .willReturn(1L);
+    }
+
+    @SneakyThrows
+    private void mockDominant() {
+        CurrencyObject currencyObject = new CurrencyObject();
+        currencyObject.setRef(new CurrencyRef("RUB"))
+                .setData(new Currency().setSymbolicCode("RUB")
+                        .setExponent((short) 2)
+                        .setName("Rubles")
+                        .setNumericCode((short) 643));
+        var domainObject = new DomainObject();
+        domainObject.setCurrency(currencyObject);
+        VersionedObject versionedObject = new VersionedObject();
+        versionedObject.setObject(domainObject);
+        Mockito.when(dominantClient.checkoutObject(any(), any())).thenReturn(versionedObject);
+
     }
 }
