@@ -83,6 +83,10 @@ partyManagement:
 dominant:
   url: http://dominant:8022/v1/test
   timeout: 5000
+  cache:
+    currencies:
+      pool-size: 10
+      ttl-sec: 60
 
 report:
   defaultTimeZone: Europe/Moscow
