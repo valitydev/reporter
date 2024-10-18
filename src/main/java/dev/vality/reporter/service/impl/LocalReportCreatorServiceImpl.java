@@ -322,13 +322,13 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
 
         String currencyCode;
+        //adjustment may not have any currency code. We should use invoice currency code in this case.
         if (adjustment.getCurrencyCode() == null) {
             currencyCode = localStatisticService.getInvoice(adjustment.getInvoiceId()).getCurrencyCode();
         } else {
             currencyCode = adjustment.getCurrencyCode();
         }
         var currency = dominantService.getCurrency(currencyCode);
-        adjustment.getInvoiceId();
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
         totalAdjustmentAmnt.setCurrency(currency);
         totalAdjustmentAmnt.getAmount().addAndGet(adjustment.getAmount());
