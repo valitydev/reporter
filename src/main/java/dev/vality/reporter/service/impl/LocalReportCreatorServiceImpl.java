@@ -320,8 +320,17 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(1).setCellValue(adjustment.getInvoiceId() + "." + adjustment.getPaymentId());
         row.createCell(2).setCellValue(
                 TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
-        var currency = dominantService.getCurrency(adjustment.getCurrencyCode());
+
+        String currencyCode;
+        if (adjustment.getCurrencyCode() == null) {
+            currencyCode = localStatisticService.getInvoice(adjustment.getInvoiceId()).getCurrencyCode();
+        } else {
+            currencyCode = adjustment.getCurrencyCode();
+        }
+        var currency = dominantService.getCurrency(currencyCode);
+        adjustment.getInvoiceId();
         row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
+        totalAdjustmentAmnt.setCurrency(currency);
         totalAdjustmentAmnt.getAmount().addAndGet(adjustment.getAmount());
         row.createCell(4).setCellValue(adjustment.getCurrencyCode());
         row.createCell(5).setCellValue(adjustment.getReason());
