@@ -54,7 +54,6 @@ public final class MapperUtils {
         var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
         InvoicePaymentRefund hgInnerRefund = hgRefund.getRefund();
-        Map<FeeType, String> currencies = DamselUtil.getCurrency(hgRefund.getCashFlow());
 
         Refund refund = new Refund();
         refund.setExternalId(hgInnerRefund.getExternalId());
@@ -69,6 +68,7 @@ public final class MapperUtils {
             refund.setAmount(cash.getAmount());
             refund.setCurrencyCode(cash.getCurrency().getSymbolicCode());
         }
+        Map<FeeType, String> currencies = DamselUtil.getCurrency(hgRefund.getCashFlow());
         Map<FeeType, Long> fees = DamselUtil.getFees(hgRefund.getCashFlow());
         if (refund.getAmount() == null && isContainsAmount(fees)) {
             refund.setAmount(fees.get(FeeType.AMOUNT));

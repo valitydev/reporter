@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import java.io.IOException;
 import java.net.URL;

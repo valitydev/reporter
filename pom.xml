@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.vality</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>2.1.8</version>
+        <version>3.0.8</version>
     </parent>
 
     <artifactId>reporter</artifactId>
@@ -19,6 +19,7 @@
 
     <properties>
         <damsel.version>1.597-bfedcb9</damsel.version>
+        <java.version>21</java.version>
         <server.port>8022</server.port>
         <management.port>8023</management.port>
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
@@ -69,6 +70,11 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>db-common-lib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>11.3.3</version>
         </dependency>
 
         <!--spring-->
@@ -181,8 +187,8 @@
             <artifactId>aws-msk-iam-auth</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
