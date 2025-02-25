@@ -91,7 +91,7 @@ dominant:
 report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
-  includeAdjustments: false
+  includeAdjustments: true
 
 storage:
   endpoint: localhost:42827
