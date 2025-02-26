@@ -248,7 +248,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondRefunds.getCell(8).setCellValue("Id возврата");
         rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
         rowSecondRefunds.getCell(10).setCellValue("Валюта");
-        rowSecondRefunds.getCell(11).setCellValue("Id мерчанта");
+        rowSecondRefunds.getCell(11).setCellValue("Id платежа на стороне мерчанта");
         rowSecondRefunds.getCell(12).setCellValue("Статус возврата");
         rowSecondRefunds.getCell(13).setCellValue("Shop Id");
         rowSecondRefunds.getCell(14).setCellValue("Название магазина");
@@ -290,7 +290,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondAdjustments.getCell(7).setCellValue("Статус корректировки");
         rowSecondAdjustments.getCell(8).setCellValue("Shop Id");
         rowSecondAdjustments.getCell(9).setCellValue("Название магазина");
-        rowSecondAdjustments.getCell(10).setCellValue("Id мерчанта");
+        rowSecondAdjustments.getCell(10).setCellValue("Id платежа на стороне мерчанта");
         rowSecondAdjustments.getCell(11).setCellValue("Статус платежа");
     }
 
@@ -440,7 +440,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
         rowSecondPayments.getCell(8).setCellValue("Комиссия");
         rowSecondPayments.getCell(9).setCellValue("Валюта");
-        rowSecondPayments.getCell(10).setCellValue("Id мерчанта");
+        rowSecondPayments.getCell(10).setCellValue("Id платежа на стороне мерчанта");
         rowSecondPayments.getCell(11).setCellValue("Статус платежа");
         rowSecondPayments.getCell(12).setCellValue("Shop Id");
         rowSecondPayments.getCell(13).setCellValue("Название магазина");
