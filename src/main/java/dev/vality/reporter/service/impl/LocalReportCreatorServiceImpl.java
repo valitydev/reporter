@@ -283,7 +283,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondAdjustments.getCell(0).setCellValue("Id корректировки");
         rowSecondAdjustments.getCell(1).setCellValue("Id платежа");
         rowSecondAdjustments.getCell(2).setCellValue("Дата корректировки");
-        rowSecondAdjustments.getCell(3).setCellValue("Сумма платежа");
+        rowSecondAdjustments.getCell(3).setCellValue("Сумма до вычета комиссии");
         rowSecondAdjustments.getCell(4).setCellValue("Сумма");
         rowSecondAdjustments.getCell(5).setCellValue("Валюта");
         rowSecondAdjustments.getCell(6).setCellValue("Причина корректировки");
