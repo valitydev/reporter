@@ -47,10 +47,10 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
 
     private static final int PACKAGE_SIZE = 25;
     private static final int PAYMENTS_HEAD_ROW = 13;
-    private static final int ADJUSTMENT_HEAD_ROW = 9;
+    private static final int ADJUSTMENT_HEAD_ROW = 12;
     private static final int REFUNDS_HEAD_ROW = 14;
     private static final int PAYMENTS_COLUMNS_DESCRIPTION_ROW = 14;
-    private static final int ADJUSTMENT_COLUMNS_DESCRIPTION_ROW = 9;
+    private static final int ADJUSTMENT_COLUMNS_DESCRIPTION_ROW = 12;
     private static final int REFUNDS_COLUMNS_DESCRIPTION_ROW = 15;
 
     @Override
@@ -248,7 +248,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondRefunds.getCell(8).setCellValue("Id возврата");
         rowSecondRefunds.getCell(9).setCellValue("Причина возврата");
         rowSecondRefunds.getCell(10).setCellValue("Валюта");
-        rowSecondRefunds.getCell(11).setCellValue("Id мерчанта");
+        rowSecondRefunds.getCell(11).setCellValue("Id платежа на стороне мерчанта");
         rowSecondRefunds.getCell(12).setCellValue("Статус возврата");
         rowSecondRefunds.getCell(13).setCellValue("Shop Id");
         rowSecondRefunds.getCell(14).setCellValue("Название магазина");
@@ -273,22 +273,25 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
     private void createAdjustmentColumnsDescriptionRow(Workbook wb,
                                                        Sheet sh,
                                                        AtomicInteger rownum) {
-        Row rowSecondRefunds = sh.createRow(rownum.getAndIncrement());
+        Row rowSecondAdjustments = sh.createRow(rownum.getAndIncrement());
         for (int i = 0; i < ADJUSTMENT_COLUMNS_DESCRIPTION_ROW; ++i) {
-            Cell cell = rowSecondRefunds.createCell(i);
+            Cell cell = rowSecondAdjustments.createCell(i);
             CellUtil.setAlignment(cell, HorizontalAlignment.CENTER);
             cell.setCellStyle(createGreyCellStyle(wb));
             CellUtil.setFont(cell, createBoldFont(wb));
         }
-        rowSecondRefunds.getCell(0).setCellValue("Id корректировки");
-        rowSecondRefunds.getCell(1).setCellValue("Id платежа");
-        rowSecondRefunds.getCell(2).setCellValue("Дата корректировки");
-        rowSecondRefunds.getCell(3).setCellValue("Сумма");
-        rowSecondRefunds.getCell(4).setCellValue("Валюта");
-        rowSecondRefunds.getCell(5).setCellValue("Причина корректировки");
-        rowSecondRefunds.getCell(6).setCellValue("Статус корректировки");
-        rowSecondRefunds.getCell(7).setCellValue("Shop Id");
-        rowSecondRefunds.getCell(8).setCellValue("Название магазина");
+        rowSecondAdjustments.getCell(0).setCellValue("Id корректировки");
+        rowSecondAdjustments.getCell(1).setCellValue("Id платежа");
+        rowSecondAdjustments.getCell(2).setCellValue("Дата корректировки");
+        rowSecondAdjustments.getCell(3).setCellValue("Сумма до вычета комиссии");
+        rowSecondAdjustments.getCell(4).setCellValue("Сумма");
+        rowSecondAdjustments.getCell(5).setCellValue("Валюта");
+        rowSecondAdjustments.getCell(6).setCellValue("Причина корректировки");
+        rowSecondAdjustments.getCell(7).setCellValue("Статус корректировки");
+        rowSecondAdjustments.getCell(8).setCellValue("Shop Id");
+        rowSecondAdjustments.getCell(9).setCellValue("Название магазина");
+        rowSecondAdjustments.getCell(10).setCellValue("Id платежа на стороне мерчанта");
+        rowSecondAdjustments.getCell(11).setCellValue("Статус платежа");
     }
 
     private void createAdjustmentsHeadRow(LocalReportCreatorDto reportCreatorDto,
@@ -300,12 +303,12 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             rowFirstAdjustments.createCell(i);
         }
         sh.addMergedRegion(new CellRangeAddress(rownum.get() - 1, rownum.get() - 1, 0, 7));
-        Cell cellFirstRefunds = rowFirstAdjustments.getCell(0);
-        cellFirstRefunds.setCellValue(
+        Cell cellFirstAdjustment = rowFirstAdjustments.getCell(0);
+        cellFirstAdjustment.setCellValue(
                 String.format("Корректировки за период с %s по %s", reportCreatorDto.getFromTime(),
                         reportCreatorDto.getToTime()));
-        CellUtil.setAlignment(cellFirstRefunds, HorizontalAlignment.CENTER);
-        CellUtil.setFont(cellFirstRefunds, createBoldFont(wb));
+        CellUtil.setAlignment(cellFirstAdjustment, HorizontalAlignment.CENTER);
+        CellUtil.setFont(cellFirstAdjustment, createBoldFont(wb));
     }
 
     private void createAdjustmentRow(LocalReportCreatorDto reportCreatorDto,
@@ -320,7 +323,13 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(1).setCellValue(adjustment.getInvoiceId() + "." + adjustment.getPaymentId());
         row.createCell(2).setCellValue(
                 TimeUtil.toLocalizedDateTime(adjustment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
-
+        PaymentRecord payment = localStatisticService.getCapturedPayment(
+                reportCreatorDto.getReport().getPartyId(),
+                reportCreatorDto.getReport().getPartyShopId(),
+                adjustment.getInvoiceId(),
+                adjustment.getPaymentId()
+        );
+        row.createCell(3).setCellValue(payment.getOriginAmount());
         String currencyCode;
         //adjustment may not have any currency code. We should use invoice currency code in this case.
         if (adjustment.getCurrencyCode() == null) {
@@ -329,14 +338,16 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             currencyCode = adjustment.getCurrencyCode();
         }
         var currency = dominantService.getCurrency(currencyCode);
-        row.createCell(3).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
+        row.createCell(4).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
         totalAdjustmentAmnt.setCurrency(currency);
         totalAdjustmentAmnt.getAmount().addAndGet(adjustment.getAmount());
-        row.createCell(4).setCellValue(adjustment.getCurrencyCode());
-        row.createCell(5).setCellValue(adjustment.getReason());
-        row.createCell(6).setCellValue(adjustment.getStatus().getLiteral());
-        row.createCell(7).setCellValue(adjustment.getShopId());
-        row.createCell(8).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
+        row.createCell(5).setCellValue(adjustment.getCurrencyCode());
+        row.createCell(6).setCellValue(adjustment.getReason());
+        row.createCell(7).setCellValue(adjustment.getStatus().getLiteral());
+        row.createCell(8).setCellValue(adjustment.getShopId());
+        row.createCell(9).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
+        row.createCell(10).setCellValue(payment.getExternalId());
+        row.createCell(11).setCellValue(payment.getStatus().getLiteral());
     }
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,
@@ -429,7 +440,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         rowSecondPayments.getCell(7).setCellValue("Назначение платежа");
         rowSecondPayments.getCell(8).setCellValue("Комиссия");
         rowSecondPayments.getCell(9).setCellValue("Валюта");
-        rowSecondPayments.getCell(10).setCellValue("Id мерчанта");
+        rowSecondPayments.getCell(10).setCellValue("Id платежа на стороне мерчанта");
         rowSecondPayments.getCell(11).setCellValue("Статус платежа");
         rowSecondPayments.getCell(12).setCellValue("Shop Id");
         rowSecondPayments.getCell(13).setCellValue("Название магазина");

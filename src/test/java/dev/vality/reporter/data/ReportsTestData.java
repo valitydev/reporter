@@ -97,6 +97,7 @@ public class ReportsTestData {
         payment.setFee(feeAmount);
         payment.setCurrencyCode(DEFAULT_CURRENCY);
         payment.setExternalId("payment_external_id");
+        payment.setOriginAmount(123L);
         return payment;
     }
 

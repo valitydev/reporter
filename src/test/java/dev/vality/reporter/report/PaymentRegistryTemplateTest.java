@@ -190,6 +190,16 @@ public class PaymentRegistryTemplateTest {
 
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
             assertEquals(FormatUtil.formatCurrency(expectedRefundSum, (short) 2), refundsTotalSum.getStringCellValue());
+
+            Cell adjustmentsHeaderCell = sheet.getRow(16).getCell(0);
+            assertEquals(String.format("Корректировки за период с %s по %s", from, to),
+                    adjustmentsHeaderCell.getStringCellValue());
+
+            Row adjustmentsFirstRow = sheet.getRow(18);
+            assertEquals("id0", adjustmentsFirstRow.getCell(0).getStringCellValue());
+            assertEquals(123, adjustmentsFirstRow.getCell(3).getNumericCellValue());
+            assertEquals("payment_external_id", adjustmentsFirstRow.getCell(10).getStringCellValue());
+            assertEquals(captured.getLiteral(), adjustmentsFirstRow.getCell(11).getStringCellValue());
         } finally {
             Files.deleteIfExists(tempFile);
         }

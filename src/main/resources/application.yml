@@ -8,21 +8,21 @@ server:
 management:
   server:
     port: ${management.port}
-  metrics:
-    export:
-      prometheus:
-        enabled: false
   endpoint:
     health:
       show-details: always
     metrics:
-      enabled: true
+      access: read_only
     prometheus:
-      enabled: true
+      access: read_only
   endpoints:
     web:
       exposure:
         include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: false
 
 spring:
   application:
@@ -91,7 +91,7 @@ dominant:
 report:
   defaultTimeZone: Europe/Moscow
   batchSize: 1
-  includeAdjustments: false
+  includeAdjustments: true
 
 storage:
   endpoint: localhost:42827
@@ -111,7 +111,7 @@ testcontainers:
   postgresql:
     tag: '11.4'
   kafka:
-    tag: '6.2.0'
+    tag: '7.7.2'
   ceph:
     tag: 'v3.0.5-stable-3.0-luminous-centos-7'
     accessKey: 'test'

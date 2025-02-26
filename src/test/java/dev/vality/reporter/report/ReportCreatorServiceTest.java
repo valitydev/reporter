@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
 @PostgresqlSpringBootITest
-public class ReportCreatorServiceTest {
+class ReportCreatorServiceTest {
 
     @Autowired
     private PaymentDao paymentDao;
@@ -77,7 +77,7 @@ public class ReportCreatorServiceTest {
     @BeforeEach
     public void setUp() {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
-        invoiceRecord.setProduct("rbk.money");
+        invoiceRecord.setProduct("product.name");
         Mockito.when(invoiceDao.getInvoice(any())).thenReturn(invoiceRecord);
         mockDominant();
         partyId = random(String.class);
@@ -112,7 +112,7 @@ public class ReportCreatorServiceTest {
     }
 
     @Test
-    public void createBigSizeReportTest() throws IOException {
+    void createBigSizeReportTest() throws IOException {
         LocalDateTime fromTime = LocalDateTime.now().minusHours(128L);
         LocalDateTime toTime = LocalDateTime.now();
         Cursor<PaymentRecord> paymentCursor =
@@ -126,6 +126,7 @@ public class ReportCreatorServiceTest {
         report.setTimezone("UTC");
         report.setPartyId(partyId);
         report.setPartyShopId(shopId);
+        report.setId(123L);
 
         Map<String, String> shopUrls = new HashMap<>();
         Map<String, String> shopNames = new HashMap<>();
