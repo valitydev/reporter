@@ -12,9 +12,9 @@ management:
     health:
       show-details: always
     metrics:
-      access: read_only
+      enabled: true
     prometheus:
-      access: read_only
+      enabled: true
   endpoints:
     web:
       exposure:
