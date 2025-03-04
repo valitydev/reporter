@@ -2,6 +2,7 @@ package dev.vality.reporter.service.impl;
 
 import dev.vality.reporter.domain.enums.PaymentPayerType;
 import dev.vality.reporter.domain.tables.records.AdjustmentRecord;
+import dev.vality.reporter.domain.tables.records.InvoiceRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
 import dev.vality.reporter.model.Cash;
@@ -10,6 +11,7 @@ import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.service.LocalStatisticService;
 import dev.vality.reporter.service.ReportCreatorService;
 import dev.vality.reporter.util.FormatUtil;
+import dev.vality.reporter.util.MapperUtils;
 import dev.vality.reporter.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -329,7 +331,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 adjustment.getInvoiceId(),
                 adjustment.getPaymentId()
         );
-        row.createCell(3).setCellValue(payment.getOriginAmount());
+        row.createCell(3).setCellValue(payment.getOriginAmount()); // TODO переделать
         String currencyCode;
         //adjustment may not have any currency code. We should use invoice currency code in this case.
         if (adjustment.getCurrencyCode() == null) {
@@ -347,7 +349,9 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(8).setCellValue(adjustment.getShopId());
         row.createCell(9).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
         row.createCell(10).setCellValue(payment.getExternalId());
-        row.createCell(11).setCellValue(payment.getStatus().getLiteral());
+        InvoiceRecord invoiceRecord = localStatisticService.getInvoice(adjustment.getInvoiceId());
+        var paymentStatus = MapperUtils.invoiceStatusToPaymentStatus(invoiceRecord.getStatus());
+        row.createCell(11).setCellValue(paymentStatus.getLiteral());
     }
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,
