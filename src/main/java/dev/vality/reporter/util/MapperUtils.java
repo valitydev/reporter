@@ -1,8 +1,8 @@
 package dev.vality.reporter.util;
 
 import dev.vality.damsel.base.Content;
-import dev.vality.damsel.domain.*;
 import dev.vality.damsel.domain.PaymentTool;
+import dev.vality.damsel.domain.*;
 import dev.vality.damsel.payment_processing.InvoicePayment;
 import dev.vality.damsel.payment_processing.InvoicePaymentSession;
 import dev.vality.damsel.payment_processing.InvoicePaymentStatusChanged;
@@ -10,25 +10,12 @@ import dev.vality.geck.common.util.TBaseUtil;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.geck.serializer.kit.tbase.TErrorUtil;
 import dev.vality.machinegun.eventsink.MachineEvent;
-import dev.vality.reporter.domain.enums.RefundStatus;
-import dev.vality.reporter.domain.enums.ChargebackCategory;
-import dev.vality.reporter.domain.enums.ChargebackStatus;
-import dev.vality.reporter.domain.enums.ChargebackStage;
-import dev.vality.reporter.domain.enums.PaymentFlow;
-import dev.vality.reporter.domain.enums.FailureClass;
-import dev.vality.reporter.domain.enums.AdjustmentStatus;
-import dev.vality.reporter.domain.enums.PaymentPayerType;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
 import dev.vality.reporter.domain.enums.InvoiceStatus;
 import dev.vality.reporter.domain.enums.OnHoldExpiration;
+import dev.vality.reporter.domain.enums.*;
 import dev.vality.reporter.domain.tables.pojos.Invoice;
-import dev.vality.reporter.domain.tables.pojos.Refund;
-import dev.vality.reporter.domain.tables.pojos.RefundAdditionalInfo;
-import dev.vality.reporter.domain.tables.pojos.Chargeback;
-import dev.vality.reporter.domain.tables.pojos.Adjustment;
-import dev.vality.reporter.domain.tables.pojos.PaymentAdditionalInfo;
-import dev.vality.reporter.domain.tables.pojos.Payment;
-import dev.vality.reporter.domain.tables.pojos.InvoiceAdditionalInfo;
+import dev.vality.reporter.domain.tables.pojos.*;
 import dev.vality.reporter.model.FeeType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -471,6 +458,15 @@ public final class MapperUtils {
                 log.warn("Received exception while removing null characters from strings", ex);
             }
         }
+    }
+
+    public static InvoicePaymentStatus invoiceStatusToPaymentStatus(InvoiceStatus invoiceStatus) {
+        return switch (invoiceStatus) {
+            case paid -> InvoicePaymentStatus.captured;
+            case unpaid -> InvoicePaymentStatus.failed;
+            case cancelled -> InvoicePaymentStatus.cancelled;
+            default -> throw new IllegalStateException("Unexpected value: " + invoiceStatus);
+        };
     }
 
 }
