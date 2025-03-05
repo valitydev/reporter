@@ -124,7 +124,7 @@ class PaymentRegistryTemplateTest {
             adjustmentDao.saveAdjustment(adjustmentRecord.into(Adjustment.class));
         }
         expectedSum = paymentRecordList.stream()
-                .mapToLong(r -> r.getAmount())
+                .mapToLong(r -> r.getOriginAmount())
                 .sum();
         expectedRefundSum = refundRecordList.stream()
                 .mapToLong(r -> r.getAmount())

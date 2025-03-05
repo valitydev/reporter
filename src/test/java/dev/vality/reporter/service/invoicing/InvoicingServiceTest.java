@@ -25,8 +25,8 @@ import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 @PostgresqlTestcontainer
 @DefaultSpringBootTest
 @Import(MockedUnimportantServicesConfig.class)
-public class InvoicingServiceTest {
+class InvoicingServiceTest {
 
     private static final String INVOICE_ID = "inv-1";
     private static final String INVOICE_ID_2 = "inv-2";
@@ -60,9 +60,9 @@ public class InvoicingServiceTest {
     private AdjustmentDao adjustmentDao;
     @Autowired
     private InvoiceStatusChangeHandler invoiceStatusChangeHandler;
-    @MockBean
+    @MockitoBean
     private Parser<MachineEvent, EventPayload> paymentMachineEventParser;
-    @MockBean
+    @MockitoBean
     private HellgateInvoicingService hgInvoicingService;
     private final MachineEvent machineEventOne = createMachineEvent(INVOICE_ID);
     private final MachineEvent machineEventTwo = createMachineEvent(INVOICE_ID_2);
@@ -76,7 +76,7 @@ public class InvoicingServiceTest {
     }
 
     @Test
-    public void addNewInvoiceTest() throws Exception {
+    void addNewInvoiceTest() throws Exception {
         List<InvoicingData.InvoiceChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
         firstStatusInfoList.add(new InvoicingData.InvoiceChangeStatusInfo(
                 1, InvoiceStatus.paid));
@@ -109,7 +109,7 @@ public class InvoicingServiceTest {
     }
 
     @Test
-    public void addNewPaymentTest() throws Exception {
+    void addNewPaymentTest() throws Exception {
         List<InvoicingData.PaymentChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
         InvoicePaymentStatus captureStatus = new InvoicePaymentStatus();
         captureStatus.setCaptured(new InvoicePaymentCaptured());
@@ -145,11 +145,11 @@ public class InvoicingServiceTest {
         assertEquals("Payment status is not equal to expected",
                 dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured, payment.getStatus());
         assertEquals("Payment currency is not equal to expected", "RUR", payment.getCurrencyCode());
-        assertEquals("Payment amount is not equal to expected", Long.valueOf(1000L), payment.getAmount());
+        assertEquals("Payment amount is not equal to expected", Long.valueOf(1000L), payment.getOriginAmount());
     }
 
     @Test
-    public void addNewRefundTest() throws Exception {
+    void addNewRefundTest() throws Exception {
         List<InvoicingData.RefundChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
         var captureStatus = new dev.vality.damsel.domain.InvoicePaymentRefundStatus();
         captureStatus.setSucceeded(new InvoicePaymentRefundSucceeded());
@@ -188,7 +188,7 @@ public class InvoicingServiceTest {
     }
 
     @Test
-    public void addNewAdjustmentTest() throws Exception {
+    void addNewAdjustmentTest() throws Exception {
         List<InvoicingData.AdjustmentChangeStatusInfo> statusInfoList = new ArrayList<>();
         var captureStatus = new dev.vality.damsel.domain.InvoicePaymentAdjustmentStatus();
         captureStatus.setCaptured(new InvoicePaymentAdjustmentCaptured());
