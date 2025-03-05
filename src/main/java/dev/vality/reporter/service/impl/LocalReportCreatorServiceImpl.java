@@ -349,9 +349,17 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(8).setCellValue(adjustment.getShopId());
         row.createCell(9).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
         row.createCell(10).setCellValue(payment.getExternalId());
-        InvoiceRecord invoiceRecord = localStatisticService.getInvoice(adjustment.getInvoiceId());
-        var paymentStatus = MapperUtils.invoiceStatusToPaymentStatus(invoiceRecord.getStatus());
-        row.createCell(11).setCellValue(paymentStatus.getLiteral());
+        var paymentStatus = getPaymentStatus(adjustment.getInvoiceId(), payment);
+        row.createCell(11).setCellValue(paymentStatus);
+    }
+
+    private String getPaymentStatus(String invoiceId, PaymentRecord payment) {
+        InvoiceRecord invoiceRecord = localStatisticService.getInvoice(invoiceId);
+        if (Objects.nonNull(invoiceRecord)) {
+            return MapperUtils.invoiceStatusToPaymentStatus(invoiceRecord.getStatus()).getLiteral();
+        } else {
+            return payment.getStatus().getLiteral();
+        }
     }
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,
