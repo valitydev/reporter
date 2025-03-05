@@ -11,6 +11,7 @@ import dev.vality.reporter.dao.InvoiceDao;
 import dev.vality.reporter.dao.PaymentDao;
 import dev.vality.reporter.dao.RefundDao;
 import dev.vality.reporter.data.ReportsTestData;
+import dev.vality.reporter.domain.enums.InvoiceStatus;
 import dev.vality.reporter.domain.enums.RefundStatus;
 import dev.vality.reporter.domain.tables.pojos.Adjustment;
 import dev.vality.reporter.domain.tables.pojos.Payment;
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +56,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @PostgresqlSpringBootITest
-public class PaymentRegistryTemplateTest {
+class PaymentRegistryTemplateTest {
 
     @Autowired
     private DominantService dominantService;
@@ -72,12 +73,12 @@ public class PaymentRegistryTemplateTest {
     @Autowired
     private LocalPaymentRegistryTemplateImpl paymentRegistryTemplate;
 
-    @MockBean
+    @MockitoBean
     private InvoiceDao invoiceDao;
 
-    @MockBean
+    @MockitoBean
     private PartyManagementSrv.Iface partyManagementClient;
-    @MockBean
+    @MockitoBean
     private RepositoryClientSrv.Iface dominantClient;
 
     private String partyId;
@@ -90,6 +91,7 @@ public class PaymentRegistryTemplateTest {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
         invoiceRecord.setProduct("vality.dev");
         invoiceRecord.setExternalId("invoice_external_id");
+        invoiceRecord.setStatus(InvoiceStatus.paid);
         Mockito.when(invoiceDao.getInvoice(any())).thenReturn(invoiceRecord);
         mockDominant();
         partyId = random(String.class);
@@ -130,7 +132,7 @@ public class PaymentRegistryTemplateTest {
     }
 
     @Test
-    public void testProcessPaymentRegistryTemplate() throws IOException, TException {
+    void testProcessPaymentRegistryTemplate() throws IOException, TException {
         Path tempFile = null;
         try {
             tempFile = Files.createTempFile("registry_of_act_", "_test_report.xlsx");
