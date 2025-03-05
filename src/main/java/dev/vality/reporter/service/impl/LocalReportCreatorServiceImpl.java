@@ -331,7 +331,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 adjustment.getInvoiceId(),
                 adjustment.getPaymentId()
         );
-        row.createCell(3).setCellValue(payment.getOriginAmount()); // TODO переделать
+        row.createCell(3).setCellValue(payment.getAmount());
         String currencyCode;
         //adjustment may not have any currency code. We should use invoice currency code in this case.
         if (adjustment.getCurrencyCode() == null) {
@@ -411,12 +411,12 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 TimeUtil.toLocalizedDateTime(payment.getStatusCreatedAt().toInstant(ZoneOffset.UTC), reportZoneId));
         row.createCell(2).setCellValue(payment.getTool().getName());
         var currency = dominantService.getCurrency(payment.getCurrencyCode());
-        row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount(), currency.getExponent()));
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getOriginAmount(), currency.getExponent()));
         long fee = Objects.nonNull(payment.getFee()) ? payment.getFee() : 0L;
         row.createCell(4).setCellValue(
-                FormatUtil.formatCurrency(payment.getAmount() - fee, currency.getExponent()));
+                FormatUtil.formatCurrency(payment.getOriginAmount() - fee, currency.getExponent()));
         totalAmnt.setCurrency(currency);
-        totalAmnt.getAmount().addAndGet(payment.getAmount());
+        totalAmnt.getAmount().addAndGet(payment.getOriginAmount());
         row.createCell(5).setCellValue(payment.getEmail());
         row.createCell(6).setCellValue(reportCreatorDto.getShopUrls().get(payment.getShopId()));
 
