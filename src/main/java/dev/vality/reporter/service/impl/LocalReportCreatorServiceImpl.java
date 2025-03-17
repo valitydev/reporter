@@ -5,6 +5,7 @@ import dev.vality.reporter.domain.tables.records.AdjustmentRecord;
 import dev.vality.reporter.domain.tables.records.InvoiceRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
+import dev.vality.reporter.model.AdjustmentType;
 import dev.vality.reporter.model.Cash;
 import dev.vality.reporter.model.LocalReportCreatorDto;
 import dev.vality.reporter.service.DominantService;
@@ -331,7 +332,6 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
                 adjustment.getInvoiceId(),
                 adjustment.getPaymentId()
         );
-        row.createCell(3).setCellValue(payment.getAmount());
         String currencyCode;
         //adjustment may not have any currency code. We should use invoice currency code in this case.
         if (adjustment.getCurrencyCode() == null) {
@@ -340,6 +340,7 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
             currencyCode = adjustment.getCurrencyCode();
         }
         var currency = dominantService.getCurrency(currencyCode);
+        row.createCell(3).setCellValue(FormatUtil.formatCurrency(payment.getAmount(), currency.getExponent()));
         row.createCell(4).setCellValue(FormatUtil.formatCurrency(adjustment.getAmount(), currency.getExponent()));
         totalAdjustmentAmnt.setCurrency(currency);
         totalAdjustmentAmnt.getAmount().addAndGet(adjustment.getAmount());
@@ -349,17 +350,18 @@ public class LocalReportCreatorServiceImpl implements ReportCreatorService<Local
         row.createCell(8).setCellValue(adjustment.getShopId());
         row.createCell(9).setCellValue(reportCreatorDto.getShopNames().get(adjustment.getShopId()));
         row.createCell(10).setCellValue(payment.getExternalId());
-        var paymentStatus = getPaymentStatus(adjustment.getInvoiceId(), payment);
+        var paymentStatus = getPaymentStatus(adjustment.getInvoiceId(), payment, adjustment);
         row.createCell(11).setCellValue(paymentStatus);
     }
 
-    private String getPaymentStatus(String invoiceId, PaymentRecord payment) {
-        InvoiceRecord invoiceRecord = localStatisticService.getInvoice(invoiceId);
-        if (Objects.nonNull(invoiceRecord)) {
-            return MapperUtils.invoiceStatusToPaymentStatus(invoiceRecord.getStatus()).getLiteral();
-        } else {
-            return payment.getStatus().getLiteral();
+    private String getPaymentStatus(String invoiceId, PaymentRecord payment, AdjustmentRecord adjustment) {
+        if (adjustment.getReason().contains(AdjustmentType.CHANGE_STATUS.getValue())) {
+            InvoiceRecord invoiceRecord = localStatisticService.getInvoice(invoiceId);
+            if (Objects.nonNull(invoiceRecord)) {
+                return MapperUtils.invoiceStatusToPaymentStatus(invoiceRecord.getStatus()).getLiteral();
+            }
         }
+        return payment.getStatus().getLiteral();
     }
 
     private void createTotalAdjustmentAmountRow(SXSSFWorkbook wb,

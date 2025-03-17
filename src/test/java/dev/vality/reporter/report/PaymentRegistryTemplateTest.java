@@ -199,7 +199,7 @@ class PaymentRegistryTemplateTest {
 
             Row adjustmentsFirstRow = sheet.getRow(18);
             assertEquals("id0", adjustmentsFirstRow.getCell(0).getStringCellValue());
-            assertEquals(123, adjustmentsFirstRow.getCell(3).getNumericCellValue());
+            assertEquals("1.23", adjustmentsFirstRow.getCell(3).getStringCellValue());
             assertEquals("payment_external_id", adjustmentsFirstRow.getCell(10).getStringCellValue());
             assertEquals(captured.getLiteral(), adjustmentsFirstRow.getCell(11).getStringCellValue());
         } finally {
