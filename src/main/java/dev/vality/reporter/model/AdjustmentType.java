@@ -10,8 +10,5 @@ public enum AdjustmentType {
     CHANGE_AMOUNT("amount"),
     CHANGE_STATUS("status");
 
-
     private final String value;
-
-
 }
