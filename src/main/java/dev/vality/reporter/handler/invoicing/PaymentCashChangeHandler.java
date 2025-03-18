@@ -1,5 +1,6 @@
 package dev.vality.reporter.handler.invoicing;
 
+import dev.vality.damsel.domain.InvoicePaymentStatus;
 import dev.vality.damsel.payment_processing.InvoiceChange;
 import dev.vality.machinegun.eventsink.MachineEvent;
 import dev.vality.reporter.dao.PaymentDao;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
 public class PaymentCashChangeHandler implements InvoicingEventHandler {
 
     private final HellgateInvoicingService hgInvoicingService;
-
     private final PaymentDao paymentDao;
 
     @Override
@@ -38,6 +38,11 @@ public class PaymentCashChangeHandler implements InvoicingEventHandler {
         var payment = InvoicingServiceUtils.getInvoicePaymentById(
                 hgInvoice, paymentId, invoiceId, sequenceId, changeId
         );
+        InvoicePaymentStatus hgPaymentStatus = payment.getPayment().getStatus();
+        if (!hgPaymentStatus.isSetCaptured() && !hgPaymentStatus.isSetCancelled()
+                && !hgPaymentStatus.isSetFailed()) {
+            return;
+        }
         Payment paymentRecord = MapperUtils.createPaymentRecord(event, hgInvoice, payment);
         paymentRecord.setAmount(newCash.getAmount());
         Long extPaymentId = paymentDao.savePayment(paymentRecord);
