@@ -6,7 +6,6 @@ import dev.vality.machinegun.eventsink.MachineEvent;
 import dev.vality.reporter.dao.PaymentDao;
 import dev.vality.reporter.domain.tables.pojos.Payment;
 import dev.vality.reporter.model.KafkaEvent;
-import dev.vality.reporter.service.FaultyEventsService;
 import dev.vality.reporter.service.HellgateInvoicingService;
 import dev.vality.reporter.util.BusinessErrorUtils;
 import dev.vality.reporter.util.InvoicingServiceUtils;
@@ -22,7 +21,6 @@ public class PaymentCashChangeHandler implements InvoicingEventHandler {
 
     private final HellgateInvoicingService hgInvoicingService;
     private final PaymentDao paymentDao;
-    private final FaultyEventsService faultyEventsService;
 
     @Override
     public void handle(KafkaEvent kafkaEvent, InvoiceChange invoiceChange, int changeId) throws Exception {
