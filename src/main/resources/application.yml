@@ -106,13 +106,3 @@ storage:
 
 retry-policy:
   maxAttempts: 5
-
-testcontainers:
-  postgresql:
-    tag: '11.4'
-  kafka:
-    tag: '7.7.2'
-  ceph:
-    tag: 'v3.0.5-stable-3.0-luminous-centos-7'
-    accessKey: 'test'
-    secretKey: 'test'

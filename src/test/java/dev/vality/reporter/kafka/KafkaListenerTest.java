@@ -5,6 +5,7 @@ import dev.vality.machinegun.eventsink.SinkEvent;
 import dev.vality.reporter.config.MockitoSharedServices;
 import dev.vality.reporter.model.KafkaEvent;
 import dev.vality.reporter.service.impl.InvoicingService;
+import dev.vality.testcontainers.annotations.KafkaConfig;
 import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainer;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
@@ -24,13 +26,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-@PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
+@SpringBootTest
+@KafkaConfig
 @KafkaTestcontainer(
         properties = {
                 "kafka.topics.invoicing.enabled=true",
                 "kafka.consumer.max-poll-records=5"},
         topicsKeys = "kafka.topics.invoicing.id")
 @MockitoSharedServices
+@PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
 public class KafkaListenerTest {
 
     @Value("${kafka.topics.invoicing.id}")
