@@ -9,7 +9,7 @@ import dev.vality.damsel.domain.InvoicePaymentRefundSucceeded;
 import dev.vality.damsel.domain.InvoicePaymentStatus;
 import dev.vality.damsel.payment_processing.EventPayload;
 import dev.vality.machinegun.eventsink.MachineEvent;
-import dev.vality.reporter.config.MockitoSharedServices;
+import dev.vality.reporter.config.PostgresqlSpringBootITest;
 import dev.vality.reporter.dao.AdjustmentDao;
 import dev.vality.reporter.dao.InvoiceDao;
 import dev.vality.reporter.dao.PaymentDao;
@@ -26,8 +26,6 @@ import dev.vality.reporter.handler.invoicing.InvoiceStatusChangeHandler;
 import dev.vality.reporter.service.HellgateInvoicingService;
 import dev.vality.reporter.service.impl.InvoicingService;
 import dev.vality.sink.common.parser.Parser;
-import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
-import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +47,7 @@ import static dev.vality.reporter.data.InvoicingData.createTestRefundEventPayloa
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-@PostgresqlTestcontainer
-@DefaultSpringBootTest
-@MockitoSharedServices
+@PostgresqlSpringBootITest
 class InvoicingServiceTest {
 
     private static final String INVOICE_ID = "inv-1";

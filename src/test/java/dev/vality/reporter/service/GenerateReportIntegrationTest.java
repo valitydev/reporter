@@ -7,13 +7,13 @@ import dev.vality.reporter.domain.enums.ReportStatus;
 import dev.vality.reporter.domain.enums.ReportType;
 import dev.vality.reporter.domain.tables.pojos.FileMeta;
 import dev.vality.reporter.domain.tables.pojos.Report;
-import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
-import dev.vality.testcontainers.annotations.ceph.CephTestcontainerSingleton;
+import dev.vality.testcontainers.annotations.minio.MinioTestcontainerSingleton;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.ByteArrayOutputStream;
@@ -32,9 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+@SpringBootTest
 @PostgresqlTestcontainer
-@CephTestcontainerSingleton
-@DefaultSpringBootTest
+@MinioTestcontainerSingleton
 public class GenerateReportIntegrationTest {
 
     @Autowired

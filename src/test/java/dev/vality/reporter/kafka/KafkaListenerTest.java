@@ -5,7 +5,6 @@ import dev.vality.machinegun.eventsink.SinkEvent;
 import dev.vality.reporter.config.MockitoSharedServices;
 import dev.vality.reporter.model.KafkaEvent;
 import dev.vality.reporter.service.impl.InvoicingService;
-import dev.vality.testcontainers.annotations.KafkaSpringBootTest;
 import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainer;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
@@ -25,13 +24,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-@PostgresqlTestcontainerSingleton
+@PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
 @KafkaTestcontainer(
         properties = {
                 "kafka.topics.invoicing.enabled=true",
                 "kafka.consumer.max-poll-records=5"},
         topicsKeys = "kafka.topics.invoicing.id")
-@KafkaSpringBootTest
 @MockitoSharedServices
 public class KafkaListenerTest {
 
