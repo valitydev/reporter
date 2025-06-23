@@ -14,7 +14,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ public class GenerateReportIntegrationTest {
     @Autowired
     private ReportDao reportDao;
 
-    @MockBean
+    @MockitoBean
     private PartyManagementSrv.Iface partyManagementClient;
 
     @Test

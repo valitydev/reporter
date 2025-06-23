@@ -2,7 +2,7 @@ package dev.vality.reporter.kafka;
 
 import dev.vality.machinegun.eventsink.MachineEvent;
 import dev.vality.machinegun.eventsink.SinkEvent;
-import dev.vality.reporter.config.testconfiguration.MockedUnimportantServicesConfig;
+import dev.vality.reporter.config.MockitoSharedServices;
 import dev.vality.reporter.model.KafkaEvent;
 import dev.vality.reporter.service.impl.InvoicingService;
 import dev.vality.testcontainers.annotations.KafkaSpringBootTest;
@@ -15,8 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,13 +32,13 @@ import static org.mockito.Mockito.verify;
                 "kafka.consumer.max-poll-records=5"},
         topicsKeys = "kafka.topics.invoicing.id")
 @KafkaSpringBootTest
-@Import(MockedUnimportantServicesConfig.class)
+@MockitoSharedServices
 public class KafkaListenerTest {
 
     @Value("${kafka.topics.invoicing.id}")
     public String invoicingTopic;
 
-    @MockBean
+    @MockitoBean
     private InvoicingService invoicingService;
 
     @Autowired

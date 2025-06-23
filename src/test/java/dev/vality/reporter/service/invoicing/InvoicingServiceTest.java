@@ -1,9 +1,15 @@
 package dev.vality.reporter.service.invoicing;
 
-import dev.vality.damsel.domain.*;
+import dev.vality.damsel.domain.InvoicePaymentAdjustmentCaptured;
+import dev.vality.damsel.domain.InvoicePaymentAdjustmentPending;
+import dev.vality.damsel.domain.InvoicePaymentCaptured;
+import dev.vality.damsel.domain.InvoicePaymentPending;
+import dev.vality.damsel.domain.InvoicePaymentRefundPending;
+import dev.vality.damsel.domain.InvoicePaymentRefundSucceeded;
+import dev.vality.damsel.domain.InvoicePaymentStatus;
 import dev.vality.damsel.payment_processing.EventPayload;
 import dev.vality.machinegun.eventsink.MachineEvent;
-import dev.vality.reporter.config.testconfiguration.MockedUnimportantServicesConfig;
+import dev.vality.reporter.config.MockitoSharedServices;
 import dev.vality.reporter.dao.AdjustmentDao;
 import dev.vality.reporter.dao.InvoiceDao;
 import dev.vality.reporter.dao.PaymentDao;
@@ -25,7 +31,6 @@ import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
@@ -34,13 +39,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.vality.reporter.data.InvoicingData.*;
+import static dev.vality.reporter.data.InvoicingData.createHgInvoice;
+import static dev.vality.reporter.data.InvoicingData.createKafkaEvent;
+import static dev.vality.reporter.data.InvoicingData.createMachineEvent;
+import static dev.vality.reporter.data.InvoicingData.createTestAdjustmentEventPayload;
+import static dev.vality.reporter.data.InvoicingData.createTestInvoiceEventPayload;
+import static dev.vality.reporter.data.InvoicingData.createTestPaymentEventPayload;
+import static dev.vality.reporter.data.InvoicingData.createTestRefundEventPayload;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @PostgresqlTestcontainer
 @DefaultSpringBootTest
-@Import(MockedUnimportantServicesConfig.class)
+@MockitoSharedServices
 class InvoicingServiceTest {
 
     private static final String INVOICE_ID = "inv-1";

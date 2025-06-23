@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -63,12 +63,12 @@ class ReportCreatorServiceTest {
     @Autowired
     private DominantService dominantService;
 
-    @MockBean
+    @MockitoBean
     private InvoiceDao invoiceDao;
 
-    @MockBean
+    @MockitoBean
     private PartyManagementSrv.Iface partyManagementClient;
-    @MockBean
+    @MockitoBean
     private RepositoryClientSrv.Iface dominantClient;
 
     private String partyId;
