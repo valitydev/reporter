@@ -1,13 +1,13 @@
 package dev.vality.reporter.service;
 
 import dev.vality.reporter.domain.tables.pojos.FileMeta;
-import dev.vality.testcontainers.annotations.DefaultSpringBootTest;
-import dev.vality.testcontainers.annotations.ceph.CephTestcontainerSingleton;
+import dev.vality.testcontainers.annotations.minio.MinioTestcontainerSingleton;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,15 +21,15 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@PostgresqlTestcontainerSingleton
-@CephTestcontainerSingleton
-@DefaultSpringBootTest
+@SpringBootTest
+@MinioTestcontainerSingleton
+@PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
 public class StorageServiceTest {
 
     @Autowired
     private StorageService storageService;
 
-    @MockBean
+    @MockitoBean
     private ScheduleReports scheduleReports;
 
     @Test

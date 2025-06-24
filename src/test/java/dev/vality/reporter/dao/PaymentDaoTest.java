@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.testcontainers.annotations.util.RandomBeans.randomListOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @PostgresqlSpringBootITest
@@ -30,17 +31,15 @@ public class PaymentDaoTest {
         String shopId = random(String.class);
 
         int paymentsCount = 100;
-        List<Payment> sourcePayments = new ArrayList<>();
-        for (int i = 0; i < paymentsCount; i++) {
-            Payment payment = random(Payment.class);
+        List<Payment> sourcePayments = randomListOf(paymentsCount, Payment.class);
+        sourcePayments.forEach(payment -> {
             payment.setShopId(shopId);
             payment.setPartyId(partyId);
             payment.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
             payment.setStatusCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
             payment.setStatus(InvoicePaymentStatus.captured);
-            sourcePayments.add(payment);
             paymentDao.savePayment(payment);
-        }
+        });
         Payment firstPayment = sourcePayments.get(0);
         PaymentRecord payment =
                 paymentDao.getPayment(partyId, shopId, firstPayment.getInvoiceId(), firstPayment.getPaymentId());

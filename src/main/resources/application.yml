@@ -26,18 +26,18 @@ management:
 
 spring:
   application:
-    name: '@project.name@'
+    name: ${project.name}
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: '@db.url@'
-    username: '@db.user@'
-    password: '@db.password@'
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
     hikari:
       idle-timeout: 30000
       maximum-pool-size: 10
   flyway:
-    schemas: '@db.schema@'
+    schemas: ${db.schema}
     table: schema_version
   output:
     ansi:
@@ -106,13 +106,3 @@ storage:
 
 retry-policy:
   maxAttempts: 5
-
-testcontainers:
-  postgresql:
-    tag: '11.4'
-  kafka:
-    tag: '7.7.2'
-  ceph:
-    tag: 'v3.0.5-stable-3.0-luminous-centos-7'
-    accessKey: 'test'
-    secretKey: 'test'

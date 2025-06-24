@@ -16,7 +16,7 @@ import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -39,10 +39,10 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = ReportsNewProtoHandler.class)
 public class ReportHandlersTest {
 
-    @MockBean
+    @MockitoBean
     private PartyService partyService;
 
-    @MockBean
+    @MockitoBean
     private ReportNewProtoService reportNewProtoService;
 
     @Autowired

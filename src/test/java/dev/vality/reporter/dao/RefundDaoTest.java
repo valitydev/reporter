@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.testcontainers.annotations.util.RandomBeans.randomListOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @PostgresqlSpringBootITest
@@ -29,17 +30,15 @@ public class RefundDaoTest {
         String shopId = random(String.class);
 
         int refundsCount = 100;
-        List<Refund> sourceRefunds = new ArrayList<>();
-        for (int i = 0; i < refundsCount; i++) {
-            Refund refund = random(Refund.class);
+        List<Refund> sourceRefunds = randomListOf(refundsCount, Refund.class);
+        sourceRefunds.forEach(refund -> {
             refund.setShopId(shopId);
             refund.setPartyId(partyId);
             refund.setCreatedAt(LocalDateTime.now());
             refund.setStatusCreatedAt(LocalDateTime.now());
             refund.setStatus(RefundStatus.succeeded);
-            sourceRefunds.add(refund);
             refundDao.saveRefund(refund);
-        }
+        });
 
         Cursor<RefundRecord> refundsCursor = refundDao.getRefundsCursor(
                 partyId,
