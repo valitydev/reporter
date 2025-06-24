@@ -6,7 +6,7 @@ import dev.vality.reporter.config.MockitoSharedServices;
 import dev.vality.reporter.model.KafkaEvent;
 import dev.vality.reporter.service.impl.InvoicingService;
 import dev.vality.testcontainers.annotations.KafkaConfig;
-import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainer;
+import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainerSingleton;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.thrift.TBase;
@@ -28,11 +28,13 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @KafkaConfig
-@KafkaTestcontainer(
+@KafkaTestcontainerSingleton(
         properties = {
                 "kafka.topics.invoicing.enabled=true",
-                "kafka.consumer.max-poll-records=5"},
-        topicsKeys = "kafka.topics.invoicing.id")
+                "kafka.consumer.max-poll-records=5"
+        },
+        topicsKeys = "kafka.topics.invoicing.id"
+)
 @MockitoSharedServices
 @PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
 public class KafkaListenerTest {
