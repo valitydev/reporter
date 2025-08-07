@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class InvoicingData {
+public final class InvoicingTestData {
 
     private static final String PARTY_ID = "patry-id-1";
     private static final String SHOP_ID = "shop-id-1";
@@ -237,7 +237,6 @@ public final class InvoicingData {
         hgInvoice.setShopId(SHOP_ID);
         hgInvoice.setDue(TypeUtil.temporalToString(LocalDateTime.now()));
         hgInvoice.setExternalId(EXTERNAL_ID);
-        hgInvoice.setPartyRevision(1);
         hgInvoice.setStatus(InvoiceStatus.paid(new InvoicePaid()));
         hgInvoice.setTemplateId("1");
         return hgInvoice;
@@ -416,7 +415,6 @@ public final class InvoicingData {
         hgRefund.setId(id);
         hgRefund.setStatus(status);
         hgRefund.setExternalId(EXTERNAL_ID);
-        hgRefund.setPartyRevision(1L);
 
         Cash cash = new Cash();
         cash.setAmount(1000L);

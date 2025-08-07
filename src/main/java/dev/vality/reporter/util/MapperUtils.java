@@ -1,8 +1,8 @@
 package dev.vality.reporter.util;
 
 import dev.vality.damsel.base.Content;
-import dev.vality.damsel.domain.PaymentTool;
 import dev.vality.damsel.domain.*;
+import dev.vality.damsel.domain.PaymentTool;
 import dev.vality.damsel.payment_processing.InvoicePayment;
 import dev.vality.damsel.payment_processing.InvoicePaymentSession;
 import dev.vality.damsel.payment_processing.InvoicePaymentStatusChanged;
@@ -10,12 +10,12 @@ import dev.vality.geck.common.util.TBaseUtil;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.geck.serializer.kit.tbase.TErrorUtil;
 import dev.vality.machinegun.eventsink.MachineEvent;
+import dev.vality.reporter.domain.enums.*;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
 import dev.vality.reporter.domain.enums.InvoiceStatus;
 import dev.vality.reporter.domain.enums.OnHoldExpiration;
-import dev.vality.reporter.domain.enums.*;
-import dev.vality.reporter.domain.tables.pojos.Invoice;
 import dev.vality.reporter.domain.tables.pojos.*;
+import dev.vality.reporter.domain.tables.pojos.Invoice;
 import dev.vality.reporter.model.FeeType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +80,6 @@ public final class MapperUtils {
         RefundAdditionalInfo additionalInfo = new RefundAdditionalInfo();
         additionalInfo.setExtRefundId(extRefundId);
         additionalInfo.setDomainRevision(hgInnerRefund.getDomainRevision());
-        additionalInfo.setPartyRevision(hgInnerRefund.getPartyRevision());
 
         if (status.isSetFailed()) {
             OperationFailure operationFailure = status.getFailed().getFailure();
@@ -102,7 +101,6 @@ public final class MapperUtils {
         var hgInnerPayment = invoicePayment.getPayment();
         Chargeback chargeback = new Chargeback();
         chargeback.setDomainRevision(paymentChargeback.getDomainRevision());
-        chargeback.setPartyRevision(paymentChargeback.getPartyRevision());
         chargeback.setInvoiceId(event.getSourceId());
         chargeback.setPaymentId(hgInnerPayment.getId());
         chargeback.setChargebackId(paymentChargeback.getId());
@@ -144,7 +142,6 @@ public final class MapperUtils {
         adjustment.setStatusCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         adjustment.setDomainRevision(paymentAdjustment.getDomainRevision());
         adjustment.setReason(paymentAdjustment.getReason());
-        adjustment.setPartyRevision(paymentAdjustment.getPartyRevision());
         Long oldAmount = DamselUtil.computeMerchantAmount(paymentAdjustment.getOldCashFlowInverse());
         Long newAmount = DamselUtil.computeMerchantAmount(paymentAdjustment.getNewCashFlow());
         adjustment.setAmount(oldAmount + newAmount);
@@ -202,9 +199,6 @@ public final class MapperUtils {
         PaymentAdditionalInfo additionalInfo = new PaymentAdditionalInfo();
         additionalInfo.setExtPaymentId(extPaymentId);
         additionalInfo.setDomainRevision(hgInnerPayment.getDomainRevision());
-        if (hgInnerPayment.isSetPartyRevision()) {
-            additionalInfo.setPartyRevision(hgInnerPayment.getPartyRevision());
-        }
         fillAdditionalPayerInfo(hgInnerPayment.getPayer(), additionalInfo);
         fillInvoicePaymentFlow(hgInnerPayment.getFlow(), additionalInfo);
 
@@ -303,12 +297,6 @@ public final class MapperUtils {
                 additionalInfo.setFingerprint(clientInfo.getFingerprint());
                 additionalInfo.setIp(clientInfo.getIpAddress());
             }
-        } else if (payer.isSetCustomer()) {
-            CustomerPayer customer = payer.getCustomer();
-            PaymentTool paymentTool = customer.getPaymentTool();
-
-            additionalInfo.setCustomerId(customer.getCustomerId());
-            fillPaymentToolUnion(additionalInfo, paymentTool);
         } else if (payer.isSetRecurrent()) {
             RecurrentPayer recurrent = payer.getRecurrent();
             RecurrentParentPayment recurrentParent = recurrent.getRecurrentParent();
@@ -374,7 +362,6 @@ public final class MapperUtils {
         additionalInfo.setExtInvoiceId(extInvoiceId);
         additionalInfo.setTemplateId(hgInnerInvoice.getTemplateId());
         additionalInfo.setStatusDetails(DamselUtil.getInvoiceStatusDetails(hgInnerInvoice.getStatus()));
-        additionalInfo.setPartyRevision(hgInnerInvoice.getPartyRevision());
         additionalInfo.setContextType(hgInnerInvoice.getContext().getType());
         additionalInfo.setContext(hgInnerInvoice.getContext().getData());
         InvoiceDetails details = hgInnerInvoice.getDetails();
@@ -407,19 +394,8 @@ public final class MapperUtils {
             ));
             ContactInfo contactInfo = paymentResource.getContactInfo();
             fillContactInfo(payment, contactInfo);
-        } else if (payer.isSetCustomer()) {
-            CustomerPayer customer = payer.getCustomer();
-            PaymentTool paymentTool = customer.getPaymentTool();
-            payment.setTool(TBaseUtil.unionFieldToEnum(
-                    paymentTool,
-                    dev.vality.reporter.domain.enums.PaymentTool.class
-            ));
-            ContactInfo contactInfo = customer.getContactInfo();
-            fillContactInfo(payment, contactInfo);
-
         } else if (payer.isSetRecurrent()) {
             RecurrentPayer recurrent = payer.getRecurrent();
-            RecurrentParentPayment recurrentParent = recurrent.getRecurrentParent();
             PaymentTool paymentTool = recurrent.getPaymentTool();
             payment.setTool(TBaseUtil.unionFieldToEnum(
                     paymentTool,

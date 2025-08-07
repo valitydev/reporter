@@ -1,6 +1,5 @@
 package dev.vality.reporter.handler.report;
 
-import dev.vality.damsel.domain.Shop;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.ReportRequest;
 import dev.vality.reporter.ReportTimeRange;
@@ -10,16 +9,15 @@ import dev.vality.reporter.domain.enums.ReportStatus;
 import dev.vality.reporter.domain.enums.ReportType;
 import dev.vality.reporter.domain.tables.pojos.FileMeta;
 import dev.vality.reporter.domain.tables.pojos.Report;
-import dev.vality.reporter.service.PartyService;
 import dev.vality.reporter.service.ReportNewProtoService;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -37,10 +35,7 @@ import static org.mockito.Mockito.when;
 @TestPropertySource("classpath:application.yml")
 @DirtiesContext
 @ContextConfiguration(classes = ReportsNewProtoHandler.class)
-public class ReportHandlersTest {
-
-    @MockitoBean
-    private PartyService partyService;
+class ReportHandlersTest {
 
     @MockitoBean
     private ReportNewProtoService reportNewProtoService;
@@ -49,14 +44,12 @@ public class ReportHandlersTest {
     private ReportsNewProtoHandler handler;
 
     @Test
-    public void reportsNewProtoHandlerTest() throws TException {
+    void reportsNewProtoHandlerTest() throws TException {
         String partyId = "partyId";
         String shopId = "shopId";
         ReportType reportType = ReportType.payment_registry;
         List<String> shopIds = Collections.singletonList(shopId);
         Random random = new Random();
-
-        when(partyService.getShop(anyString(), anyString())).thenReturn(new Shop());
 
         when(reportNewProtoService
                 .createReport(eq(partyId), eq(shopId), any(), any(), eq(reportType)))

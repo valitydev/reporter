@@ -1,7 +1,7 @@
 package dev.vality.reporter.util;
 
 import dev.vality.damsel.domain.*;
-import dev.vality.reporter.data.InvoicingData;
+import dev.vality.reporter.data.InvoicingTestData;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,9 +13,9 @@ public final class DamselUtilTest {
 
     @Test
     public void testComputeAdjustmentAmount() {
-        List<FinalCashFlowPosting> paymentCashFlow = InvoicingData.createPaymentCashFlow();
-        List<FinalCashFlowPosting> oldCashFlow = InvoicingData.createOldCashFlow();
-        List<FinalCashFlowPosting> newCashFlow = InvoicingData.createNewCashFlow();
+        List<FinalCashFlowPosting> paymentCashFlow = InvoicingTestData.createPaymentCashFlow();
+        List<FinalCashFlowPosting> oldCashFlow = InvoicingTestData.createOldCashFlow();
+        List<FinalCashFlowPosting> newCashFlow = InvoicingTestData.createNewCashFlow();
 
         long paymentAmount = DamselUtil.computeMerchantAmount(paymentCashFlow);
         long oldAmount = DamselUtil.computeMerchantAmount(oldCashFlow);

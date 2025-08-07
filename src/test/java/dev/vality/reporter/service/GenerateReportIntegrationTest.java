@@ -1,7 +1,6 @@
 package dev.vality.reporter.service;
 
-import dev.vality.damsel.msgpack.Value;
-import dev.vality.damsel.payment_processing.PartyManagementSrv;
+import dev.vality.damsel.domain_config_v2.RepositoryClientSrv;
 import dev.vality.reporter.dao.ReportDao;
 import dev.vality.reporter.domain.enums.ReportStatus;
 import dev.vality.reporter.domain.enums.ReportType;
@@ -25,8 +24,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static dev.vality.reporter.data.CommonTestData.getTestParty;
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.data.CommonTestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 @SpringBootTest
 @PostgresqlTestcontainer
 @MinioTestcontainerSingleton
-public class GenerateReportIntegrationTest {
+class GenerateReportIntegrationTest {
 
     @Autowired
     private ReportService reportService;
@@ -44,19 +42,19 @@ public class GenerateReportIntegrationTest {
     private ReportDao reportDao;
 
     @MockitoBean
-    private PartyManagementSrv.Iface partyManagementClient;
+    private RepositoryClientSrv.Iface repositoryClient;
 
     @Test
-    public void generatePaymentRegistryReportTest() throws Exception {
+    void generatePaymentRegistryReportTest() throws Exception {
         String partyId = "TestPartyID";
         String shopId = "TestShopID";
         Instant fromTime = LocalDateTime.now().minusHours(10L).toInstant(ZoneOffset.UTC);
         Instant toTime = Instant.now();
 
-        given(partyManagementClient.checkout(any(), any()))
-                .willReturn(getTestParty(partyId, shopId, random(String.class)));
-        given(partyManagementClient.getMetaData(any(), any()))
-                .willReturn(Value.b(true));
+        given(repositoryClient.checkoutObject(any(), any()))
+                .willReturn(getVersionedObject(getTestParty(partyId, shopId)));
+        given(repositoryClient.checkoutObjects(any(), any()))
+                .willReturn(List.of(getVersionedObject(getTestShop(shopId))));
 
         ReportType reportType = ReportType.payment_registry;
         long reportId = reportService.createReport(partyId, shopId, fromTime, toTime, reportType);
