@@ -11,7 +11,6 @@ import org.apache.thrift.TException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,24 +54,32 @@ public class DominantServiceImpl implements DominantService {
     @Override
     public Map<String, ShopConfig> getShopConfigs(String partyId) {
         var versionedObject = getPartyObject(partyId);
-        List<Reference> shopReferences = getShopReferences(versionedObject);
+        PartyConfig partyConfig = versionedObject.getObject().getPartyConfig().getData();
+        log.debug("Trying to get shops, shops='{}'", partyConfig.getShops());
+        List<Reference> shopReferences = getShopReferences(partyConfig);
         List<VersionedObject> shopObjects = getVersionedObjects(shopReferences);
-        return shopObjects.stream()
+        Map<String, ShopConfig> shopConfigs = shopObjects.stream()
                 .collect(Collectors.toMap(
                         object -> object.getObject().getShopConfig().getRef().getId(),
                         object -> object.getObject().getShopConfig().getData()));
+        log.debug("Shop has been found, shopConfigs='{}', shopReferences='{}'",
+                shopConfigs, shopReferences);
+        return shopConfigs;
     }
 
     private VersionedObject getPartyObject(String partyId) {
+        log.debug("Trying to get party, partyId='{}'", partyId);
         Reference reference = new Reference();
         PartyConfigRef partyConfigRef = new PartyConfigRef();
         partyConfigRef.setId(partyId);
         reference.setPartyConfig(partyConfigRef);
-        return getVersionedObject(reference);
+        VersionedObject partyObject = getVersionedObject(reference);
+        log.debug("Party has been found, partyConfig ='{}', partyConfigRef='{}'",
+                partyObject.getObject().getPartyConfig(), partyConfigRef);
+        return partyObject;
     }
 
-    private List<Reference> getShopReferences(VersionedObject versionedObject) {
-        var partyConfig = versionedObject.getObject().getPartyConfig().getData();
+    private List<Reference> getShopReferences(PartyConfig partyConfig) {
         return partyConfig.getShops().stream()
                 .map(shopConfigRef -> {
                     Reference respRef = new Reference();
@@ -83,13 +90,16 @@ public class DominantServiceImpl implements DominantService {
     }
 
     private List<VersionedObject> getVersionedObjects(List<Reference> references) {
+        VersionReference versionRef = new VersionReference();
+        versionRef.setHead(new Head());
         try {
-            VersionReference versionRef = new VersionReference();
-            versionRef.setHead(new Head());
             return dominantClient.checkoutObjects(versionRef, references);
-        } catch (TException e) {
-            log.error("Error while get objects for references from dominant: {}", references, e);
-            return Collections.emptyList();
+        } catch (VersionNotFound ex) {
+            throw new NotFoundException(String.format("Versions not found, references='%s', versionRef='%s'",
+                    references, versionRef), ex);
+        } catch (TException ex) {
+            throw new DominantException(String.format("Failed to get objects, references='%s', " +
+                    "versionRef='%s'", references, versionRef), ex);
         }
     }
 }
