@@ -7,7 +7,6 @@ import dev.vality.reporter.exception.FileNotFoundException;
 import dev.vality.reporter.exception.PartyNotFoundException;
 import dev.vality.reporter.exception.ReportNotFoundException;
 import dev.vality.reporter.exception.ShopNotFoundException;
-import dev.vality.reporter.service.PartyService;
 import dev.vality.reporter.service.ReportNewProtoService;
 import dev.vality.reporter.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +30,6 @@ import static dev.vality.reporter.util.NewProtoUtil.toNewProtoReport;
 public class ReportsNewProtoHandler implements ReportingSrv.Iface {
 
     private static final int REPORTS_LIMIT = 100;
-
-    private final PartyService partyService;
     private final ReportNewProtoService reportService;
 
     @Override
@@ -44,10 +41,6 @@ public class ReportsNewProtoHandler implements ReportingSrv.Iface {
 
             if (fromTime.compareTo(toTime) > 0) {
                 throw buildInvalidRequest("fromTime must be less that toTime");
-            }
-
-            if (reportRequest.getShopId() != null) {
-                partyService.getShop(reportRequest.getPartyId(), reportRequest.getShopId());
             }
 
             return reportService.createReport(

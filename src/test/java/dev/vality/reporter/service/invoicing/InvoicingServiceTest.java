@@ -14,7 +14,7 @@ import dev.vality.reporter.dao.AdjustmentDao;
 import dev.vality.reporter.dao.InvoiceDao;
 import dev.vality.reporter.dao.PaymentDao;
 import dev.vality.reporter.dao.RefundDao;
-import dev.vality.reporter.data.InvoicingData;
+import dev.vality.reporter.data.InvoicingTestData;
 import dev.vality.reporter.domain.enums.AdjustmentStatus;
 import dev.vality.reporter.domain.enums.InvoiceStatus;
 import dev.vality.reporter.domain.enums.RefundStatus;
@@ -37,13 +37,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.vality.reporter.data.InvoicingData.createHgInvoice;
-import static dev.vality.reporter.data.InvoicingData.createKafkaEvent;
-import static dev.vality.reporter.data.InvoicingData.createMachineEvent;
-import static dev.vality.reporter.data.InvoicingData.createTestAdjustmentEventPayload;
-import static dev.vality.reporter.data.InvoicingData.createTestInvoiceEventPayload;
-import static dev.vality.reporter.data.InvoicingData.createTestPaymentEventPayload;
-import static dev.vality.reporter.data.InvoicingData.createTestRefundEventPayload;
+import static dev.vality.reporter.data.InvoicingTestData.createHgInvoice;
+import static dev.vality.reporter.data.InvoicingTestData.createKafkaEvent;
+import static dev.vality.reporter.data.InvoicingTestData.createMachineEvent;
+import static dev.vality.reporter.data.InvoicingTestData.createTestAdjustmentEventPayload;
+import static dev.vality.reporter.data.InvoicingTestData.createTestInvoiceEventPayload;
+import static dev.vality.reporter.data.InvoicingTestData.createTestPaymentEventPayload;
+import static dev.vality.reporter.data.InvoicingTestData.createTestRefundEventPayload;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -84,14 +84,14 @@ class InvoicingServiceTest {
 
     @Test
     void addNewInvoiceTest() throws Exception {
-        List<InvoicingData.InvoiceChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
-        firstStatusInfoList.add(new InvoicingData.InvoiceChangeStatusInfo(
+        List<InvoicingTestData.InvoiceChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
+        firstStatusInfoList.add(new InvoicingTestData.InvoiceChangeStatusInfo(
                 1, InvoiceStatus.paid));
-        firstStatusInfoList.add(new InvoicingData.InvoiceChangeStatusInfo(
+        firstStatusInfoList.add(new InvoicingTestData.InvoiceChangeStatusInfo(
                 1, InvoiceStatus.unpaid));
 
-        List<InvoicingData.InvoiceChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
-        secondStatusInfoList.add(new InvoicingData.InvoiceChangeStatusInfo(
+        List<InvoicingTestData.InvoiceChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
+        secondStatusInfoList.add(new InvoicingTestData.InvoiceChangeStatusInfo(
                 1, InvoiceStatus.unpaid));
 
         when(paymentMachineEventParser.parse(machineEventOne))
@@ -117,19 +117,19 @@ class InvoicingServiceTest {
 
     @Test
     void addNewPaymentTest() throws Exception {
-        List<InvoicingData.PaymentChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
+        List<InvoicingTestData.PaymentChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
         InvoicePaymentStatus captureStatus = new InvoicePaymentStatus();
         captureStatus.setCaptured(new InvoicePaymentCaptured());
-        firstStatusInfoList.add(new InvoicingData.PaymentChangeStatusInfo(PAYMENT_ID, captureStatus));
+        firstStatusInfoList.add(new InvoicingTestData.PaymentChangeStatusInfo(PAYMENT_ID, captureStatus));
 
         InvoicePaymentStatus pendingStatus = new InvoicePaymentStatus();
         pendingStatus.setPending(new InvoicePaymentPending());
-        firstStatusInfoList.add(new InvoicingData.PaymentChangeStatusInfo("2", pendingStatus));
+        firstStatusInfoList.add(new InvoicingTestData.PaymentChangeStatusInfo("2", pendingStatus));
 
-        List<InvoicingData.PaymentChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
+        List<InvoicingTestData.PaymentChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
         InvoicePaymentStatus pendingStatusTwo = new InvoicePaymentStatus();
         pendingStatusTwo.setPending(new InvoicePaymentPending());
-        secondStatusInfoList.add(new InvoicingData.PaymentChangeStatusInfo(PAYMENT_ID, pendingStatusTwo));
+        secondStatusInfoList.add(new InvoicingTestData.PaymentChangeStatusInfo(PAYMENT_ID, pendingStatusTwo));
 
         when(paymentMachineEventParser.parse(machineEventOne))
                 .thenReturn(createTestPaymentEventPayload(firstStatusInfoList));
@@ -157,18 +157,18 @@ class InvoicingServiceTest {
 
     @Test
     void addNewRefundTest() throws Exception {
-        List<InvoicingData.RefundChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
+        List<InvoicingTestData.RefundChangeStatusInfo> firstStatusInfoList = new ArrayList<>();
         var captureStatus = new dev.vality.damsel.domain.InvoicePaymentRefundStatus();
         captureStatus.setSucceeded(new InvoicePaymentRefundSucceeded());
-        firstStatusInfoList.add(new InvoicingData.RefundChangeStatusInfo(PAYMENT_ID, REFUND_ID, captureStatus));
+        firstStatusInfoList.add(new InvoicingTestData.RefundChangeStatusInfo(PAYMENT_ID, REFUND_ID, captureStatus));
         var pendingStatus = new dev.vality.damsel.domain.InvoicePaymentRefundStatus();
         pendingStatus.setPending(new InvoicePaymentRefundPending());
-        firstStatusInfoList.add(new InvoicingData.RefundChangeStatusInfo(PAYMENT_ID, "2", pendingStatus));
+        firstStatusInfoList.add(new InvoicingTestData.RefundChangeStatusInfo(PAYMENT_ID, "2", pendingStatus));
 
-        List<InvoicingData.RefundChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
+        List<InvoicingTestData.RefundChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
         var pendingStatusTwo = new dev.vality.damsel.domain.InvoicePaymentRefundStatus();
         pendingStatusTwo.setPending(new InvoicePaymentRefundPending());
-        secondStatusInfoList.add(new InvoicingData.RefundChangeStatusInfo(PAYMENT_ID, REFUND_ID, pendingStatusTwo));
+        secondStatusInfoList.add(new InvoicingTestData.RefundChangeStatusInfo(PAYMENT_ID, REFUND_ID, pendingStatusTwo));
 
         when(paymentMachineEventParser.parse(machineEventOne))
                 .thenReturn(createTestRefundEventPayload(firstStatusInfoList));
@@ -196,22 +196,22 @@ class InvoicingServiceTest {
 
     @Test
     void addNewAdjustmentTest() throws Exception {
-        List<InvoicingData.AdjustmentChangeStatusInfo> statusInfoList = new ArrayList<>();
+        List<InvoicingTestData.AdjustmentChangeStatusInfo> statusInfoList = new ArrayList<>();
         var captureStatus = new dev.vality.damsel.domain.InvoicePaymentAdjustmentStatus();
         captureStatus.setCaptured(new InvoicePaymentAdjustmentCaptured());
         statusInfoList.add(
-                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, ADJUSTMENT_ID, captureStatus));
+                new InvoicingTestData.AdjustmentChangeStatusInfo(PAYMENT_ID, ADJUSTMENT_ID, captureStatus));
 
         var pengingStatus = new dev.vality.damsel.domain.InvoicePaymentAdjustmentStatus();
         pengingStatus.setPending(new InvoicePaymentAdjustmentPending());
         statusInfoList.add(
-                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-2", pengingStatus));
+                new InvoicingTestData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-2", pengingStatus));
 
-        List<InvoicingData.AdjustmentChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
+        List<InvoicingTestData.AdjustmentChangeStatusInfo> secondStatusInfoList = new ArrayList<>();
         var pengingStatusTwo = new dev.vality.damsel.domain.InvoicePaymentAdjustmentStatus();
         pengingStatusTwo.setPending(new InvoicePaymentAdjustmentPending());
         secondStatusInfoList.add(
-                new InvoicingData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-3", pengingStatusTwo));
+                new InvoicingTestData.AdjustmentChangeStatusInfo(PAYMENT_ID, "q-3", pengingStatusTwo));
 
         when(paymentMachineEventParser.parse(machineEventOne))
                 .thenReturn(createTestAdjustmentEventPayload(statusInfoList));

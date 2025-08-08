@@ -1,16 +1,14 @@
 package dev.vality.reporter.data;
 
 import dev.vality.damsel.domain.*;
-import dev.vality.damsel.domain_config.VersionedObject;
-import dev.vality.geck.common.util.TypeUtil;
+import dev.vality.damsel.domain_config_v2.VersionedObjectInfo;
 import dev.vality.reporter.domain.enums.AdjustmentStatus;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
 import dev.vality.reporter.domain.enums.RefundStatus;
 import dev.vality.reporter.domain.tables.pojos.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
 
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
 
@@ -18,58 +16,58 @@ public class CommonTestData {
 
     private static final String DEFAULT_CURRENCY = "RUB";
 
-    public static Party getTestParty(String partyId, String shopId, String contractId) {
-        Party party = new Party();
-        party.setId(partyId);
-
-        Contract contract = new Contract();
-        contract.setId(contractId);
-        contract.setPaymentInstitution(new PaymentInstitutionRef(1));
-        RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
-        russianLegalEntity.setRegisteredName(random(String.class));
-        russianLegalEntity.setRepresentativePosition(random(String.class));
-        russianLegalEntity.setRepresentativeFullName(random(String.class));
-        contract.setContractor(
-                Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
-        contract.setLegalAgreement(
-                new LegalAgreement(TypeUtil.temporalToString(Instant.now()), random(String.class)));
-        party.setShops(Collections.singletonMap(shopId, getTestShop(shopId, contractId)));
-        party.setContracts(Collections.singletonMap(contractId, contract));
-        return party;
+    public static DomainObject getTestParty(String partyId, String shopId) {
+        PartyConfig partyConfig = new PartyConfig();
+        partyConfig.setName(random(String.class));
+        partyConfig.setShops(List.of(getTestShopConfigRef(shopId)));
+        partyConfig.setDescription(random(String.class));
+        DomainObject domainObject = new DomainObject();
+        domainObject.setPartyConfig(
+                new PartyConfigObject()
+                        .setData(partyConfig)
+                        .setRef(new PartyConfigRef().setId(partyId)));
+        return domainObject;
     }
 
-    public static Shop getTestShop(String shopId, String contractId) {
-        Shop shop = new Shop();
-        shop.setId(shopId);
-        shop.setContractId(contractId);
-        shop.setLocation(ShopLocation.url("http://2ch.hk/"));
-        shop.setDetails(new ShopDetails().setName("Test shop"));
-        return shop;
+    public static dev.vality.damsel.domain_config_v2.VersionedObject getVersionedObject(DomainObject domainObject) {
+        var versionedObject = new dev.vality.damsel.domain_config_v2.VersionedObject();
+        versionedObject.setInfo(new VersionedObjectInfo().setVersion(random(Integer.class)));
+        versionedObject.setObject(domainObject);
+        return versionedObject;
     }
 
-    public static VersionedObject buildPaymentCalendarObject(CalendarRef calendarRef) {
-        Calendar calendar = new Calendar("calendar", "Europe/Moscow", Collections.emptyMap());
-
-        return new VersionedObject(
-                1,
-                DomainObject.calendar(new CalendarObject(
-                        calendarRef,
-                        calendar
-                ))
-        );
+    public static ShopConfigRef getTestShopConfigRef(String shopId) {
+        ShopConfigRef shopConfigRef = new ShopConfigRef();
+        shopConfigRef.setId(shopId);
+        return shopConfigRef;
     }
 
-    public static VersionedObject buildPaymentInstitutionObject(PaymentInstitutionRef paymentInstitutionRef) {
-        PaymentInstitution paymentInstitution = new PaymentInstitution();
-        paymentInstitution.setCalendar(new CalendarRef(1));
+    public static DomainObject getTestShop(String shopId) {
+        ShopConfig shop = new ShopConfig();
+        shop.setDescription(random(String.class));
+        ShopLocation location = new ShopLocation();
+        location.setUrl(random(String.class));
+        shop.setLocation(location);
+        shop.setName(random(String.class));
+        DomainObject domainObject = new DomainObject();
+        domainObject.setShopConfig(
+                new ShopConfigObject()
+                        .setData(shop)
+                        .setRef(new ShopConfigRef().setId(shopId)));
+        return domainObject;
+    }
 
-        return new VersionedObject(
-                1,
-                DomainObject.payment_institution(new PaymentInstitutionObject(
-                        paymentInstitutionRef,
-                        paymentInstitution
-                ))
-        );
+    public static DomainObject getTesCurrency(String code) {
+        Currency currency = new Currency();
+        currency.setName(random(String.class));
+        currency.setExponent((short) 2);
+        currency.setSymbolicCode(code);
+        DomainObject domainObject = new DomainObject();
+        domainObject.setCurrency(
+                new CurrencyObject()
+                        .setData(currency)
+                        .setRef(new CurrencyRef().setSymbolicCode(code)));
+        return domainObject;
     }
 
     public static Adjustment createTestAdjustment(String partyId,

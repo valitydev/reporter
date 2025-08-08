@@ -1,8 +1,11 @@
 package dev.vality.reporter.report;
 
-import dev.vality.damsel.domain.*;
-import dev.vality.damsel.domain_config.RepositoryClientSrv;
-import dev.vality.damsel.domain_config.VersionedObject;
+import dev.vality.damsel.domain.Currency;
+import dev.vality.damsel.domain.CurrencyObject;
+import dev.vality.damsel.domain.CurrencyRef;
+import dev.vality.damsel.domain.DomainObject;
+import dev.vality.damsel.domain_config_v2.RepositoryClientSrv;
+import dev.vality.damsel.domain_config_v2.VersionedObject;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
@@ -21,7 +24,6 @@ import dev.vality.reporter.domain.tables.records.AdjustmentRecord;
 import dev.vality.reporter.domain.tables.records.InvoiceRecord;
 import dev.vality.reporter.domain.tables.records.PaymentRecord;
 import dev.vality.reporter.domain.tables.records.RefundRecord;
-import dev.vality.reporter.service.DominantService;
 import dev.vality.reporter.template.LocalPaymentRegistryTemplateImpl;
 import dev.vality.reporter.util.FormatUtil;
 import dev.vality.reporter.util.TimeUtil;
@@ -46,9 +48,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import static dev.vality.reporter.data.CommonTestData.*;
 import static dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured;
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,9 +59,6 @@ import static org.mockito.BDDMockito.given;
 
 @PostgresqlSpringBootITest
 class PaymentRegistryTemplateTest {
-
-    @Autowired
-    private DominantService dominantService;
 
     @Autowired
     private PaymentDao paymentDao;
@@ -143,12 +142,14 @@ class PaymentRegistryTemplateTest {
             report.setFromTime(LocalDateTime.now().minusHours(128L));
             report.setToTime(LocalDateTime.now());
             report.setTimezone("Europe/Moscow");
-            String registeredName = random(String.class);
-            String legalSignedAt = TypeUtil.temporalToString(Instant.now());
-            String legalAgreementId = random(String.class);
-            String contractId = random(String.class);
+            DomainObject testShop = getTestShop(report.getPartyShopId());
+            String currencyCode = "RUB";
 
-            mockPartyManagementClient(contractId, report, registeredName, legalSignedAt, legalAgreementId);
+            given(dominantClient.checkoutObject(any(), any()))
+                    .willReturn(getVersionedObject(getTestParty(partyId, shopId)))
+                    .willReturn(getVersionedObject(getTesCurrency(currencyCode)));
+            given(dominantClient.checkoutObjects(any(), any()))
+                    .willReturn(List.of(getVersionedObject(testShop)));
 
             paymentRegistryTemplate.processReportTemplate(report, Files.newOutputStream(tempFile));
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));
@@ -164,14 +165,15 @@ class PaymentRegistryTemplateTest {
                     paymentsHeaderCell.getStringCellValue());
 
             Row paymentsFirstRow = sheet.getRow(2);
-            assertEquals("http://0ch.ru/b", paymentsFirstRow.getCell(6).getStringCellValue());
+            assertEquals(testShop.getShopConfig().getData().getLocation().getUrl(),
+                    paymentsFirstRow.getCell(6).getStringCellValue());
             assertEquals(FormatUtil.formatCurrency(2L, (short) 2), paymentsFirstRow.getCell(8).getStringCellValue());
-            assertEquals("RUB", paymentsFirstRow.getCell(9).getStringCellValue());
+            assertEquals(currencyCode, paymentsFirstRow.getCell(9).getStringCellValue());
             assertEquals("payment_external_id", paymentsFirstRow.getCell(10).getStringCellValue());
             assertEquals(captured.getLiteral(), paymentsFirstRow.getCell(11).getStringCellValue());
             assertEquals(shopId, paymentsFirstRow.getCell(12).getStringCellValue());
-            assertEquals("Test shop", paymentsFirstRow.getCell(13).getStringCellValue());
-
+            assertEquals(testShop.getShopConfig().getData().getName(),
+                    paymentsFirstRow.getCell(13).getStringCellValue());
 
 
             Cell paymentsTotalSum = sheet.getRow(5).getCell(3);
@@ -184,10 +186,12 @@ class PaymentRegistryTemplateTest {
             Row refundsFirstRow = sheet.getRow(10);
             assertEquals("0", refundsFirstRow.getCell(8).getStringCellValue());
             assertEquals("You are the reason of my life", refundsFirstRow.getCell(9).getStringCellValue());
-            assertEquals("RUB", refundsFirstRow.getCell(10).getStringCellValue());
+            assertEquals(currencyCode, refundsFirstRow.getCell(10).getStringCellValue());
             assertEquals(shopId, refundsFirstRow.getCell(13).getStringCellValue());
-            assertEquals("Test shop", refundsFirstRow.getCell(14).getStringCellValue());
-            assertEquals("http://0ch.ru/b", refundsFirstRow.getCell(6).getStringCellValue());
+            assertEquals(testShop.getShopConfig().getData().getName(),
+                    refundsFirstRow.getCell(14).getStringCellValue());
+            assertEquals(testShop.getShopConfig().getData().getLocation().getUrl(),
+                    refundsFirstRow.getCell(6).getStringCellValue());
             assertEquals(RefundStatus.succeeded.getLiteral(), refundsFirstRow.getCell(12).getStringCellValue());
 
             Cell refundsTotalSum = sheet.getRow(13).getCell(3);
@@ -205,35 +209,6 @@ class PaymentRegistryTemplateTest {
         } finally {
             Files.deleteIfExists(tempFile);
         }
-    }
-
-    private void mockPartyManagementClient(String contractId,
-                                           Report report,
-                                           String registeredName,
-                                           String legalSignedAt,
-                                           String legalAgreementId) throws TException {
-        Shop shop = new Shop();
-        shop.setId(report.getPartyShopId());
-        shop.setContractId(contractId);
-        shop.setLocation(ShopLocation.url("http://0ch.ru/b"));
-        shop.setDetails(new ShopDetails().setName("Test shop"));
-        RussianLegalEntity russianLegalEntity = new RussianLegalEntity();
-        russianLegalEntity.setRegisteredName(registeredName);
-        russianLegalEntity.setRepresentativePosition(random(String.class));
-        russianLegalEntity.setRepresentativeFullName(random(String.class));
-        Contract contract = new Contract();
-        contract.setId(contractId);
-        contract.setContractor(Contractor.legal_entity(LegalEntity.russian_legal_entity(russianLegalEntity)));
-        contract.setLegalAgreement(new LegalAgreement(legalSignedAt, legalAgreementId));
-        Party party = new Party();
-        party.setId(report.getPartyId());
-        party.setShops(Collections.singletonMap(report.getPartyShopId(), shop));
-        party.setContracts(Collections.singletonMap(contractId, contract));
-
-        given(partyManagementClient.checkout(any(), any()))
-                .willReturn(party);
-        given(partyManagementClient.getRevision(any()))
-                .willReturn(1L);
     }
 
     @SneakyThrows
