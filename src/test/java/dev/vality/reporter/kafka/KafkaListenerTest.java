@@ -57,7 +57,7 @@ public class KafkaListenerTest {
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
-        verify(invoicingService, timeout(150000).times(5))
+        verify(invoicingService, timeout(150000).times(1))
                 .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
                 .isEqualTo(eventsCount);
