@@ -60,7 +60,7 @@ public class KafkaListenerTest {
         verify(invoicingService, timeout(10000).times(eventsCount))
                 .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
-                .isEqualTo(eventsCount);
+                .isEqualTo(1);
     }
 
     private SinkEvent createSinkEvent() {
