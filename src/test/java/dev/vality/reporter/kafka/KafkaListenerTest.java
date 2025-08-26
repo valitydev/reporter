@@ -23,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -58,8 +57,8 @@ public class KafkaListenerTest {
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
-        verify(invoicingService, timeout(150000).times(eventsCount))
-                .handleEvents(any());
+        verify(invoicingService, timeout(10000).times(4))
+                .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
                 .isEqualTo(eventsCount);
     }
