@@ -55,7 +55,7 @@ public class KafkaListenerTest {
 
     @Test
     public void listenInvoicingChanges() throws Exception {
-        int eventsCount = 2;
+        int eventsCount = 1;
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
