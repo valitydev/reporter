@@ -16,6 +16,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @KafkaConfig
+@DirtiesContext
 @KafkaTestcontainerSingleton(
         properties = {
                 "kafka.topics.invoicing.enabled=true",
@@ -60,7 +62,7 @@ public class KafkaListenerTest {
         verify(invoicingService, timeout(10000).times(1))
                 .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
-                .isEqualTo(1);
+                .isEqualTo(eventsCount);
     }
 
     private SinkEvent createSinkEvent() {
