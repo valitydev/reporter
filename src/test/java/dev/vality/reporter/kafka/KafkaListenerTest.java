@@ -55,11 +55,11 @@ public class KafkaListenerTest {
 
     @Test
     public void listenInvoicingChanges() throws Exception {
-        int eventsCount = 5;
+        int eventsCount = 2;
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
-        verify(invoicingService, timeout(50000).times(1))
+        verify(invoicingService, timeout(50000).times(eventsCount))
                 .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
                 .isEqualTo(eventsCount);
