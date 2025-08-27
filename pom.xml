@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>reporter-proto</artifactId>
-            <version>1.16-cc187f5</version>
+            <version>1.18-d7d9995</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
