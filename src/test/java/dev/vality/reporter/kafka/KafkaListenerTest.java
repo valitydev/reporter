@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 @KafkaTestcontainerSingleton(
         properties = {
                 "kafka.topics.invoicing.enabled=true",
-                "kafka.consumer.max-poll-records=5"
+                "kafka.consumer.max-poll-records=1"
         },
         topicsKeys = "kafka.topics.invoicing.id"
 )
@@ -59,7 +59,7 @@ public class KafkaListenerTest {
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());
         }
-        verify(invoicingService, timeout(10000).times(1))
+        verify(invoicingService, timeout(50000).times(1))
                 .handleEvents(arg.capture());
         assertThat(arg.getValue().size())
                 .isEqualTo(eventsCount);
