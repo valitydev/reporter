@@ -1,6 +1,8 @@
 package dev.vality.reporter.service;
 
+import dev.vality.damsel.domain.DomainObject;
 import dev.vality.damsel.domain_config_v2.RepositoryClientSrv;
+import dev.vality.damsel.domain_config_v2.VersionedObject;
 import dev.vality.reporter.dao.ReportDao;
 import dev.vality.reporter.domain.enums.ReportStatus;
 import dev.vality.reporter.domain.enums.ReportType;
@@ -50,11 +52,15 @@ class GenerateReportIntegrationTest {
         String shopId = "TestShopID";
         Instant fromTime = LocalDateTime.now().minusHours(10L).toInstant(ZoneOffset.UTC);
         Instant toTime = Instant.now();
+        DomainObject testParty = getTestParty(partyId);
+        DomainObject testShop = getTestShop(shopId);
+        VersionedObject versionedObjectParty = getVersionedObject(testParty);
 
         given(repositoryClient.checkoutObject(any(), any()))
-                .willReturn(getVersionedObject(getTestParty(partyId, shopId)));
-        given(repositoryClient.checkoutObjects(any(), any()))
-                .willReturn(List.of(getVersionedObject(getTestShop(shopId))));
+                .willReturn(getVersionedObject(getTestParty(partyId)));
+        VersionedObject versionedObjectShop = getVersionedObject(testShop);
+        given(repositoryClient.checkoutObjectWithReferences(any(), any()))
+                .willReturn(getTestVersionedObjectWithReferences(versionedObjectParty, versionedObjectShop));
 
         ReportType reportType = ReportType.payment_registry;
         long reportId = reportService.createReport(partyId, shopId, fromTime, toTime, reportType);

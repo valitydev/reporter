@@ -7,7 +7,6 @@ import dev.vality.damsel.domain.DomainObject;
 import dev.vality.damsel.domain_config_v2.RepositoryClientSrv;
 import dev.vality.damsel.domain_config_v2.VersionedObject;
 import dev.vality.damsel.payment_processing.PartyManagementSrv;
-import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
 import dev.vality.reporter.dao.AdjustmentDao;
 import dev.vality.reporter.dao.InvoiceDao;
@@ -43,7 +42,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -86,7 +84,7 @@ class PaymentRegistryTemplateTest {
     private long expectedRefundSum;
 
     @BeforeEach
-    public void setUp() throws TException {
+    void setUp() {
         InvoiceRecord invoiceRecord = new InvoiceRecord();
         invoiceRecord.setProduct("vality.dev");
         invoiceRecord.setExternalId("invoice_external_id");
@@ -142,14 +140,15 @@ class PaymentRegistryTemplateTest {
             report.setFromTime(LocalDateTime.now().minusHours(128L));
             report.setToTime(LocalDateTime.now());
             report.setTimezone("Europe/Moscow");
-            DomainObject testShop = getTestShop(report.getPartyShopId());
+            DomainObject testParty = getTestParty(partyId);
             String currencyCode = "RUB";
-
+            DomainObject testShop = getTestShop(report.getPartyShopId());
+            VersionedObject versionedObjectParty = getVersionedObject(testParty);
             given(dominantClient.checkoutObject(any(), any()))
-                    .willReturn(getVersionedObject(getTestParty(partyId, shopId)))
                     .willReturn(getVersionedObject(getTesCurrency(currencyCode)));
-            given(dominantClient.checkoutObjects(any(), any()))
-                    .willReturn(List.of(getVersionedObject(testShop)));
+            VersionedObject versionedObjectShop = getVersionedObject(testShop);
+            given(dominantClient.checkoutObjectWithReferences(any(), any()))
+                    .willReturn(getTestVersionedObjectWithReferences(versionedObjectParty, versionedObjectShop));
 
             paymentRegistryTemplate.processReportTemplate(report, Files.newOutputStream(tempFile));
             Workbook wb = new XSSFWorkbook(Files.newInputStream(tempFile));

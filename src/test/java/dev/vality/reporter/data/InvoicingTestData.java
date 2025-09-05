@@ -1,8 +1,8 @@
 package dev.vality.reporter.data;
 
 import dev.vality.damsel.base.Content;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentPending;
 import dev.vality.damsel.domain.*;
+import dev.vality.damsel.domain.InvoicePaymentAdjustmentPending;
 import dev.vality.damsel.payment_processing.*;
 import dev.vality.geck.common.util.TypeUtil;
 import dev.vality.machinegun.eventsink.MachineEvent;
@@ -208,9 +208,9 @@ public final class InvoicingTestData {
     }
 
     public static dev.vality.damsel.payment_processing.Invoice createHgInvoice(String invoiceId,
-                                                                                 String paymentId,
-                                                                                 String refundId,
-                                                                                 String adjustmentId) {
+                                                                               String paymentId,
+                                                                               String refundId,
+                                                                               String adjustmentId) {
         var invoice = new dev.vality.damsel.payment_processing.Invoice();
         invoice.setInvoice(createDomainInvoice(invoiceId));
         List<dev.vality.damsel.payment_processing.InvoicePayment> invoicePaymentList = new ArrayList<>();
@@ -233,8 +233,8 @@ public final class InvoicingTestData {
                 .setDescription("Desc-1")
                 .setProduct("Product-1")
         );
-        hgInvoice.setOwnerId(PARTY_ID);
-        hgInvoice.setShopId(SHOP_ID);
+        hgInvoice.setPartyRef(new PartyConfigRef(PARTY_ID));
+        hgInvoice.setShopRef(new ShopConfigRef(SHOP_ID));
         hgInvoice.setDue(TypeUtil.temporalToString(LocalDateTime.now()));
         hgInvoice.setExternalId(EXTERNAL_ID);
         hgInvoice.setStatus(InvoiceStatus.paid(new InvoicePaid()));
@@ -262,8 +262,8 @@ public final class InvoicingTestData {
     private static dev.vality.damsel.domain.InvoicePayment createDamselInvoicePayment(String paymentId) {
         var hgPayment = new dev.vality.damsel.domain.InvoicePayment();
         hgPayment.setId(paymentId);
-        hgPayment.setOwnerId(PARTY_ID);
-        hgPayment.setShopId(SHOP_ID);
+        hgPayment.setPartyRef(new PartyConfigRef(PARTY_ID));
+        hgPayment.setShopRef(new ShopConfigRef(SHOP_ID));
         hgPayment.setExternalId(EXTERNAL_ID);
         hgPayment.setCreatedAt(TypeUtil.temporalToString(LocalDateTime.now()));
         hgPayment.setStatus(InvoicePaymentStatus.captured(new InvoicePaymentCaptured()));

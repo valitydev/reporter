@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
                 FaultyEventsProperties.class,
                 InvoicingFaultyEventsServiceImpl.class},
         initializers = InvoicingFaultyEventsServiceTest.Initializer.class)
-public class InvoicingFaultyEventsServiceTest {
+class InvoicingFaultyEventsServiceTest {
 
     private static final String TOPIC_NAME = "testTopic";
     private static final int PARTITION_ID = 1;
@@ -38,7 +38,7 @@ public class InvoicingFaultyEventsServiceTest {
     private FaultyEventsService invoicingFaultyEventsServiceImpl;
 
     @Test
-    public void faultyEventsTest() {
+    void faultyEventsTest() {
         KafkaEvent kafkaEventOne = new KafkaEvent(TOPIC_NAME, PARTITION_ID, 1, new MachineEvent());
         assertTrue(invoicingFaultyEventsServiceImpl.isFaultyEvent(kafkaEventOne));
 
