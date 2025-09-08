@@ -53,53 +53,41 @@ public class DominantServiceImpl implements DominantService {
 
     @Override
     public Map<String, ShopConfig> getShopConfigs(String partyId) {
-        var versionedObject = getPartyObject(partyId);
-        PartyConfig partyConfig = versionedObject.getObject().getPartyConfig().getData();
-        log.debug("Trying to get shops, shops='{}'", partyConfig.getShops());
-        List<Reference> shopReferences = getShopReferences(partyConfig);
-        List<VersionedObject> shopObjects = getVersionedObjects(shopReferences);
-        Map<String, ShopConfig> shopConfigs = shopObjects.stream()
+        var versionedObjectWithReferences = getPartyObject(partyId);
+        var shopConfigObjects = versionedObjectWithReferences.getReferencedBy().stream()
+                .map(VersionedObject::getObject)
+                .map(DomainObject::getShopConfig)
+                .toList();
+        log.debug("Receive shops for partyId: {}, shopConfigObjects ='{}'", partyId, shopConfigObjects);
+        return shopConfigObjects.stream()
                 .collect(Collectors.toMap(
-                        object -> object.getObject().getShopConfig().getRef().getId(),
-                        object -> object.getObject().getShopConfig().getData()));
-        log.debug("Shop has been found, shopConfigs='{}', shopReferences='{}'",
-                shopConfigs, shopReferences);
-        return shopConfigs;
+                        object -> object.getRef().getId(),
+                        ShopConfigObject::getData));
     }
 
-    private VersionedObject getPartyObject(String partyId) {
+    private VersionedObjectWithReferences getPartyObject(String partyId) {
         log.debug("Trying to get party, partyId='{}'", partyId);
         Reference reference = new Reference();
         PartyConfigRef partyConfigRef = new PartyConfigRef();
         partyConfigRef.setId(partyId);
         reference.setPartyConfig(partyConfigRef);
-        VersionedObject partyObject = getVersionedObject(reference);
+        var partyObject = getVersionedObjectWithReferences(reference);
         log.debug("Party has been found, partyConfig ='{}', partyConfigRef='{}'",
-                partyObject.getObject().getPartyConfig(), partyConfigRef);
+                partyObject.getObject().getObject().getPartyConfig(), partyConfigRef);
         return partyObject;
     }
 
-    private List<Reference> getShopReferences(PartyConfig partyConfig) {
-        return partyConfig.getShops().stream()
-                .map(shopConfigRef -> {
-                    Reference respRef = new Reference();
-                    respRef.setShopConfig(shopConfigRef);
-                    return respRef;
-                })
-                .toList();
-    }
-
-    private List<VersionedObject> getVersionedObjects(List<Reference> references) {
+    private VersionedObjectWithReferences getVersionedObjectWithReferences(Reference reference) {
         VersionReference versionRef = new VersionReference();
         versionRef.setHead(new Head());
         try {
-            return dominantClient.checkoutObjects(versionRef, references);
-        } catch (VersionNotFound ex) {
-            throw new NotFoundException(String.format("Versions not found, references='%s', versionRef='%s'",
-                    references, versionRef), ex);
+            return dominantClient.checkoutObjectWithReferences(versionRef, reference);
+        } catch (VersionNotFound | ObjectNotFound ex) {
+            throw new NotFoundException(String.format("Version not found, objectRef='%s', versionRef='%s'",
+                    reference, versionRef), ex);
         } catch (TException ex) {
-            throw new DominantException(String.format("Failed to get objects, references='%s', " +
-                    "versionRef='%s'", references, versionRef), ex);
+            throw new DominantException(String.format("Failed to get object with references, objectRef='%s', " +
+                    "versionRef='%s'", reference, versionRef), ex);
         }
     }
 }

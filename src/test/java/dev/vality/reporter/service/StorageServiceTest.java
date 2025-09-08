@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 @MinioTestcontainerSingleton
 @PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
-public class StorageServiceTest {
+class StorageServiceTest {
 
     @Autowired
     private StorageService storageService;
@@ -33,7 +33,7 @@ public class StorageServiceTest {
     private ScheduleReports scheduleReports;
 
     @Test
-    public void saveFileTest() throws IOException {
+    void saveFileTest() throws IOException {
         Path expectedFile = Files.createTempFile("reporter_", "_expected_file");
         Path actualFile = Files.createTempFile("reporter_", "_actual_file");
 

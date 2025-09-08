@@ -39,7 +39,7 @@ import static org.mockito.Mockito.verify;
 )
 @MockitoSharedServices
 @PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
-public class KafkaListenerTest {
+class KafkaListenerTest {
 
     @Value("${kafka.topics.invoicing.id}")
     public String invoicingTopic;
@@ -54,7 +54,7 @@ public class KafkaListenerTest {
     private ArgumentCaptor<List<KafkaEvent>> arg;
 
     @Test
-    public void listenInvoicingChanges() throws Exception {
+    void listenInvoicingChanges() throws Exception {
         int eventsCount = 1;
         for (int i = 0; i < eventsCount; i++) {
             testThriftKafkaProducer.send(invoicingTopic, createSinkEvent());

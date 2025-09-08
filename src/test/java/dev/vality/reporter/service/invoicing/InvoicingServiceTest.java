@@ -75,7 +75,7 @@ class InvoicingServiceTest {
     private final MachineEvent machineEventTwo = createMachineEvent(INVOICE_ID_2);
 
     @BeforeEach
-    public void init() throws Exception {
+    void init() throws Exception {
         when(hgInvoicingService.getInvoice(INVOICE_ID, 1L))
                 .thenReturn(createHgInvoice(INVOICE_ID, PAYMENT_ID, REFUND_ID, ADJUSTMENT_ID));
         when(hgInvoicingService.getInvoice(INVOICE_ID_2, 1L))

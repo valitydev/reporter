@@ -44,8 +44,8 @@ public final class MapperUtils {
 
         Refund refund = new Refund();
         refund.setExternalId(hgInnerRefund.getExternalId());
-        refund.setPartyId(hgInnerInvoice.getOwnerId());
-        refund.setShopId(hgInnerInvoice.getShopId());
+        refund.setPartyId(hgInnerInvoice.getPartyRef().getId());
+        refund.setShopId(hgInnerInvoice.getShopRef().getId());
         refund.setInvoiceId(event.getSourceId());
         refund.setPaymentId(hgInnerPayment.getId());
         refund.setRefundId(hgInnerRefund.getId());
@@ -104,8 +104,8 @@ public final class MapperUtils {
         chargeback.setInvoiceId(event.getSourceId());
         chargeback.setPaymentId(hgInnerPayment.getId());
         chargeback.setChargebackId(paymentChargeback.getId());
-        chargeback.setShopId(hgInnerInvoice.getShopId());
-        chargeback.setPartyId(hgInnerInvoice.getOwnerId());
+        chargeback.setShopId(hgInnerInvoice.getShopRef().getId());
+        chargeback.setPartyId(hgInnerInvoice.getPartyRef().getId());
         chargeback.setExternalId(paymentChargeback.getExternalId());
         chargeback.setEventCreatedAt(TypeUtil.stringToLocalDateTime(paymentChargeback.getCreatedAt()));
         chargeback.setCreatedAt(TypeUtil.stringToLocalDateTime(paymentChargeback.getCreatedAt()));
@@ -132,8 +132,8 @@ public final class MapperUtils {
         var hgInnerInvoice = hgInvoice.getInvoice();
         var hgInnerPayment = invoicePayment.getPayment();
         Adjustment adjustment = new Adjustment();
-        adjustment.setPartyId(hgInnerInvoice.getOwnerId());
-        adjustment.setShopId(hgInnerInvoice.getShopId());
+        adjustment.setPartyId(hgInnerInvoice.getPartyRef().getId());
+        adjustment.setShopId(hgInnerInvoice.getShopRef().getId());
         adjustment.setInvoiceId(event.getSourceId());
         adjustment.setPaymentId(hgInnerPayment.getId());
         adjustment.setAdjustmentId(paymentAdjustment.getId());
@@ -163,8 +163,8 @@ public final class MapperUtils {
         payment.setStatus(TBaseUtil.unionFieldToEnum(hgInnerPayment.getStatus(), InvoicePaymentStatus.class));
         payment.setStatusCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
 
-        payment.setPartyId(hgInnerInvoice.getOwnerId());
-        payment.setShopId(hgInnerInvoice.getShopId());
+        payment.setPartyId(hgInnerInvoice.getPartyRef().getId());
+        payment.setShopId(hgInnerInvoice.getShopRef().getId());
         payment.setFlow(TBaseUtil.unionFieldToEnum(hgInnerPayment.getFlow(), PaymentFlow.class));
 
         fillPayerInfo(hgInnerPayment.getPayer(), payment);
@@ -348,8 +348,8 @@ public final class MapperUtils {
         invoice.setStatus(TBaseUtil.unionFieldToEnum(hgInnerInvoice.getStatus(), InvoiceStatus.class));
         invoice.setStatusCreatedAt(TypeUtil.stringToLocalDateTime(event.getCreatedAt()));
         invoice.setDue(TypeUtil.stringToLocalDateTime(hgInnerInvoice.getDue()));
-        invoice.setPartyId(hgInnerInvoice.getOwnerId());
-        invoice.setShopId(hgInnerInvoice.getShopId());
+        invoice.setPartyId(hgInnerInvoice.getPartyRef().getId());
+        invoice.setShopId(hgInnerInvoice.getShopRef().getId());
         return invoice;
     }
 

@@ -9,10 +9,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class DamselUtilTest {
+final class DamselUtilTest {
 
     @Test
-    public void testComputeAdjustmentAmount() {
+    void testComputeAdjustmentAmount() {
         List<FinalCashFlowPosting> paymentCashFlow = InvoicingTestData.createPaymentCashFlow();
         List<FinalCashFlowPosting> oldCashFlow = InvoicingTestData.createOldCashFlow();
         List<FinalCashFlowPosting> newCashFlow = InvoicingTestData.createNewCashFlow();
@@ -26,7 +26,7 @@ public final class DamselUtilTest {
     }
 
     @Test
-    public void testAdjustmentStatusChangeCaptureToFailed() {
+    void testAdjustmentStatusChangeCaptureToFailed() {
         List<FinalCashFlowPosting> paymentCashFlow = List.of(
 
                 new FinalCashFlowPosting()
@@ -86,7 +86,7 @@ public final class DamselUtilTest {
     }
 
     @Test
-    public void testAdjustmentStatusChangeFailedToCapture() {
+    void testAdjustmentStatusChangeFailedToCapture() {
         List<FinalCashFlowPosting> paymentCashFlow = List.of(
 
                 new FinalCashFlowPosting()

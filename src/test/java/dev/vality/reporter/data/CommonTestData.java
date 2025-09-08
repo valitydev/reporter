@@ -1,14 +1,16 @@
 package dev.vality.reporter.data;
 
 import dev.vality.damsel.domain.*;
+import dev.vality.damsel.domain_config_v2.VersionedObject;
 import dev.vality.damsel.domain_config_v2.VersionedObjectInfo;
+import dev.vality.damsel.domain_config_v2.VersionedObjectWithReferences;
 import dev.vality.reporter.domain.enums.AdjustmentStatus;
 import dev.vality.reporter.domain.enums.InvoicePaymentStatus;
 import dev.vality.reporter.domain.enums.RefundStatus;
 import dev.vality.reporter.domain.tables.pojos.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
 
@@ -16,10 +18,9 @@ public class CommonTestData {
 
     private static final String DEFAULT_CURRENCY = "RUB";
 
-    public static DomainObject getTestParty(String partyId, String shopId) {
+    public static DomainObject getTestParty(String partyId) {
         PartyConfig partyConfig = new PartyConfig();
         partyConfig.setName(random(String.class));
-        partyConfig.setShops(List.of(getTestShopConfigRef(shopId)));
         partyConfig.setDescription(random(String.class));
         DomainObject domainObject = new DomainObject();
         domainObject.setPartyConfig(
@@ -27,19 +28,6 @@ public class CommonTestData {
                         .setData(partyConfig)
                         .setRef(new PartyConfigRef().setId(partyId)));
         return domainObject;
-    }
-
-    public static dev.vality.damsel.domain_config_v2.VersionedObject getVersionedObject(DomainObject domainObject) {
-        var versionedObject = new dev.vality.damsel.domain_config_v2.VersionedObject();
-        versionedObject.setInfo(new VersionedObjectInfo().setVersion(random(Integer.class)));
-        versionedObject.setObject(domainObject);
-        return versionedObject;
-    }
-
-    public static ShopConfigRef getTestShopConfigRef(String shopId) {
-        ShopConfigRef shopConfigRef = new ShopConfigRef();
-        shopConfigRef.setId(shopId);
-        return shopConfigRef;
     }
 
     public static DomainObject getTestShop(String shopId) {
@@ -68,6 +56,21 @@ public class CommonTestData {
                         .setData(currency)
                         .setRef(new CurrencyRef().setSymbolicCode(code)));
         return domainObject;
+    }
+
+    public static dev.vality.damsel.domain_config_v2.VersionedObject getVersionedObject(DomainObject domainObject) {
+        var versionedObject = new dev.vality.damsel.domain_config_v2.VersionedObject();
+        versionedObject.setInfo(new VersionedObjectInfo().setVersion(random(Integer.class)));
+        versionedObject.setObject(domainObject);
+        return versionedObject;
+    }
+
+    public static VersionedObjectWithReferences getTestVersionedObjectWithReferences(VersionedObject versionedObject,
+                                                                                     VersionedObject referenceBy) {
+        var versionedObjectWithReferences = new VersionedObjectWithReferences();
+        versionedObjectWithReferences.setObject(versionedObject);
+        versionedObjectWithReferences.setReferencedBy(Set.of(referenceBy));
+        return versionedObjectWithReferences;
     }
 
     public static Adjustment createTestAdjustment(String partyId,
