@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>reporter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>reporter</name>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
