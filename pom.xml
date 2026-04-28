@@ -43,11 +43,12 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>damsel</artifactId>
+            <version>1.685-5c25c2e</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>machinegun-proto</artifactId>
-            <version>1.38-347c5c4</version>
+            <version>1.43-3decc8f</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
@@ -61,7 +62,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>reporter-proto</artifactId>
-            <version>1.16-cc187f5</version>
+            <version>1.18-d7d9995</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
@@ -201,6 +202,11 @@
             <groupId>dev.vality</groupId>
             <artifactId>testcontainers-annotations</artifactId>
             <version>3.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
