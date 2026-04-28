@@ -11,7 +11,6 @@ import org.apache.thrift.TException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -56,6 +55,7 @@ public class DominantServiceImpl implements DominantService {
         var versionedObjectWithReferences = getPartyObject(partyId);
         var shopConfigObjects = versionedObjectWithReferences.getReferencedBy().stream()
                 .map(VersionedObject::getObject)
+                .filter(DomainObject::isSetShopConfig)
                 .map(DomainObject::getShopConfig)
                 .toList();
         log.debug("Receive shops for partyId: {}, shopConfigObjects ='{}'", partyId, shopConfigObjects);
