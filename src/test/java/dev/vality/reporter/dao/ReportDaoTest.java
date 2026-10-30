@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.util.RandomBeans.random;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

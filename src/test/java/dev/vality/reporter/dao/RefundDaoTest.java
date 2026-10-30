@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
-import static dev.vality.testcontainers.annotations.util.RandomBeans.randomListOf;
+import static dev.vality.reporter.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @PostgresqlSpringBootITest
@@ -30,7 +30,9 @@ public class RefundDaoTest {
         String shopId = random(String.class);
 
         int refundsCount = 100;
-        List<Refund> sourceRefunds = randomListOf(refundsCount, Refund.class);
+        List<Refund> sourceRefunds = IntStream.range(0, refundsCount)
+                .mapToObj(i -> random(Refund.class))
+                .toList();
         sourceRefunds.forEach(refund -> {
             refund.setShopId(shopId);
             refund.setPartyId(partyId);

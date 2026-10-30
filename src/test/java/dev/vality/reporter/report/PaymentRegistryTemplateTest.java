@@ -50,7 +50,7 @@ import java.util.List;
 
 import static dev.vality.reporter.data.CommonTestData.*;
 import static dev.vality.reporter.domain.enums.InvoicePaymentStatus.captured;
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

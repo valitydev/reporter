@@ -41,7 +41,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
