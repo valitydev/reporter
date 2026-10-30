@@ -1,10 +1,4 @@
-FROM ghcr.io/valitydev/temurin-jemalloc:sha-14c0b34
-
-RUN apt-get update \
-      && apt-get install -y \
-      --no-install-recommends \
-      fontconfig=2.13.* \
-      && rm -rf /var/lib/apt/lists/*
+FROM ghcr.io/valitydev/temurin-jemalloc:sha-402a042
 
 RUN useradd -s /bin/false -U -u 20000 vality
 

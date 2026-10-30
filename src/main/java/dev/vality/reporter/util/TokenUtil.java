@@ -1,6 +1,5 @@
 package dev.vality.reporter.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vality.reporter.ReportRequest;
 import dev.vality.reporter.StatReportRequest;
 import lombok.AllArgsConstructor;
@@ -8,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Base64;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 public class TokenUtil {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final JsonMapper objectMapper = JsonMapper.builderWithJackson2Defaults().build();
 
     @SneakyThrows
     public static String buildToken(ReportRequest request, List<String> reportTypes, String createdAfter) {

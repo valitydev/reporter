@@ -17,7 +17,6 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,8 +64,7 @@ class KafkaListenerTest {
     @Autowired
     private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
-    @Captor
-    private ArgumentCaptor<List<KafkaEvent>> arg;
+    private final ArgumentCaptor<List<KafkaEvent>> arg = ArgumentCaptor.captor();
 
     @BeforeEach
     void waitForKafkaListenersAssignment() {

@@ -10,14 +10,13 @@ import dev.vality.reporter.domain.tables.pojos.FileMeta;
 import dev.vality.reporter.exception.FileNotFoundException;
 import dev.vality.reporter.exception.FileStorageException;
 import dev.vality.reporter.service.StorageService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import java.io.IOException;
 import java.net.URL;
