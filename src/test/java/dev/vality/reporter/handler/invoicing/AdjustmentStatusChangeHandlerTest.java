@@ -1,28 +1,11 @@
 package dev.vality.reporter.handler.invoicing;
 
-import dev.vality.damsel.domain.Cash;
-import dev.vality.damsel.domain.CashFlowAccount;
-import dev.vality.damsel.domain.CurrencyRef;
-import dev.vality.damsel.domain.FinalCashFlowAccount;
 import dev.vality.damsel.domain.FinalCashFlowPosting;
 import dev.vality.damsel.domain.InvoicePaymentAdjustment;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentCaptured;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentCashFlow;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentCashFlowState;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentState;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentStatus;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentStatusChange;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentStatusChangeState;
-import dev.vality.damsel.domain.InvoicePaymentCaptured;
-import dev.vality.damsel.domain.InvoicePaymentFailed;
-import dev.vality.damsel.domain.InvoicePaymentStatus;
-import dev.vality.damsel.domain.MerchantCashFlowAccount;
-import dev.vality.damsel.domain.ProviderCashFlowAccount;
-import dev.vality.damsel.domain.SystemCashFlowAccount;
 import dev.vality.damsel.payment_processing.Invoice;
 import dev.vality.damsel.payment_processing.InvoicePayment;
 import dev.vality.reporter.dao.AdjustmentDao;
-import dev.vality.reporter.data.InvoicingTestData.AdjustmentChangeStatusInfo;
+import dev.vality.reporter.data.InvoicingTestData.*;
 import dev.vality.reporter.domain.tables.pojos.Adjustment;
 import dev.vality.reporter.service.FaultyEventsService;
 import dev.vality.reporter.service.HellgateInvoicingService;
@@ -38,17 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static dev.vality.reporter.data.InvoicingTestData.createHgInvoice;
-import static dev.vality.reporter.data.InvoicingTestData.createKafkaEvent;
-import static dev.vality.reporter.data.InvoicingTestData.createMachineEvent;
-import static dev.vality.reporter.data.InvoicingTestData.createTestAdjustmentEventPayload;
+import static dev.vality.reporter.data.AdjustmentTestData.*;
+import static dev.vality.reporter.data.InvoicingTestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdjustmentStatusChangeHandlerTest {
@@ -149,48 +127,6 @@ class AdjustmentStatusChangeHandlerTest {
         var payload = createTestAdjustmentEventPayload(List.of(
                 new AdjustmentChangeStatusInfo(PAYMENT_ID, adjustment.getId(), adjustment.getStatus())));
         handler.handle(createKafkaEvent(event), payload.getInvoiceChanges().get(0), 0);
-    }
-
-    private static InvoicePaymentAdjustment createAdjustment(String id,
-                                                              InvoicePaymentAdjustmentState state,
-                                                              List<FinalCashFlowPosting> oldCashFlowInverse,
-                                                              List<FinalCashFlowPosting> newCashFlow) {
-        return new InvoicePaymentAdjustment(id,
-                InvoicePaymentAdjustmentStatus.captured(new InvoicePaymentAdjustmentCaptured()),
-                "2026-09-24T12:20:32Z", 1L, "test", newCashFlow, oldCashFlowInverse).setState(state);
-    }
-
-    private static InvoicePaymentAdjustmentState cashFlowState() {
-        return InvoicePaymentAdjustmentState.cash_flow(
-                new InvoicePaymentAdjustmentCashFlowState(new InvoicePaymentAdjustmentCashFlow()));
-    }
-
-    private static InvoicePaymentAdjustmentState statusChangeState(InvoicePaymentStatus targetStatus) {
-        return InvoicePaymentAdjustmentState.status_change(new InvoicePaymentAdjustmentStatusChangeState(
-                new InvoicePaymentAdjustmentStatusChange(targetStatus)));
-    }
-
-    private static InvoicePaymentStatus capturedStatus() {
-        return InvoicePaymentStatus.captured(new InvoicePaymentCaptured());
-    }
-
-    private static InvoicePaymentStatus failedStatus() {
-        return InvoicePaymentStatus.failed(new InvoicePaymentFailed());
-    }
-
-    private static List<FinalCashFlowPosting> cashFlow(long amount, long fee, long providerFee) {
-        var merchant = CashFlowAccount.merchant(MerchantCashFlowAccount.settlement);
-        var provider = CashFlowAccount.provider(ProviderCashFlowAccount.settlement);
-        var system = CashFlowAccount.system(SystemCashFlowAccount.settlement);
-        return List.of(posting(provider, merchant, amount), posting(merchant, system, fee),
-                posting(system, provider, providerFee));
-    }
-
-    private static FinalCashFlowPosting posting(CashFlowAccount source, CashFlowAccount destination, long amount) {
-        return new FinalCashFlowPosting()
-                .setSource(new FinalCashFlowAccount().setAccountType(source))
-                .setDestination(new FinalCashFlowAccount().setAccountType(destination))
-                .setVolume(new Cash(amount, new CurrencyRef("RUB")));
     }
 
     private static List<FinalCashFlowPosting> inverse(List<FinalCashFlowPosting> cashFlow) {
