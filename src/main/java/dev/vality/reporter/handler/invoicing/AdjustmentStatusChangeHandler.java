@@ -69,6 +69,14 @@ public class AdjustmentStatusChangeHandler implements InvoicingEventHandler {
             }
         }
 
+        if (paymentAdjustment.isSetState() && paymentAdjustment.getState().isSetCashFlow()
+                && invoicePayment.getPayment().getStatus().isSetFailed()) {
+            log.info("Skipping cash flow adjustment for failed payment (invoiceId = '{}', paymentId = '{}', " +
+                            "adjustmentId = '{}', sequenceId = '{}', changeId = '{}')",
+                    invoiceId, paymentId, adjustmentId, sequenceId, changeId);
+            return;
+        }
+
         Adjustment adjustmentRecord = MapperUtils.createAdjustmentRecord(
                 paymentAdjustment, invoicePayment, invoice, event
         );

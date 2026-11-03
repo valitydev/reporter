@@ -1,12 +1,6 @@
 package dev.vality.reporter.service.invoicing;
 
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentCaptured;
-import dev.vality.damsel.domain.InvoicePaymentAdjustmentPending;
-import dev.vality.damsel.domain.InvoicePaymentCaptured;
-import dev.vality.damsel.domain.InvoicePaymentPending;
-import dev.vality.damsel.domain.InvoicePaymentRefundPending;
-import dev.vality.damsel.domain.InvoicePaymentRefundSucceeded;
-import dev.vality.damsel.domain.InvoicePaymentStatus;
+import dev.vality.damsel.domain.*;
 import dev.vality.damsel.payment_processing.EventPayload;
 import dev.vality.machinegun.eventsink.MachineEvent;
 import dev.vality.reporter.config.PostgresqlSpringBootITest;
@@ -37,15 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.vality.reporter.data.InvoicingTestData.createHgInvoice;
-import static dev.vality.reporter.data.InvoicingTestData.createKafkaEvent;
-import static dev.vality.reporter.data.InvoicingTestData.createMachineEvent;
-import static dev.vality.reporter.data.InvoicingTestData.createTestAdjustmentEventPayload;
-import static dev.vality.reporter.data.InvoicingTestData.createTestInvoiceEventPayload;
-import static dev.vality.reporter.data.InvoicingTestData.createTestPaymentEventPayload;
-import static dev.vality.reporter.data.InvoicingTestData.createTestRefundEventPayload;
-import static org.junit.Assert.assertEquals;
+import static dev.vality.reporter.data.InvoicingTestData.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @PostgresqlSpringBootITest
 class InvoicingServiceTest {

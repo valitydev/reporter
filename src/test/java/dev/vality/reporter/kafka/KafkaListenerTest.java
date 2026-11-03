@@ -2,10 +2,9 @@ package dev.vality.reporter.kafka;
 
 import dev.vality.machinegun.eventsink.MachineEvent;
 import dev.vality.machinegun.eventsink.SinkEvent;
-import dev.vality.reporter.config.MockitoSharedServices;
+import dev.vality.reporter.config.PostgresqlSpringBootITest;
 import dev.vality.reporter.model.KafkaEvent;
 import dev.vality.reporter.service.impl.InvoicingService;
-import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainerSingleton;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -17,7 +16,6 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,8 +47,7 @@ import static org.mockito.Mockito.verify;
         "kafka.topics.invoicing.enabled=true",
         "kafka.consumer.max-poll-records=1"
 })
-@MockitoSharedServices
-@PostgresqlTestcontainerSingleton(excludeTruncateTables = "schema_version")
+@PostgresqlSpringBootITest
 class KafkaListenerTest {
 
     @Value("${kafka.topics.invoicing.id}")
@@ -65,8 +62,7 @@ class KafkaListenerTest {
     @Autowired
     private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
-    @Captor
-    private ArgumentCaptor<List<KafkaEvent>> arg;
+    private final ArgumentCaptor<List<KafkaEvent>> arg = ArgumentCaptor.captor();
 
     @BeforeEach
     void waitForKafkaListenersAssignment() {

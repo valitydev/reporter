@@ -12,7 +12,7 @@ import dev.vality.reporter.domain.tables.pojos.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.util.RandomBeans.random;
 
 public class CommonTestData {
 

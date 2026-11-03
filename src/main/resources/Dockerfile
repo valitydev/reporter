@@ -1,4 +1,4 @@
-FROM ghcr.io/valitydev/temurin-jemalloc:sha-14c0b34
+FROM ghcr.io/valitydev/temurin-jemalloc:sha-402a042
 
 RUN apt-get update \
       && apt-get install -y \

@@ -41,7 +41,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static dev.vality.testcontainers.annotations.util.RandomBeans.random;
+import static dev.vality.reporter.util.RandomBeans.random;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -115,12 +115,6 @@ class ReportCreatorServiceTest {
     void createBigSizeReportTest() throws IOException {
         LocalDateTime fromTime = LocalDateTime.now().minusHours(128L);
         LocalDateTime toTime = LocalDateTime.now();
-        Cursor<PaymentRecord> paymentCursor =
-                paymentDao.getPaymentsCursor(partyId, shopId, Optional.of(fromTime), toTime);
-        Cursor<RefundRecord> refundCursor =
-                refundDao.getRefundsCursor(partyId, shopId, fromTime, toTime);
-        Cursor<AdjustmentRecord> adjustmentCursor =
-                adjustmentDao.getAdjustmentCursor(partyId, shopId, fromTime, toTime);
 
         Report report = new Report();
         report.setTimezone("UTC");
@@ -132,6 +126,12 @@ class ReportCreatorServiceTest {
         Map<String, String> shopNames = new HashMap<>();
 
         Path tempFile = Files.createTempFile("check_limit", ".xlsx");
+        Cursor<PaymentRecord> paymentCursor =
+                paymentDao.getPaymentsCursor(partyId, shopId, Optional.of(fromTime), toTime);
+        Cursor<RefundRecord> refundCursor =
+                refundDao.getRefundsCursor(partyId, shopId, fromTime, toTime);
+        Cursor<AdjustmentRecord> adjustmentCursor =
+                adjustmentDao.getAdjustmentCursor(partyId, shopId, fromTime, toTime);
         try {
             LocalReportCreatorDto reportCreatorDto = new LocalReportCreatorDto(
                     fromTime.toString(),
