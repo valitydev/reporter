@@ -3,7 +3,7 @@ FROM ghcr.io/valitydev/temurin-jemalloc:sha-402a042
 RUN apt-get update \
       && apt-get install -y \
       --no-install-recommends \
-      fontconfig=2.13.* \
+      fontconfig \
       && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -s /bin/false -U -u 20000 vality
